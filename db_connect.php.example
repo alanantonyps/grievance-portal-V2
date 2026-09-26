@@ -1,0 +1,8 @@
+<?php
+$host = "localhost";
+$user = "YOUR_DB_USER";
+$password = "YOUR_DB_PASSWORD";
+$database = "grievance_db";
+
+$conn = new mysqli($host, $user, $password, $database);
+?>
