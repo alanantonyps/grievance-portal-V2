@@ -1,14 +1,14 @@
 {
-  "builds": [
+  "headers": [
     {
-      "src": "**/*.php",
-      "use": "@vercel/static"
+      "source": "/(.*)\\.php",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/html; charset=utf-8"
+        }
+      ]
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+  "cleanUrls": true
 }
