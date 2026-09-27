@@ -13,6 +13,7 @@
  *   • List icon → opens Action Summary modal (pulls from grievance_actions)
  *   • Custom themed logout confirmation modal
  *   • Flash messages auto-dismiss after 3 seconds
+ *   • Fully responsive table — no horizontal scroll on any screen
  * ---------------------------------------------------------------------------
  */
 
@@ -26,9 +27,7 @@ ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
-// ---------------------------------------------------------------------------
 // AUTH GUARD
-// ---------------------------------------------------------------------------
 $sessionRole = isset($_SESSION['role']) ? strtoupper((string) $_SESSION['role']) : '';
 
 if (empty($_SESSION['user_id']) || ($sessionRole !== 'ADMIN' && $sessionRole !== 'MANAGEMENT' && $sessionRole !== 'TEACHER')) {
@@ -38,9 +37,7 @@ if (empty($_SESSION['user_id']) || ($sessionRole !== 'ADMIN' && $sessionRole !==
 
 $userId = (int) $_SESSION['user_id'];
 
-// ---------------------------------------------------------------------------
 // DATABASE CONNECTION
-// ---------------------------------------------------------------------------
 $dbFile = __DIR__ . '/../db_connect.php';
 $dbError = null;
 $conn    = null;
@@ -66,17 +63,12 @@ if (!file_exists($dbFile)) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
 function e(?string $v): string
 {
     return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-// ---------------------------------------------------------------------------
 // FETCH ADMIN PROFILE
-// ---------------------------------------------------------------------------
 $adminData = [
     'username'        => $_SESSION['username'] ?? 'Admin',
     'name'            => '',
@@ -125,9 +117,7 @@ if (!empty($adminData['profile_picture'])) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // FLASH
-// ---------------------------------------------------------------------------
 $flashSuccess = '';
 $flashError   = '';
 
@@ -140,9 +130,7 @@ if (!empty($_SESSION['flash_error'])) {
     unset($_SESSION['flash_error']);
 }
 
-// ---------------------------------------------------------------------------
 // QUERY PARAMS
-// ---------------------------------------------------------------------------
 $search  = trim((string) ($_GET['q']       ?? ''));
 $entries = (int) ($_GET['entries']          ?? 10);
 $page    = (int) ($_GET['page']             ?? 1);
@@ -151,9 +139,7 @@ if (!in_array($entries, [10, 25, 50, 100], true)) $entries = 10;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $entries;
 
-// ---------------------------------------------------------------------------
 // FETCH GRIEVANCES
-// ---------------------------------------------------------------------------
 $grievances = [];
 $totalRows  = 0;
 $totalPages = 1;
@@ -179,7 +165,6 @@ if ($conn instanceof mysqli) {
             $types   .= 'ssss';
         }
 
-        // Count
         $countSql = "SELECT COUNT(*) AS c
                      FROM grievances g
                      LEFT JOIN grievance_types gt ON g.grievance_type_id   = gt.id
@@ -205,19 +190,9 @@ if ($conn instanceof mysqli) {
             $offset = ($page - 1) * $entries;
         }
 
-        // Data query with attachments
-        $dataSql = "SELECT  g.id,
-                            g.grievance_number,
-                            g.subject,
-                            g.description,
-                            g.status,
-                            g.attachment_path,
-                            g.reply_details,
-                            g.reply_attachment_path,
-                            g.feedback_details,
-                            g.created_at,
-                            g.updated_at,
-                            g.attended_by,
+        $dataSql = "SELECT  g.id, g.grievance_number, g.subject, g.description, g.status,
+                            g.attachment_path, g.reply_details, g.reply_attachment_path,
+                            g.feedback_details, g.created_at, g.updated_at, g.attended_by,
                             gt.type_name,
                             u.role AS complainant_role,
                             COALESCE(s.name, p.name, cm.name, ap.name, u.username) AS complainant_name,
@@ -255,9 +230,7 @@ if ($conn instanceof mysqli) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// FETCH ACTION SUMMARIES for the current page's grievances
-// ---------------------------------------------------------------------------
+// FETCH ACTION SUMMARIES
 $actionsByGrievance = [];
 
 if ($conn instanceof mysqli && !empty($grievances)) {
@@ -299,9 +272,6 @@ if ($conn instanceof mysqli && !empty($grievances)) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// STATUS BADGE CLASSES
-// ---------------------------------------------------------------------------
 function statusBadgeClass(string $status): string
 {
     return match (strtolower($status)) {
@@ -325,48 +295,34 @@ function statusBadgeClass(string $status): string
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink:   '#E5097F',
-            brandGreen:  '#006837',
-            brandGold:   '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
-            fadeInUp: {
-              '0%':   { opacity: '0', transform: 'translateY(12px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            },
-            dropdownFade: {
-              '0%':   { opacity: '0', transform: 'translateY(-8px) scale(0.98)' },
-              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
-            },
-            modalFadeIn: {
-              '0%':   { opacity: '0', transform: 'scale(0.96)' },
-              '100%': { opacity: '1', transform: 'scale(1)' }
-            },
-            confirmShake: {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '20%':      { transform: 'translateX(-6px)' },
-              '40%':      { transform: 'translateX(6px)' },
-              '60%':      { transform: 'translateX(-4px)' },
-              '80%':      { transform: 'translateX(4px)' }
-            },
-            flashIn: {
-              '0%':   { opacity: '0', transform: 'translateY(-10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            },
-            flashOut: {
-              '0%':   { opacity: '1', transform: 'translateY(0)', maxHeight: '200px' },
-              '100%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0px' }
-            },
-            lightboxIn: {
-              '0%':   { opacity: '0' },
-              '100%': { opacity: '1' }
-            }
+            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            dropdownFade: { '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+            modalFadeIn: { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+            confirmShake: { '0%, 100%': { transform: 'translateX(0)' }, '20%': { transform: 'translateX(-6px)' }, '40%': { transform: 'translateX(6px)' }, '60%': { transform: 'translateX(-4px)' }, '80%': { transform: 'translateX(4px)' } },
+            flashIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            flashOut: { '0%': { opacity: '1', transform: 'translateY(0)', maxHeight: '200px' }, '100%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0px' } },
+            lightboxIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+            pulseRing: { '0%': { boxShadow: '0 0 0 0 rgba(0,110,116,0.45)' }, '70%': { boxShadow: '0 0 0 12px rgba(0,110,116,0)' }, '100%': { boxShadow: '0 0 0 0 rgba(0,110,116,0)' } }
           },
           animation: {
             'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -375,404 +331,733 @@ function statusBadgeClass(string $status): string
             'confirm-shake': 'confirmShake 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             'flash-in':   'flashIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             'flash-out':  'flashOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards',
-            'lightbox-in':'lightboxIn 0.25s ease-out forwards'
+            'lightbox-in':'lightboxIn 0.25s ease-out forwards',
+            'shimmer':    'shimmer 3s linear infinite',
+            'pulse-ring': 'pulseRing 2s ease-out infinite'
           }
         }
       }
     };
   </script>
 
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    /* ============================================================
+       FONT FACES
+       ============================================================ */
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    /* ============================================================
+       AMBIENT BACKGROUND MESH (fixed only on desktop)
+       ============================================================ */
+    body {
+      background-color: #EAF4F4;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(0,110,116,0.08) 0px, transparent 50%),
+        radial-gradient(at 88% 4%, rgba(63,155,159,0.10) 0px, transparent 50%),
+        radial-gradient(at 78% 92%, rgba(0,110,116,0.07) 0px, transparent 50%),
+        radial-gradient(at 4% 88%, rgba(63,155,159,0.08) 0px, transparent 50%);
+    }
+    @media (min-width: 1024px) and (hover: hover) {
+      body { background-attachment: fixed; }
+    }
+
+    /* ============================================================
+       CUSTOM SCROLLBAR (desktop only)
+       ============================================================ */
+    @media (hover: hover) and (pointer: fine) {
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #128287, #006E74);
+        border-radius: 8px;
+        border: 2px solid #EAF4F4;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: #005A5F; }
+    }
+
+    ::selection { background: #9FCDCF; color: #003134; }
+
+    /* ============================================================
+       DECORATIVE PATTERNS
+       ============================================================ */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+      position: relative;
+      overflow: hidden;
+    }
+    .roofline::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 4s linear infinite;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-track { background: transparent; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    #sidebarNav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+    /* ============================================================
+       SIDEBAR ACTIVE GLOW + LINK HOVER SLIDE
+       ============================================================ */
+    .sidebar-active-glow {
+      box-shadow: 0 0 0 1px rgba(255,255,255,.3),
+                  0 6px 20px -6px rgba(0,0,0,.35),
+                  inset 0 0 20px rgba(255,255,255,.06);
+    }
+    .sidebar-link { position: relative; overflow: hidden; }
+    .sidebar-link::after {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #fff;
+      transform: translateX(-4px);
+      opacity: 0;
+      transition: all .25s ease;
+      border-radius: 0 4px 4px 0;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .sidebar-link:hover::after { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ============================================================
+       HEADER FROSTED-ON-SCROLL
+       ============================================================ */
+    .header-scrolled {
+      background: rgba(255,255,255,.92) !important;
+      box-shadow: 0 4px 24px -8px rgba(0,69,74,.15);
+    }
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+      @media (hover: hover) and (min-width: 1024px) {
+        .header-scrolled {
+          background: rgba(255,255,255,.85) !important;
+          backdrop-filter: saturate(180%) blur(14px);
+          -webkit-backdrop-filter: saturate(180%) blur(14px);
+        }
+      }
+    }
+
+    /* ============================================================
+       HEADING UNDERLINE
+       ============================================================ */
+    .heading-underline { position: relative; display: inline-block; }
+    .heading-underline::after {
+      content: '';
+      position: absolute; left: 0; bottom: -6px;
+      height: 3px; width: 100%;
+      background: linear-gradient(90deg, #006E74, #3F9B9F 60%, transparent);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underlineIn .8s .3s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes underlineIn { to { transform: scaleX(1); } }
+
+    /* ============================================================
+       RESPONSIVE TABLE — no horizontal scroll, larger sizes
+       ============================================================ */
+    .grievance-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    .grievance-table th,
+    .grievance-table td {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      white-space: normal;
+      vertical-align: top;
+    }
+    .grievance-table thead th {
+      font-size: 0.72rem;
+      padding: 0.85rem 0.6rem;
+      line-height: 1.3;
+    }
+    .grievance-table tbody td {
+      font-size: 0.85rem;
+      padding: 0.85rem 0.6rem;
+      line-height: 1.45;
+    }
+    @media (max-width: 1440px) {
+      .grievance-table thead th { font-size: 0.68rem; padding: 0.75rem 0.5rem; }
+      .grievance-table tbody td { font-size: 0.82rem; padding: 0.75rem 0.5rem; }
+    }
+    @media (max-width: 1280px) {
+      .grievance-table thead th { font-size: 0.64rem; padding: 0.65rem 0.45rem; }
+      .grievance-table tbody td { font-size: 0.78rem; padding: 0.65rem 0.45rem; }
+    }
+    @media (max-width: 1024px) {
+      .grievance-table thead th { font-size: 0.6rem;  padding: 0.55rem 0.35rem; }
+      .grievance-table tbody td { font-size: 0.72rem; padding: 0.55rem 0.35rem; }
+    }
+    @media (max-width: 640px) {
+      .grievance-table thead th { font-size: 0.56rem; padding: 0.5rem 0.3rem; }
+      .grievance-table tbody td { font-size: 0.68rem; padding: 0.5rem 0.3rem; }
+    }
+
+    .col-sno        { width: 4%;  }
+    .col-number     { width: 11%; }
+    .col-type       { width: 11%; }
+    .col-name       { width: 11%; }
+    .col-date       { width: 8%;  }
+    .col-subject    { width: 15%; }
+    .col-status     { width: 9%;  }
+    .col-actions    { width: 10%; }
+    .col-remainder  { width: 12%; }
+
+    /* ============================================================
+       ACTION BUTTONS
+       ============================================================ */
+    .action-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color .2s, color .2s;
+      cursor: pointer;
+    }
+    .action-btn i { width: 1rem; height: 1rem; }
+
+    /* ============================================================
+       STATUS BADGE
+       ============================================================ */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    @media (max-width: 1280px) {
+      .status-badge { font-size: 0.66rem; padding: 0.25rem 0.55rem; }
+      .action-btn { width: 1.75rem; height: 1.75rem; }
+      .action-btn i { width: 0.9rem; height: 0.9rem; }
+    }
+    @media (max-width: 1024px) {
+      .status-badge { font-size: 0.6rem; padding: 0.2rem 0.45rem; }
+      .action-btn { width: 1.6rem; height: 1.6rem; }
+      .action-btn i { width: 0.85rem; height: 0.85rem; }
+    }
+
+    /* ============================================================
+       "Needs Attention" pill
+       ============================================================ */
+    .attention-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.28rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+    @media (max-width: 1280px) {
+      .attention-pill { font-size: 0.62rem; padding: 0.22rem 0.5rem; }
+    }
+    @media (max-width: 1024px) {
+      .attention-pill { font-size: 0.56rem; padding: 0.2rem 0.42rem; }
+    }
+
+    /* ============================================================
+       BACK TO TOP
+       ============================================================ */
+    #backToTop {
+      transition: opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1), background-color .25s ease;
+      opacity: 0;
+      transform: translateY(10px) scale(.9);
+      pointer-events: none;
+    }
+    #backToTop.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       FOCUS RING
+       ============================================================ */
+    :focus-visible {
+      outline: 2px solid #3F9B9F;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ============================================================
+       LOW-END DEVICE STRIP-OUT
+       ============================================================ */
+    @media (max-width: 480px) {
+      .roofline::after { animation: none; }
+      .heading-underline::after { animation: none; transform: scaleX(1); }
+      .animate-pulse-ring { animation: none; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+      .heading-underline::after { transform: scaleX(1); }
+      html { scroll-behavior: auto; }
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen text-teal-900 antialiased flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- SIDEBAR -->
-    <aside class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837] flex flex-col items-center py-4 shadow-2xl fixed inset-y-0 left-0 z-40">
-      <button class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside id="adminSidebar"
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
+                  transition-all duration-300 ease-in-out overflow-hidden">
 
-      <nav class="flex flex-col items-center space-y-6 flex-1">
-        <a href="dashboard.php" class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110" title="Dashboard">
-          <i data-lucide="home" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
+      <!-- Brand row: "grievance" text + toggle (logo removed) -->
+      <div class="flex items-center gap-2 px-3 mb-6 flex-shrink-0">
+        <a href="dashboard.php"
+           class="sidebar-brand inline-flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+          <span class="sidebar-label text-white font-bold text-lg whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">
+            grievance
+          </span>
+          <span class="sidebar-label w-1.5 h-1.5 rounded-full bg-white mb-1 flex-shrink-0 opacity-0 w-0 overflow-hidden transition-all duration-200"></span>
+        </a>
+        <button id="sidebarToggle"
+                class="text-white/80 hover:text-white p-2.5 rounded-xl hover:bg-white/10
+                       transition-colors flex items-center justify-center flex-shrink-0"
+                aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
+        </button>
+      </div>
+
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
+
+        <a href="dashboard.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <a href="profile.php" class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110" title="Profile">
-          <i data-lucide="user" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Profile</span>
+        <a href="profile.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
         </a>
 
-        <a href="grievances.php" class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110" title="Back to Grievance Hub">
-          <i data-lucide="file-text" class="w-6 h-6 group-hover:scale-110 transition-transform duration-300"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Back to Grievance Hub</span>
+        <a href="grievances.php" class="sidebar-link sidebar-active-glow group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
+          <i data-lucide="clipboard-list" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Grievance</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Grievance</span>
         </a>
+
+        <a href="settings.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="settings" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Settings</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Settings</span>
+        </a>
+
+        <a href="change_password.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
+        </a>
+
       </nav>
 
       <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
-         class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center justify-center text-white transition-all hover:scale-110" title="Logout">
-        <i data-lucide="log-out" class="w-6 h-6 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
+         class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
+        <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 ml-20 flex flex-col min-h-screen">
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <div id="adminMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <!-- HEADER -->
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
-          <div class="flex items-center space-x-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30 transition-all duration-300">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo" class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance" class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
           <div class="relative" id="admin-dropdown-container">
             <button id="admin-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
+
               <?php if ($hasProfilePicture): ?>
-                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
+                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                     class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                  <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
-              <span class="hidden sm:block text-sm font-semibold text-slate-700"><?= e($displayName) ?></span>
-              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
-            <div id="admin-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden">
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+            <div id="admin-dropdown-menu"
+                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
+
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($hasProfilePicture): ?>
-                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
+                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                         class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white">
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white">
                       <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                   <?php endif; ?>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
+                    <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                    <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
               </div>
 
-              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="key" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
+
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn"
+                   class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
                   <span class="font-medium">Logout</span>
                 </a>
               </div>
             </div>
           </div>
+
         </div>
       </header>
 
-      <!-- PAGE CONTENT -->
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <!-- Breadcrumb -->
         <div class="max-w-6xl mx-auto mb-6 animate-fade-in-up">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 tracking-tight">Grievance Details</h1>
-              <nav class="flex items-center space-x-2 text-sm text-slate-500">
-                <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-                  <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i> Dashboard
-                </a>
-                <span class="text-slate-300">/</span>
-                <a href="grievances.php" class="hover:text-[#8B1E7E] transition-colors">Grievance</a>
-                <span class="text-slate-300">/</span>
-                <span class="text-[#E5097F] font-semibold">Grievance Details</span>
-              </nav>
-            </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600 animate-pulse-ring"></span>
+            <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Grievance · Details</p>
           </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-3">
+            <span class="heading-underline">Grievance Details</span>
+          </h1>
+          <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+            <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+              Dashboard
+            </a>
+            <span class="text-teal-900/30">/</span>
+            <a href="grievances.php" class="hover:text-teal-600 transition-colors">Grievance</a>
+            <span class="text-teal-900/30">/</span>
+            <span class="text-teal-600 font-semibold">Grievance Details</span>
+          </nav>
         </div>
 
-        <!-- Flash -->
         <?php if ($flashSuccess !== ''): ?>
-          <div id="flashSuccessBox" class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
-            <i data-lucide="check-circle" class="w-5 h-5 text-[#006837] flex-shrink-0 mt-0.5"></i>
+          <div id="flashSuccessBox" class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-emerald-800 font-medium"><?= e($flashSuccess) ?></p>
           </div>
         <?php endif; ?>
 
         <?php if ($flashError !== ''): ?>
-          <div id="flashErrorBox" class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
+          <div id="flashErrorBox" class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-red-700 font-medium"><?= e($flashError) ?></p>
           </div>
         <?php endif; ?>
 
-        <!-- TABLE CONTROLS -->
         <div class="max-w-6xl mx-auto mb-5 animate-fade-in-up" style="animation-delay: 60ms;">
-          <form method="GET" action="grievance_details.php" id="filterForm" class="bg-white rounded-xl shadow-sm border border-slate-200/70 px-5 py-4">
+          <form method="GET" action="grievance_details.php" id="filterForm" class="bg-white rounded-xl border-2 border-teal-100 px-5 py-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="flex items-center space-x-3">
-                <span class="text-sm text-slate-600">Show</span>
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-teal-900/70">Show</span>
                 <select name="entries" id="entriesPerPage"
-                        class="px-3 py-1.5 border-2 border-slate-200 rounded-lg text-sm font-medium text-slate-700
-                               focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                               hover:border-[#4A154B]/40 transition-colors bg-white">
+                        class="px-3 py-1.5 border-2 border-teal-100 rounded-lg text-sm font-medium text-teal-900
+                               focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                               hover:border-teal-200 transition-colors bg-white">
                   <option value="10"  <?= $entries === 10  ? 'selected' : '' ?>>10</option>
                   <option value="25"  <?= $entries === 25  ? 'selected' : '' ?>>25</option>
                   <option value="50"  <?= $entries === 50  ? 'selected' : '' ?>>50</option>
                   <option value="100" <?= $entries === 100 ? 'selected' : '' ?>>100</option>
                 </select>
-                <span class="text-sm text-slate-600">entries</span>
+                <span class="text-sm text-teal-900/70">entries</span>
               </div>
 
               <div class="relative w-full sm:w-80">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" name="q" id="searchInput" value="<?= e($search) ?>" placeholder="Search.." autocomplete="off"
-                       class="w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg text-sm
-                              focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                              hover:border-[#4A154B]/40 transition-all bg-white" />
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-900/40"></i>
+                <input type="text" name="q" id="searchInput" value="<?= e($search) ?>" placeholder="Search..." autocomplete="off"
+                       class="w-full pl-10 pr-4 py-2 border-2 border-teal-100 rounded-lg text-sm bg-white text-teal-900 placeholder-teal-900/40
+                              focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                              hover:border-teal-200 transition-all" />
               </div>
             </div>
           </form>
         </div>
 
-        <!-- DATA TABLE -->
         <div class="max-w-6xl mx-auto animate-fade-in-up" style="animation-delay: 100ms;">
-          <div class="bg-white rounded-2xl shadow-lg border border-slate-200/70 overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full" id="grievancesTable">
-                <thead>
-                  <tr class="bg-[#4A154B] text-white">
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Sl.No.</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Grievance Number</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Grievance Type</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Subject</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-center text-xs font-bold uppercase tracking-wider">Actions</th>
-                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Remainder</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100" id="grievancesTableBody">
+          <div class="bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
+            <table class="grievance-table" id="grievancesTable">
+              <thead>
+                <tr class="bg-teal-600 text-white">
+                  <th class="col-sno       text-left font-bold uppercase tracking-wider">Sl.No.</th>
+                  <th class="col-number    text-left font-bold uppercase tracking-wider">Grievance Number</th>
+                  <th class="col-type      text-left font-bold uppercase tracking-wider">Grievance Type</th>
+                  <th class="col-name      text-left font-bold uppercase tracking-wider">Name</th>
+                  <th class="col-date      text-left font-bold uppercase tracking-wider">Date</th>
+                  <th class="col-subject   text-left font-bold uppercase tracking-wider">Subject</th>
+                  <th class="col-status    text-left font-bold uppercase tracking-wider">Status</th>
+                  <th class="col-actions   text-center font-bold uppercase tracking-wider">Actions</th>
+                  <th class="col-remainder text-left font-bold uppercase tracking-wider">Remainder</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-teal-100" id="grievancesTableBody">
 
-                  <?php if (empty($grievances)): ?>
-                    <tr>
-                      <td colspan="9" class="px-6 py-16 text-center text-slate-500">
-                        <div class="flex flex-col items-center justify-center">
-                          <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
-                            <i data-lucide="inbox" class="w-8 h-8 text-[#8B1E7E]"></i>
-                          </div>
-                          <p class="text-lg font-semibold text-slate-700">No grievances found</p>
-                          <p class="text-sm text-slate-500 mt-1 mb-4">
-                            <?= $search !== '' ? 'Try adjusting your search.' : 'No grievances have been filed yet.' ?>
-                          </p>
+                <?php if (empty($grievances)): ?>
+                  <tr>
+                    <td colspan="9" class="px-6 py-16 text-center text-teal-900/60">
+                      <div class="flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center mb-4">
+                          <i data-lucide="inbox" class="w-8 h-8 text-teal-600"></i>
+                        </div>
+                        <p class="text-lg font-semibold text-teal-900">No grievances found</p>
+                        <p class="text-sm text-teal-900/60 mt-1 mb-4">
+                          <?= $search !== '' ? 'Try adjusting your search.' : 'No grievances have been filed yet.' ?>
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                <?php else: ?>
+
+                  <?php foreach ($grievances as $index => $gr): ?>
+                    <?php
+                      $grId         = (int) $gr['id'];
+                      $grNumber     = (string) ($gr['grievance_number']  ?? '');
+                      $grType       = (string) ($gr['type_name']         ?? 'N/A');
+                      $grName       = (string) ($gr['complainant_name']  ?? 'N/A');
+                      $grEmail      = (string) ($gr['complainant_email'] ?? '');
+                      $grRole       = (string) ($gr['complainant_role']  ?? '');
+                      $grDate       = (string) ($gr['created_at']        ?? '');
+                      $grUpdated    = (string) ($gr['updated_at']        ?? '');
+                      $grSubject    = (string) ($gr['subject']           ?? '');
+                      $grDesc       = (string) ($gr['description']       ?? '');
+                      $grReply      = (string) ($gr['reply_details']     ?? '');
+                      $grFeedback   = (string) ($gr['feedback_details']  ?? '');
+                      $grStatus     = (string) ($gr['status']            ?? 'Pending');
+                      $grAttendee   = (string) ($gr['attendee_name']     ?? '');
+                      $grAttach     = (string) ($gr['attachment_path']   ?? '');
+                      $grReplyAttach= (string) ($gr['reply_attachment_path'] ?? '');
+                      $statusCls    = statusBadgeClass($grStatus);
+
+                      $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+
+                      $attachUrl    = '';
+                      $attachIsImg  = false;
+                      $attachExt    = '';
+                      if ($grAttach !== '') {
+                          $rel = ltrim($grAttach, '/');
+                          if (file_exists(__DIR__ . '/../' . $rel)) {
+                              $attachUrl    = '../' . $rel;
+                              $attachExt    = strtolower(pathinfo($rel, PATHINFO_EXTENSION));
+                              $attachIsImg  = in_array($attachExt, $imageExts, true);
+                          }
+                      }
+
+                      $replyAttachUrl   = '';
+                      $replyAttachIsImg = false;
+                      $replyAttachExt   = '';
+                      if ($grReplyAttach !== '') {
+                          $rel2 = ltrim($grReplyAttach, '/');
+                          if (file_exists(__DIR__ . '/../' . $rel2)) {
+                              $replyAttachUrl   = '../' . $rel2;
+                              $replyAttachExt   = strtolower(pathinfo($rel2, PATHINFO_EXTENSION));
+                              $replyAttachIsImg = in_array($replyAttachExt, $imageExts, true);
+                          }
+                      }
+
+                      $actionsForThis = $actionsByGrievance[$grId] ?? [];
+                      $actionsJson = [];
+                      foreach ($actionsForThis as $act) {
+                          $actionsJson[] = [
+                              'date'           => !empty($act['action_date']) ? date('d M Y', strtotime((string) $act['action_date'])) : '',
+                              'attendee_name'  => (string) ($act['attendee_name'] ?? ''),
+                              'attendee_desig' => (string) ($act['attendee_designation'] ?? ''),
+                              'summary'        => (string) ($act['summary'] ?? ''),
+                              'action_taken'   => (string) ($act['action_taken'] ?? ''),
+                              'created_by'     => (string) ($act['created_by_username'] ?? ''),
+                          ];
+                      }
+
+                      $formattedDate = '—';
+                      if ($grDate !== '') {
+                          $ts = strtotime($grDate);
+                          if ($ts !== false) $formattedDate = date('Y-m-d', $ts);
+                      }
+
+                      $formattedUpdated = '—';
+                      if ($grUpdated !== '') {
+                          $ts2 = strtotime($grUpdated);
+                          if ($ts2 !== false) $formattedUpdated = date('d M Y, h:i A', $ts2);
+                      }
+
+                      $globalIndex = $offset + $index + 1;
+                    ?>
+                    <tr class="hover:bg-teal-50/60 transition-colors">
+                      <td class="col-sno font-medium text-teal-900/70"><?= $globalIndex ?></td>
+                      <td class="col-number font-semibold text-teal-700 break-words"><?= e($grNumber) ?></td>
+                      <td class="col-type text-teal-900/80 break-words"><?= e($grType) ?></td>
+                      <td class="col-name text-teal-900 font-medium break-words"><?= e($grName) ?></td>
+                      <td class="col-date text-teal-900/70 break-words"><?= e($formattedDate) ?></td>
+                      <td class="col-subject text-teal-900/80 break-words"><?= e($grSubject !== '' ? $grSubject : '—') ?></td>
+                      <td class="col-status">
+                        <span class="status-badge border <?= $statusCls ?>">
+                          <?= e($grStatus) ?>
+                        </span>
+                      </td>
+                      <td class="col-actions">
+                        <div class="flex items-center justify-center gap-2">
+
+                          <button type="button" title="View grievance"
+                                  onclick='openViewGrievanceModal(<?= htmlspecialchars(json_encode([
+                                      "number"           => $grNumber,
+                                      "type"             => $grType,
+                                      "name"             => $grName,
+                                      "email"            => $grEmail,
+                                      "role"             => $grRole,
+                                      "subject"          => $grSubject,
+                                      "description"      => $grDesc,
+                                      "status"           => $grStatus,
+                                      "reply"            => $grReply,
+                                      "feedback"         => $grFeedback,
+                                      "date"             => $formattedDate,
+                                      "updated"          => $formattedUpdated,
+                                      "attendee"         => $grAttendee,
+                                      "attachment_url"   => $attachUrl,
+                                      "attachment_ext"   => $attachExt,
+                                      "attachment_is_img"=> $attachIsImg,
+                                      "reply_attach_url" => $replyAttachUrl,
+                                      "reply_attach_ext" => $replyAttachExt,
+                                      "reply_attach_is_img" => $replyAttachIsImg,
+                                  ]), ENT_QUOTES, 'UTF-8') ?>)'
+                                  class="action-btn bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white">
+                            <i data-lucide="eye"></i>
+                          </button>
+
+                          <button type="button" title="Action summary"
+                                  onclick='openActionSummary(<?= htmlspecialchars(json_encode([
+                                      "number"  => $grNumber,
+                                      "subject" => $grSubject,
+                                      "actions" => $actionsJson,
+                                  ]), ENT_QUOTES, 'UTF-8') ?>)'
+                                  class="action-btn bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white">
+                            <i data-lucide="list"></i>
+                          </button>
+
                         </div>
                       </td>
-                    </tr>
-                  <?php else: ?>
-
-                    <?php foreach ($grievances as $index => $gr): ?>
-                      <?php
-                        $grId         = (int) $gr['id'];
-                        $grNumber     = (string) ($gr['grievance_number']  ?? '');
-                        $grType       = (string) ($gr['type_name']         ?? 'N/A');
-                        $grName       = (string) ($gr['complainant_name']  ?? 'N/A');
-                        $grEmail      = (string) ($gr['complainant_email'] ?? '');
-                        $grRole       = (string) ($gr['complainant_role']  ?? '');
-                        $grDate       = (string) ($gr['created_at']        ?? '');
-                        $grUpdated    = (string) ($gr['updated_at']        ?? '');
-                        $grSubject    = (string) ($gr['subject']           ?? '');
-                        $grDesc       = (string) ($gr['description']       ?? '');
-                        $grReply      = (string) ($gr['reply_details']     ?? '');
-                        $grFeedback   = (string) ($gr['feedback_details']  ?? '');
-                        $grStatus     = (string) ($gr['status']            ?? 'Pending');
-                        $grAttendee   = (string) ($gr['attendee_name']     ?? '');
-                        $grAttach     = (string) ($gr['attachment_path']   ?? '');
-                        $grReplyAttach= (string) ($gr['reply_attachment_path'] ?? '');
-                        $statusCls    = statusBadgeClass($grStatus);
-
-                        // Resolve attachments
-                        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-
-                        $attachUrl    = '';
-                        $attachIsImg  = false;
-                        $attachExt    = '';
-                        if ($grAttach !== '') {
-                            $rel = ltrim($grAttach, '/');
-                            if (file_exists(__DIR__ . '/../' . $rel)) {
-                                $attachUrl    = '../' . $rel;
-                                $attachExt    = strtolower(pathinfo($rel, PATHINFO_EXTENSION));
-                                $attachIsImg  = in_array($attachExt, $imageExts, true);
-                            }
-                        }
-
-                        $replyAttachUrl   = '';
-                        $replyAttachIsImg = false;
-                        $replyAttachExt   = '';
-                        if ($grReplyAttach !== '') {
-                            $rel2 = ltrim($grReplyAttach, '/');
-                            if (file_exists(__DIR__ . '/../' . $rel2)) {
-                                $replyAttachUrl   = '../' . $rel2;
-                                $replyAttachExt   = strtolower(pathinfo($rel2, PATHINFO_EXTENSION));
-                                $replyAttachIsImg = in_array($replyAttachExt, $imageExts, true);
-                            }
-                        }
-
-                        // Prepare actions list for this grievance
-                        $actionsForThis = $actionsByGrievance[$grId] ?? [];
-                        $actionsJson = [];
-                        foreach ($actionsForThis as $act) {
-                            $actionsJson[] = [
-                                'date'           => !empty($act['action_date']) ? date('d M Y', strtotime((string) $act['action_date'])) : '',
-                                'attendee_name'  => (string) ($act['attendee_name'] ?? ''),
-                                'attendee_desig' => (string) ($act['attendee_designation'] ?? ''),
-                                'summary'        => (string) ($act['summary'] ?? ''),
-                                'action_taken'   => (string) ($act['action_taken'] ?? ''),
-                                'created_by'     => (string) ($act['created_by_username'] ?? ''),
-                            ];
-                        }
-
-                        $formattedDate = '—';
-                        if ($grDate !== '') {
-                            $ts = strtotime($grDate);
-                            if ($ts !== false) $formattedDate = date('Y-m-d', $ts);
-                        }
-
-                        $formattedUpdated = '—';
-                        if ($grUpdated !== '') {
-                            $ts2 = strtotime($grUpdated);
-                            if ($ts2 !== false) $formattedUpdated = date('d M Y, h:i A', $ts2);
-                        }
-
-                        $globalIndex = $offset + $index + 1;
-                      ?>
-                      <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900"><?= $globalIndex ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#4A154B]"><?= e($grNumber) ?></td>
-                        <td class="px-6 py-4 text-sm text-slate-700 max-w-[220px]"><?= e($grType) ?></td>
-                        <td class="px-6 py-4 text-sm text-slate-800 font-medium max-w-[180px]"><?= e($grName) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600"><?= e($formattedDate) ?></td>
-                        <td class="px-6 py-4 text-sm text-slate-700 max-w-[220px]"><?= e($grSubject !== '' ? $grSubject : '—') ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border <?= $statusCls ?>">
-                            <?= e($grStatus) ?>
+                      <td class="col-remainder">
+                        <?php
+                          $needsAttention = in_array(strtolower($grStatus), ['reopened', 'pending'], true);
+                        ?>
+                        <?php if ($needsAttention): ?>
+                          <span class="attention-pill bg-pink-100 text-pink-800 border border-pink-200">
+                            <i data-lucide="alert-circle" class="w-3 h-3 flex-shrink-0"></i>
+                            Needs Attention
                           </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="flex items-center justify-center gap-2">
+                        <?php else: ?>
+                          <span class="text-teal-900/40">—</span>
+                        <?php endif; ?>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
 
-                            <!-- View (Eye) -->
-                            <button type="button" title="View grievance"
-                                    onclick='openViewGrievanceModal(<?= htmlspecialchars(json_encode([
-                                        "number"           => $grNumber,
-                                        "type"             => $grType,
-                                        "name"             => $grName,
-                                        "email"            => $grEmail,
-                                        "role"             => $grRole,
-                                        "subject"          => $grSubject,
-                                        "description"      => $grDesc,
-                                        "status"           => $grStatus,
-                                        "reply"            => $grReply,
-                                        "feedback"         => $grFeedback,
-                                        "date"             => $formattedDate,
-                                        "updated"          => $formattedUpdated,
-                                        "attendee"         => $grAttendee,
-                                        "attachment_url"   => $attachUrl,
-                                        "attachment_ext"   => $attachExt,
-                                        "attachment_is_img"=> $attachIsImg,
-                                        "reply_attach_url" => $replyAttachUrl,
-                                        "reply_attach_ext" => $replyAttachExt,
-                                        "reply_attach_is_img" => $replyAttachIsImg,
-                                    ]), ENT_QUOTES, 'UTF-8') ?>)'
-                                    class="w-9 h-9 rounded-full bg-purple-50 hover:bg-[#4A154B]
-                                           flex items-center justify-center text-[#4A154B] hover:text-white
-                                           transition-all duration-200 hover:scale-110">
-                              <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
+                <?php endif; ?>
 
-                            <!-- Action Summary (list) -->
-                            <button type="button" title="Action summary"
-                                    onclick='openActionSummary(<?= htmlspecialchars(json_encode([
-                                        "number"  => $grNumber,
-                                        "subject" => $grSubject,
-                                        "actions" => $actionsJson,
-                                    ]), ENT_QUOTES, 'UTF-8') ?>)'
-                                    class="w-9 h-9 rounded-full bg-purple-50 hover:bg-[#4A154B]
-                                           flex items-center justify-center text-[#4A154B] hover:text-white
-                                           transition-all duration-200 hover:scale-110">
-                              <i data-lucide="list" class="w-4 h-4"></i>
-                            </button>
+              </tbody>
+            </table>
 
-                          </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <?php
-                            $needsAttention = in_array(strtolower($grStatus), ['reopened', 'pending'], true);
-                          ?>
-                          <?php if ($needsAttention): ?>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full
-                                         bg-pink-100 text-pink-800 border border-pink-200">
-                              <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
-                              Needs Attention
-                            </span>
-                          <?php else: ?>
-                            <span class="text-sm text-slate-400">—</span>
-                          <?php endif; ?>
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
-
-                  <?php endif; ?>
-
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Pagination -->
             <?php if ($totalRows > 0): ?>
-              <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p class="text-sm text-slate-600" id="tableInfo">
+              <div class="px-6 py-4 bg-teal-50/50 border-t border-teal-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-sm text-teal-900/70" id="tableInfo">
                   Showing
-                  <span class="font-semibold text-slate-900"><?= $offset + 1 ?></span>
+                  <span class="font-semibold text-teal-900"><?= $offset + 1 ?></span>
                   to
-                  <span class="font-semibold text-slate-900"><?= min($offset + count($grievances), $totalRows) ?></span>
+                  <span class="font-semibold text-teal-900"><?= min($offset + count($grievances), $totalRows) ?></span>
                   of
-                  <span class="font-semibold text-slate-900"><?= $totalRows ?></span>
+                  <span class="font-semibold text-teal-900"><?= $totalRows ?></span>
                   entries
                 </p>
 
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center gap-2 flex-wrap justify-center">
                   <?php
                     $qsBase = 'grievance_details.php?entries=' . $entries;
                     if ($search !== '') $qsBase .= '&q=' . urlencode($search);
                   ?>
 
                   <?php if ($page > 1): ?>
-                    <a href="<?= e($qsBase . '&page=' . ($page - 1)) ?>" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">Previous</a>
+                    <a href="<?= e($qsBase . '&page=' . ($page - 1)) ?>" class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 transition-colors">Previous</a>
                   <?php else: ?>
-                    <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 border border-slate-200 cursor-not-allowed" disabled>Previous</button>
+                    <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900/40 bg-teal-50 border-2 border-teal-100 cursor-not-allowed" disabled>Previous</button>
                   <?php endif; ?>
 
                   <?php
@@ -781,28 +1066,28 @@ function statusBadgeClass(string $status): string
                     $endPage    = min($totalPages, $page + $pageWindow);
 
                     if ($startPage > 1) {
-                        echo '<a href="' . e($qsBase . '&page=1') . '" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">1</a>';
-                        if ($startPage > 2) echo '<span class="px-2 text-slate-400">…</span>';
+                        echo '<a href="' . e($qsBase . '&page=1') . '" class="px-3 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 transition-colors">1</a>';
+                        if ($startPage > 2) echo '<span class="px-2 text-teal-900/40">…</span>';
                     }
 
                     for ($p = $startPage; $p <= $endPage; $p++) {
                         if ($p === $page) {
-                            echo '<span class="inline-flex items-center justify-center min-w-[36px] h-9 px-3 rounded-lg bg-[#4A154B] text-white text-sm font-bold shadow-md">' . $p . '</span>';
+                            echo '<span class="inline-flex items-center justify-center min-w-[36px] h-9 px-3 rounded-lg bg-teal-600 text-white text-sm font-bold shadow-sm">' . $p . '</span>';
                         } else {
-                            echo '<a href="' . e($qsBase . '&page=' . $p) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">' . $p . '</a>';
+                            echo '<a href="' . e($qsBase . '&page=' . $p) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 transition-colors">' . $p . '</a>';
                         }
                     }
 
                     if ($endPage < $totalPages) {
-                        if ($endPage < $totalPages - 1) echo '<span class="px-2 text-slate-400">…</span>';
-                        echo '<a href="' . e($qsBase . '&page=' . $totalPages) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">' . $totalPages . '</a>';
+                        if ($endPage < $totalPages - 1) echo '<span class="px-2 text-teal-900/40">…</span>';
+                        echo '<a href="' . e($qsBase . '&page=' . $totalPages) . '" class="px-3 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 transition-colors">' . $totalPages . '</a>';
                     }
                   ?>
 
                   <?php if ($page < $totalPages): ?>
-                    <a href="<?= e($qsBase . '&page=' . ($page + 1)) ?>" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">Next</a>
+                    <a href="<?= e($qsBase . '&page=' . ($page + 1)) ?>" class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 transition-colors">Next</a>
                   <?php else: ?>
-                    <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 border border-slate-200 cursor-not-allowed" disabled>Next</button>
+                    <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900/40 bg-teal-50 border-2 border-teal-100 cursor-not-allowed" disabled>Next</button>
                   <?php endif; ?>
                 </div>
               </div>
@@ -813,116 +1098,122 @@ function statusBadgeClass(string $status): string
 
       </main>
 
-      <!-- FOOTER -->
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-6">
           <div class="max-w-7xl mx-auto text-center">
-            <p class="text-xs text-slate-700">
+            <p class="text-xs text-teal-200/70">
               Copyright &copy; <?= date('Y') ?>
-              <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>. All rights reserved.
+              <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
             </p>
-            <p class="text-xs text-slate-700 mt-1">
-              Powered by
-              <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">Orell</span>
+            <p class="text-xs text-teal-200/70 mt-1">
+              Powered by <span class="font-bold text-white">RLabZ</span>
             </p>
           </div>
         </div>
       </footer>
+
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- VIEW GRIEVANCE MODAL (with attachments + reply attachment)     -->
-  <!-- ============================================================= -->
+  <!-- BACK TO TOP -->
+  <button id="backToTop" aria-label="Back to top"
+          class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-teal-600 hover:bg-teal-700
+                 text-white shadow-lg hover:shadow-xl flex items-center justify-center
+                 hover:scale-110 transition-all duration-300">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
+  <!-- ============================================================ -->
+  <!-- VIEW GRIEVANCE MODAL                                         -->
+  <!-- ============================================================ -->
   <div id="viewGrievanceModal" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeViewGrievanceModal()"></div>
 
     <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl animate-modal-in
                 overflow-hidden max-h-[92vh] flex flex-col">
 
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800">Grievance Details</h3>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 class="text-lg md:text-xl font-bold text-teal-900">Grievance Details</h3>
         <button type="button" onclick="closeViewGrievanceModal()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="p-6 overflow-y-auto flex-1 space-y-5">
 
-        <div class="flex items-start space-x-4 pb-4 border-b border-slate-100">
-          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                      flex items-center justify-center text-white shadow-md flex-shrink-0">
+        <div class="flex items-start gap-4 pb-4 border-b border-teal-100">
+          <div class="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
             <i data-lucide="file-text" class="w-7 h-7"></i>
           </div>
           <div class="min-w-0 flex-1">
-            <p id="vgNumber" class="text-sm font-bold text-[#4A154B] break-words">—</p>
-            <p id="vgSubject" class="text-base font-bold text-slate-800 break-words mt-0.5">—</p>
+            <p id="vgNumber" class="text-sm font-bold text-teal-700 break-words">—</p>
+            <p id="vgSubject" class="text-base font-bold text-teal-900 break-words mt-0.5">—</p>
             <div class="mt-2 flex flex-wrap items-center gap-2">
               <span id="vgStatus"></span>
-              <span class="text-xs text-slate-500">·</span>
-              <span class="text-xs text-slate-500" id="vgDate">—</span>
+              <span class="text-xs text-teal-900/50">·</span>
+              <span class="text-xs text-teal-900/60" id="vgDate">—</span>
             </div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Grievance Type</p>
-            <p id="vgType" class="text-sm font-semibold text-slate-800 break-words">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Grievance Type</p>
+            <p id="vgType" class="text-sm font-semibold text-teal-900 break-words">—</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Complainant</p>
-            <p id="vgComplainant" class="text-sm font-semibold text-slate-800 break-words">—</p>
-            <p id="vgComplainantMeta" class="text-xs text-slate-500 break-all mt-0.5">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Complainant</p>
+            <p id="vgComplainant" class="text-sm font-semibold text-teal-900 break-words">—</p>
+            <p id="vgComplainantMeta" class="text-xs text-teal-900/60 break-all mt-0.5">—</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Submitted On</p>
-            <p id="vgSubmitted" class="text-sm font-semibold text-slate-800">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Submitted On</p>
+            <p id="vgSubmitted" class="text-sm font-semibold text-teal-900">—</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Last Updated</p>
-            <p id="vgUpdated" class="text-sm font-semibold text-slate-800">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Last Updated</p>
+            <p id="vgUpdated" class="text-sm font-semibold text-teal-900">—</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 sm:col-span-2">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Attendee</p>
-            <p id="vgAttendee" class="text-sm font-semibold text-slate-800 break-words">No Data</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100 sm:col-span-2">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Attendee</p>
+            <p id="vgAttendee" class="text-sm font-semibold text-teal-900 break-words">No Data</p>
           </div>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Description</p>
-          <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-            <p id="vgDescription" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Description</p>
+          <div class="bg-teal-50/60 rounded-xl p-4 border border-teal-100">
+            <p id="vgDescription" class="text-sm text-teal-900/80 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
 
-        <!-- Original Attachment -->
         <div id="vgAttachmentWrap" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Original Attachment</p>
-          <div class="bg-slate-50 rounded-xl p-4 border border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Original Attachment</p>
+          <div class="bg-teal-50/60 rounded-xl p-4 border border-teal-100 flex items-center justify-between gap-3 flex-wrap">
             <div class="flex items-center min-w-0">
-              <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-slate-200">
-                <i data-lucide="paperclip" class="w-4 h-4 text-[#8B1E7E]"></i>
+              <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-teal-100">
+                <i data-lucide="paperclip" class="w-4 h-4 text-teal-600"></i>
               </div>
               <div class="min-w-0 ml-3">
-                <p class="text-sm font-semibold text-slate-800 truncate" id="vgAttachmentName">attachment</p>
-                <p class="text-[11px] text-slate-500" id="vgAttachmentMeta">—</p>
+                <p class="text-sm font-semibold text-teal-900 truncate" id="vgAttachmentName">attachment</p>
+                <p class="text-[11px] text-teal-900/60" id="vgAttachmentMeta">—</p>
               </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <button type="button" id="vgAttachmentViewBtn"
                       class="inline-flex items-center px-3 py-2 rounded-lg
-                             bg-purple-50 hover:bg-[#4A154B] text-[#4A154B] hover:text-white
-                             text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                             bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white
+                             text-xs font-bold transition-colors duration-200">
                 <i data-lucide="eye" class="w-3.5 h-3.5 mr-1.5"></i> View
               </button>
               <a id="vgAttachmentDownloadBtn" href="#" download
                  class="inline-flex items-center px-3 py-2 rounded-lg
-                        bg-emerald-50 hover:bg-[#006837] text-[#006837] hover:text-white
-                        text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                        bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white
+                        text-xs font-bold transition-colors duration-200">
                 <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i> Download
               </a>
             </div>
@@ -930,36 +1221,35 @@ function statusBadgeClass(string $status): string
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reply / Response</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Reply / Response</p>
           <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
             <p id="vgReply" class="text-sm text-emerald-800 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
 
-        <!-- Reply Attachment -->
         <div id="vgReplyAttachmentWrap" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reply Attachment</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Reply Attachment</p>
           <div class="bg-emerald-50/60 rounded-xl p-4 border border-emerald-200 flex items-center justify-between gap-3 flex-wrap">
             <div class="flex items-center min-w-0">
               <div class="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 border border-emerald-200">
-                <i data-lucide="paperclip" class="w-4 h-4 text-[#006837]"></i>
+                <i data-lucide="paperclip" class="w-4 h-4 text-emerald-700"></i>
               </div>
               <div class="min-w-0 ml-3">
-                <p class="text-sm font-semibold text-slate-800 truncate" id="vgReplyAttachmentName">attachment</p>
-                <p class="text-[11px] text-slate-500" id="vgReplyAttachmentMeta">—</p>
+                <p class="text-sm font-semibold text-teal-900 truncate" id="vgReplyAttachmentName">attachment</p>
+                <p class="text-[11px] text-teal-900/60" id="vgReplyAttachmentMeta">—</p>
               </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <button type="button" id="vgReplyAttachmentViewBtn"
                       class="inline-flex items-center px-3 py-2 rounded-lg
-                             bg-white hover:bg-[#006837] text-[#006837] hover:text-white
-                             text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                             bg-white hover:bg-emerald-600 text-emerald-700 hover:text-white
+                             text-xs font-bold transition-colors duration-200">
                 <i data-lucide="eye" class="w-3.5 h-3.5 mr-1.5"></i> View
               </button>
               <a id="vgReplyAttachmentDownloadBtn" href="#" download
                  class="inline-flex items-center px-3 py-2 rounded-lg
-                        bg-emerald-50 hover:bg-[#006837] text-[#006837] hover:text-white
-                        text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                        bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white
+                        text-xs font-bold transition-colors duration-200">
                 <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i> Download
               </a>
             </div>
@@ -967,7 +1257,7 @@ function statusBadgeClass(string $status): string
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Feedback</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Feedback</p>
           <div class="bg-amber-50 rounded-xl p-4 border border-amber-100">
             <p id="vgFeedback" class="text-sm text-amber-800 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
@@ -975,34 +1265,34 @@ function statusBadgeClass(string $status): string
 
       </div>
 
-      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+      <div class="px-6 py-4 bg-teal-50/60 border-t border-teal-100 flex justify-end">
         <button type="button" onclick="closeViewGrievanceModal()"
-                class="px-5 py-2.5 rounded-xl font-semibold text-slate-700
-                       bg-white hover:bg-slate-100 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+                class="px-5 py-2.5 rounded-lg font-semibold text-teal-900
+                       bg-white hover:bg-teal-50 border-2 border-teal-200
+                       transition-all duration-200">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- ACTION SUMMARY MODAL (renders saved actions from DB)           -->
-  <!-- ============================================================= -->
+  <!-- ============================================================ -->
+  <!-- ACTION SUMMARY MODAL                                         -->
+  <!-- ============================================================ -->
   <div id="actionSummaryModal" class="hidden fixed inset-0 z-[66] flex items-start justify-center p-4 pt-16">
     <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="closeActionSummary()"></div>
 
     <div class="relative w-full max-w-2xl max-h-[88vh] bg-white rounded-xl shadow-2xl animate-modal-in
                 overflow-hidden flex flex-col">
 
-      <div class="bg-pink-100 text-pink-900 px-5 py-2.5 border-b border-pink-200 flex-shrink-0">
+      <div class="bg-teal-50 text-teal-900 px-5 py-2.5 border-b border-teal-100 flex-shrink-0">
         <p id="asTitle" class="text-sm font-semibold truncate">—</p>
       </div>
 
       <div class="flex items-center justify-between px-6 pt-5 pb-3 flex-shrink-0">
-        <h3 class="text-xl font-bold text-slate-800">Action Summary</h3>
+        <h3 class="text-xl font-bold text-teal-900">Action Summary</h3>
         <button type="button" onclick="closeActionSummary()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1010,29 +1300,29 @@ function statusBadgeClass(string $status): string
       <div class="px-6 pb-6 overflow-y-auto flex-1">
         <div id="asList" class="space-y-3"></div>
 
-        <div id="asEmpty" class="hidden border border-slate-200 rounded-lg p-8 text-center">
-          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3">
-            <i data-lucide="list-x" class="w-6 h-6 text-slate-400"></i>
+        <div id="asEmpty" class="hidden border-2 border-teal-100 rounded-lg p-8 text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-50 mb-3">
+            <i data-lucide="list-x" class="w-6 h-6 text-teal-600"></i>
           </div>
-          <p class="text-sm font-semibold text-slate-600">No action summaries recorded</p>
-          <p class="text-xs text-slate-500 mt-1">Nothing has been logged for this grievance yet.</p>
+          <p class="text-sm font-semibold text-teal-900">No action summaries recorded</p>
+          <p class="text-xs text-teal-900/60 mt-1">Nothing has been logged for this grievance yet.</p>
         </div>
       </div>
 
-      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end flex-shrink-0">
+      <div class="px-6 py-4 bg-teal-50/60 border-t border-teal-100 flex justify-end flex-shrink-0">
         <button type="button" onclick="closeActionSummary()"
-                class="px-5 py-2.5 rounded-xl font-semibold text-slate-700
-                       bg-white hover:bg-slate-100 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+                class="px-5 py-2.5 rounded-lg font-semibold text-teal-900
+                       bg-white hover:bg-teal-50 border-2 border-teal-200
+                       transition-all duration-200">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- LIGHTBOX (opens image previews on the page)                    -->
-  <!-- ============================================================= -->
+  <!-- ============================================================ -->
+  <!-- LIGHTBOX                                                     -->
+  <!-- ============================================================ -->
   <div id="lightbox" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-md animate-lightbox-in">
     <div id="lightboxToolbar"
          class="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between gap-3
@@ -1045,14 +1335,14 @@ function statusBadgeClass(string $status): string
         <a id="lightboxDownloadBtn" href="#" download
            class="inline-flex items-center px-4 py-2 rounded-lg
                   bg-white/10 hover:bg-white/20 text-white text-sm font-semibold
-                  border border-white/20 transition-all duration-200 hover:-translate-y-0.5">
+                  border border-white/20 transition-all duration-200">
           <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download
         </a>
         <button type="button" data-lightbox-close="1"
                 class="inline-flex items-center justify-center w-10 h-10 rounded-lg
                        bg-white/10 hover:bg-red-500/80 text-white
                        border border-white/20 transition-all duration-200
-                       active:scale-95 cursor-pointer" title="Close (Esc)" aria-label="Close">
+                       cursor-pointer" title="Close (Esc)" aria-label="Close">
           <i data-lucide="x" class="w-5 h-5 pointer-events-none"></i>
         </button>
       </div>
@@ -1064,45 +1354,44 @@ function statusBadgeClass(string $status): string
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- LOGOUT MODAL                                                  -->
-  <!-- ============================================================= -->
+  <!-- ============================================================ -->
+  <!-- LOGOUT CONFIRMATION MODAL                                    -->
+  <!-- ============================================================ -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div id="logoutConfirmPanel"
          class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
         <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4
-                    bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+                    bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
+        <p class="text-sm text-teal-900/70 leading-relaxed">
           You are about to log out of
-          <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+          <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
           Any unsaved changes will be lost.
         </p>
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700
-                       bg-slate-100 hover:bg-slate-200 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900
+                       bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                       transition-all duration-200">
           Cancel
         </button>
         <button type="button" id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white
-                       bg-gradient-to-r from-red-500 via-red-600 to-rose-600
-                       hover:from-red-600 hover:via-red-700 hover:to-rose-700
-                       shadow-lg shadow-red-500/30 hover:shadow-red-500/50
-                       transition-all duration-300 hover:-translate-y-0.5 active:scale-95
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white
+                       bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md
+                       transition-all duration-200
                        flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
@@ -1112,396 +1401,441 @@ function statusBadgeClass(string $status): string
   </div>
 
   <script>
-    if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+    document.addEventListener('DOMContentLoaded', function () {
 
-    /* Flash auto-dismiss */
-    (function () {
-      ['flashSuccessBox', 'flashErrorBox'].forEach(function (id) {
-        const box = document.getElementById(id);
-        if (!box) return;
-        setTimeout(function () {
-          box.classList.remove('animate-flash-in');
-          box.classList.add('animate-flash-out');
-          setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 500);
-        }, 3000);
-      });
-    })();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    /* Admin dropdown */
-    (function () {
-      const btn = document.getElementById('admin-dropdown-btn');
-      const menu = document.getElementById('admin-dropdown-menu');
-      const chevron = document.getElementById('admin-chevron');
-      const container = document.getElementById('admin-dropdown-container');
-      if (!btn || !menu || !container) return;
+      const sidebar = document.getElementById('adminSidebar');
+      const main    = document.getElementById('adminMain');
 
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const isOpen = !menu.classList.contains('hidden');
-        if (isOpen) {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
-        } else {
-          menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
-          if (chevron) chevron.classList.add('rotate-180');
-          btn.setAttribute('aria-expanded', 'true');
+      // Sidebar expand/collapse
+      (function () {
+        const toggleBtn = document.getElementById('sidebarToggle');
+        if (!toggleBtn || !sidebar || !main) return;
+
+        const labels   = sidebar.querySelectorAll('.sidebar-label');
+        const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
+        let expanded = false;
+
+        toggleBtn.addEventListener('click', function () {
+          expanded = !expanded;
+          if (expanded) {
+            sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+            main.classList.remove('ml-20');   main.classList.add('ml-64');
+            labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.add('hidden'); });
+          } else {
+            sidebar.classList.add('w-20');    sidebar.classList.remove('w-64');
+            main.classList.add('ml-20');      main.classList.remove('ml-64');
+            labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.remove('hidden'); });
+          }
+          setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
+        });
+      })();
+
+      /* Flash auto-dismiss */
+      (function () {
+        ['flashSuccessBox', 'flashErrorBox'].forEach(function (id) {
+          const box = document.getElementById(id);
+          if (!box) return;
+          setTimeout(function () {
+            box.classList.remove('animate-flash-in');
+            box.classList.add('animate-flash-out');
+            setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 500);
+          }, 3000);
+        });
+      })();
+
+      /* Admin dropdown */
+      (function () {
+        const btn = document.getElementById('admin-dropdown-btn');
+        const menu = document.getElementById('admin-dropdown-menu');
+        const chevron = document.getElementById('admin-chevron');
+        const container = document.getElementById('admin-dropdown-container');
+        if (!btn || !menu || !container) return;
+
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const isOpen = !menu.classList.contains('hidden');
+          if (isOpen) {
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
+            if (chevron) chevron.classList.remove('rotate-180');
+            btn.setAttribute('aria-expanded', 'false');
+          } else {
+            menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
+            if (chevron) chevron.classList.add('rotate-180');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        document.addEventListener('click', function (e) {
+          if (!container.contains(e.target)) {
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
+            if (chevron) chevron.classList.remove('rotate-180');
+            btn.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
+            if (chevron) chevron.classList.remove('rotate-180');
+            btn.setAttribute('aria-expanded', 'false');
+          }
+        });
+      })();
+
+      /* Helpers */
+      function escHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function filenameFromUrl(url) {
+        if (!url) return 'attachment';
+        try {
+          const clean = url.split('?')[0].split('#')[0];
+          const parts = clean.split('/');
+          let name = parts[parts.length - 1] || 'attachment';
+          name = name.replace(/^(reply|grv)_\d+_\d+_[a-f0-9]+_/i, '');
+          return decodeURIComponent(name);
+        } catch (e) { return 'attachment'; }
+      }
+
+      /* Lightbox */
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      const lightboxFilename = document.getElementById('lightboxFilename');
+      const lightboxDownloadBtn = document.getElementById('lightboxDownloadBtn');
+      const lightboxStage = document.getElementById('lightboxStage');
+
+      function openLightbox(url, filename) {
+        if (!lightbox || !lightboxImage) return;
+        lightboxImage.src = url || '';
+        if (lightboxFilename) lightboxFilename.textContent = filename || 'attachment';
+        if (lightboxDownloadBtn) {
+          lightboxDownloadBtn.setAttribute('href', url || '#');
+          lightboxDownloadBtn.setAttribute('download', filename || '');
         }
-      });
+        lightbox.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.add('hidden');
+        if (lightboxImage) lightboxImage.src = '';
+        const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
+                     || (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
+                     || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'));
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+      }
 
       document.addEventListener('click', function (e) {
-        if (!container.contains(e.target)) {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+        const closeEl = e.target.closest('[data-lightbox-close="1"]');
+        if (closeEl && lightbox && !lightbox.classList.contains('hidden')) {
+          e.preventDefault(); e.stopPropagation();
+          closeLightbox();
         }
       });
+      if (lightboxStage) lightboxStage.addEventListener('click', function (e) { if (e.target === lightboxStage) closeLightbox(); });
+      if (lightbox) lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
+      const lightboxToolbar = document.getElementById('lightboxToolbar');
+      if (lightboxToolbar) {
+        lightboxToolbar.addEventListener('click', function (e) {
+          if (!e.target.closest('[data-lightbox-close="1"]') && !e.target.closest('#lightboxDownloadBtn')) e.stopPropagation();
+        });
+      }
 
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+      /* VIEW GRIEVANCE MODAL */
+      const viewGrievanceModal = document.getElementById('viewGrievanceModal');
+
+      function statusBadgeHtml(status) {
+        const s = (status || '').trim();
+        const map = {
+          'Pending':     'bg-amber-100 text-amber-800 border-amber-200',
+          'In Progress': 'bg-sky-100 text-sky-800 border-sky-200',
+          'Disposed':    'bg-emerald-100 text-emerald-800 border-emerald-200',
+          'Closed':      'bg-slate-100 text-slate-700 border-slate-200',
+          'Reopened':    'bg-pink-100 text-pink-800 border-pink-200'
+        };
+        const cls = map[s] || 'bg-slate-100 text-slate-700 border-slate-200';
+        return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ' + cls + '">' + escHtml(s) + '</span>';
+      }
+
+      window.openViewGrievanceModal = function (data) {
+        if (!viewGrievanceModal || !data) return;
+
+        document.getElementById('vgNumber').textContent    = data.number || '—';
+        document.getElementById('vgSubject').textContent   = data.subject || '—';
+        document.getElementById('vgStatus').innerHTML      = statusBadgeHtml(data.status || 'Pending');
+        document.getElementById('vgDate').textContent      = data.date || '—';
+        document.getElementById('vgType').textContent      = data.type || '—';
+
+        document.getElementById('vgComplainant').textContent = data.name || '—';
+        const metaParts = [];
+        if (data.role)  metaParts.push(data.role);
+        if (data.email) metaParts.push(data.email);
+        document.getElementById('vgComplainantMeta').textContent = metaParts.length ? metaParts.join(' · ') : '—';
+
+        document.getElementById('vgSubmitted').textContent = data.date || '—';
+        document.getElementById('vgUpdated').textContent   = data.updated || '—';
+        document.getElementById('vgAttendee').textContent  = (data.attendee && data.attendee.trim() !== '') ? data.attendee : 'No Data';
+
+        document.getElementById('vgDescription').textContent =
+          (data.description && data.description.trim() !== '') ? data.description : 'No description provided.';
+        document.getElementById('vgReply').textContent =
+          (data.reply && data.reply.trim() !== '') ? data.reply : 'No reply yet from the committee.';
+        document.getElementById('vgFeedback').textContent =
+          (data.feedback && data.feedback.trim() !== '') ? data.feedback : 'No feedback recorded.';
+
+        const attWrap = document.getElementById('vgAttachmentWrap');
+        const attView = document.getElementById('vgAttachmentViewBtn');
+        const attDl   = document.getElementById('vgAttachmentDownloadBtn');
+        const attName = document.getElementById('vgAttachmentName');
+        const attMeta = document.getElementById('vgAttachmentMeta');
+
+        if (data.attachment_url && data.attachment_url.trim() !== '') {
+          attWrap.classList.remove('hidden');
+          const nm = filenameFromUrl(data.attachment_url);
+          const ex = (data.attachment_ext || '').toUpperCase();
+          attName.textContent = nm;
+          attMeta.textContent = (ex ? ex + ' • ' : '') + (data.attachment_is_img ? 'Image' : 'Document');
+          attDl.setAttribute('href', data.attachment_url);
+          attDl.setAttribute('download', nm);
+
+          const newBtn = attView.cloneNode(true);
+          attView.parentNode.replaceChild(newBtn, attView);
+          newBtn.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (data.attachment_is_img) openLightbox(data.attachment_url, nm);
+            else window.open(data.attachment_url, '_blank', 'noopener');
+          });
+        } else {
+          attWrap.classList.add('hidden');
         }
-      });
-    })();
 
-    /* Helpers */
-    function escHtml(s) {
-      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
-    function filenameFromUrl(url) {
-      if (!url) return 'attachment';
-      try {
-        const clean = url.split('?')[0].split('#')[0];
-        const parts = clean.split('/');
-        let name = parts[parts.length - 1] || 'attachment';
-        name = name.replace(/^(reply|grv)_\d+_\d+_[a-f0-9]+_/i, '');
-        return decodeURIComponent(name);
-      } catch (e) { return 'attachment'; }
-    }
+        const repWrap = document.getElementById('vgReplyAttachmentWrap');
+        const repView = document.getElementById('vgReplyAttachmentViewBtn');
+        const repDl   = document.getElementById('vgReplyAttachmentDownloadBtn');
+        const repName = document.getElementById('vgReplyAttachmentName');
+        const repMeta = document.getElementById('vgReplyAttachmentMeta');
 
-    /* Lightbox */
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = document.getElementById('lightboxImage');
-    const lightboxFilename = document.getElementById('lightboxFilename');
-    const lightboxDownloadBtn = document.getElementById('lightboxDownloadBtn');
-    const lightboxStage = document.getElementById('lightboxStage');
+        if (data.reply_attach_url && data.reply_attach_url.trim() !== '') {
+          repWrap.classList.remove('hidden');
+          const nm = filenameFromUrl(data.reply_attach_url);
+          const ex = (data.reply_attach_ext || '').toUpperCase();
+          repName.textContent = nm;
+          repMeta.textContent = (ex ? ex + ' • ' : '') + (data.reply_attach_is_img ? 'Image' : 'Document');
+          repDl.setAttribute('href', data.reply_attach_url);
+          repDl.setAttribute('download', nm);
 
-    function openLightbox(url, filename) {
-      if (!lightbox || !lightboxImage) return;
-      lightboxImage.src = url || '';
-      if (lightboxFilename) lightboxFilename.textContent = filename || 'attachment';
-      if (lightboxDownloadBtn) {
-        lightboxDownloadBtn.setAttribute('href', url || '#');
-        lightboxDownloadBtn.setAttribute('download', filename || '');
-      }
-      lightbox.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeLightbox() {
-      if (!lightbox) return;
-      lightbox.classList.add('hidden');
-      if (lightboxImage) lightboxImage.src = '';
-      const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
-                   || (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
-                   || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'));
-      if (!anyOpen) document.body.classList.remove('overflow-hidden');
-    }
+          const newBtn = repView.cloneNode(true);
+          repView.parentNode.replaceChild(newBtn, repView);
+          newBtn.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (data.reply_attach_is_img) openLightbox(data.reply_attach_url, nm);
+            else window.open(data.reply_attach_url, '_blank', 'noopener');
+          });
+        } else {
+          repWrap.classList.add('hidden');
+        }
 
-    document.addEventListener('click', function (e) {
-      const closeEl = e.target.closest('[data-lightbox-close="1"]');
-      if (closeEl && lightbox && !lightbox.classList.contains('hidden')) {
-        e.preventDefault(); e.stopPropagation();
-        closeLightbox();
-      }
-    });
-    if (lightboxStage) lightboxStage.addEventListener('click', function (e) { if (e.target === lightboxStage) closeLightbox(); });
-    if (lightbox) lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
-    const lightboxToolbar = document.getElementById('lightboxToolbar');
-    if (lightboxToolbar) {
-      lightboxToolbar.addEventListener('click', function (e) {
-        if (!e.target.closest('[data-lightbox-close="1"]') && !e.target.closest('#lightboxDownloadBtn')) e.stopPropagation();
-      });
-    }
-
-    /* ============================================================
-       VIEW GRIEVANCE MODAL
-       ============================================================ */
-    const viewGrievanceModal = document.getElementById('viewGrievanceModal');
-
-    function statusBadgeHtml(status) {
-      const s = (status || '').trim();
-      const map = {
-        'Pending':     'bg-amber-100 text-amber-800 border-amber-200',
-        'In Progress': 'bg-sky-100 text-sky-800 border-sky-200',
-        'Disposed':    'bg-emerald-100 text-emerald-800 border-emerald-200',
-        'Closed':      'bg-slate-100 text-slate-700 border-slate-200',
-        'Reopened':    'bg-pink-100 text-pink-800 border-pink-200'
-      };
-      const cls = map[s] || 'bg-slate-100 text-slate-700 border-slate-200';
-      return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ' + cls + '">' + escHtml(s) + '</span>';
-    }
-
-    function openViewGrievanceModal(data) {
-      if (!viewGrievanceModal || !data) return;
-
-      document.getElementById('vgNumber').textContent    = data.number || '—';
-      document.getElementById('vgSubject').textContent   = data.subject || '—';
-      document.getElementById('vgStatus').innerHTML      = statusBadgeHtml(data.status || 'Pending');
-      document.getElementById('vgDate').textContent      = data.date || '—';
-      document.getElementById('vgType').textContent      = data.type || '—';
-
-      document.getElementById('vgComplainant').textContent = data.name || '—';
-      const metaParts = [];
-      if (data.role)  metaParts.push(data.role);
-      if (data.email) metaParts.push(data.email);
-      document.getElementById('vgComplainantMeta').textContent = metaParts.length ? metaParts.join(' · ') : '—';
-
-      document.getElementById('vgSubmitted').textContent = data.date || '—';
-      document.getElementById('vgUpdated').textContent   = data.updated || '—';
-      document.getElementById('vgAttendee').textContent  = (data.attendee && data.attendee.trim() !== '') ? data.attendee : 'No Data';
-
-      document.getElementById('vgDescription').textContent =
-        (data.description && data.description.trim() !== '') ? data.description : 'No description provided.';
-      document.getElementById('vgReply').textContent =
-        (data.reply && data.reply.trim() !== '') ? data.reply : 'No reply yet from the committee.';
-      document.getElementById('vgFeedback').textContent =
-        (data.feedback && data.feedback.trim() !== '') ? data.feedback : 'No feedback recorded.';
-
-      /* Original attachment */
-      const attWrap = document.getElementById('vgAttachmentWrap');
-      const attView = document.getElementById('vgAttachmentViewBtn');
-      const attDl   = document.getElementById('vgAttachmentDownloadBtn');
-      const attName = document.getElementById('vgAttachmentName');
-      const attMeta = document.getElementById('vgAttachmentMeta');
-
-      if (data.attachment_url && data.attachment_url.trim() !== '') {
-        attWrap.classList.remove('hidden');
-        const nm = filenameFromUrl(data.attachment_url);
-        const ex = (data.attachment_ext || '').toUpperCase();
-        attName.textContent = nm;
-        attMeta.textContent = (ex ? ex + ' • ' : '') + (data.attachment_is_img ? 'Image' : 'Document');
-        attDl.setAttribute('href', data.attachment_url);
-        attDl.setAttribute('download', nm);
-
-        // Replace button to clear previous listeners
-        const newBtn = attView.cloneNode(true);
-        attView.parentNode.replaceChild(newBtn, attView);
-        newBtn.addEventListener('click', function (e) {
-          e.preventDefault(); e.stopPropagation();
-          if (data.attachment_is_img) openLightbox(data.attachment_url, nm);
-          else window.open(data.attachment_url, '_blank', 'noopener');
-        });
-      } else {
-        attWrap.classList.add('hidden');
+        viewGrievanceModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       }
 
-      /* Reply attachment */
-      const repWrap = document.getElementById('vgReplyAttachmentWrap');
-      const repView = document.getElementById('vgReplyAttachmentViewBtn');
-      const repDl   = document.getElementById('vgReplyAttachmentDownloadBtn');
-      const repName = document.getElementById('vgReplyAttachmentName');
-      const repMeta = document.getElementById('vgReplyAttachmentMeta');
-
-      if (data.reply_attach_url && data.reply_attach_url.trim() !== '') {
-        repWrap.classList.remove('hidden');
-        const nm = filenameFromUrl(data.reply_attach_url);
-        const ex = (data.reply_attach_ext || '').toUpperCase();
-        repName.textContent = nm;
-        repMeta.textContent = (ex ? ex + ' • ' : '') + (data.reply_attach_is_img ? 'Image' : 'Document');
-        repDl.setAttribute('href', data.reply_attach_url);
-        repDl.setAttribute('download', nm);
-
-        const newBtn = repView.cloneNode(true);
-        repView.parentNode.replaceChild(newBtn, repView);
-        newBtn.addEventListener('click', function (e) {
-          e.preventDefault(); e.stopPropagation();
-          if (data.reply_attach_is_img) openLightbox(data.reply_attach_url, nm);
-          else window.open(data.reply_attach_url, '_blank', 'noopener');
-        });
-      } else {
-        repWrap.classList.add('hidden');
+      window.closeViewGrievanceModal = function () {
+        if (!viewGrievanceModal) return;
+        viewGrievanceModal.classList.add('hidden');
+        const anyOpen = (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
+                     || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'))
+                     || (lightbox && !lightbox.classList.contains('hidden'));
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
       }
 
-      viewGrievanceModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
+      /* ACTION SUMMARY MODAL */
+      const actionSummaryModal = document.getElementById('actionSummaryModal');
 
-    function closeViewGrievanceModal() {
-      if (!viewGrievanceModal) return;
-      viewGrievanceModal.classList.add('hidden');
-      const anyOpen = (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
-                   || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'))
-                   || (lightbox && !lightbox.classList.contains('hidden'));
-      if (!anyOpen) document.body.classList.remove('overflow-hidden');
-    }
+      window.openActionSummary = function (data) {
+        if (!actionSummaryModal || !data) return;
 
-    /* ============================================================
-       ACTION SUMMARY MODAL (renders real rows from grievance_actions)
-       ============================================================ */
-    const actionSummaryModal = document.getElementById('actionSummaryModal');
+        const titleEl  = document.getElementById('asTitle');
+        const listEl   = document.getElementById('asList');
+        const emptyEl  = document.getElementById('asEmpty');
 
-    function openActionSummary(data) {
-      if (!actionSummaryModal || !data) return;
+        const bannerText = (data.subject && data.subject.trim() !== '')
+          ? data.number + ' | ' + data.subject
+          : data.number;
+        titleEl.textContent = bannerText || '—';
 
-      const titleEl  = document.getElementById('asTitle');
-      const listEl   = document.getElementById('asList');
-      const emptyEl  = document.getElementById('asEmpty');
+        const actions = Array.isArray(data.actions) ? data.actions : [];
 
-      const bannerText = (data.subject && data.subject.trim() !== '')
-        ? data.number + ' | ' + data.subject
-        : data.number;
-      titleEl.textContent = bannerText || '—';
+        if (actions.length === 0) {
+          listEl.innerHTML = '';
+          emptyEl.classList.remove('hidden');
+        } else {
+          emptyEl.classList.add('hidden');
 
-      const actions = Array.isArray(data.actions) ? data.actions : [];
+          let html = '';
+          actions.forEach(function (act, idx) {
+            const dt     = escHtml(act.date || '—');
+            const aname  = escHtml(act.attendee_name || '—');
+            const desig  = escHtml(act.attendee_desig || '');
+            const summ   = escHtml(act.summary || '—');
+            const taken  = escHtml(act.action_taken || '—');
+            const by     = escHtml(act.created_by || '');
 
-      if (actions.length === 0) {
-        listEl.innerHTML = '';
-        emptyEl.classList.remove('hidden');
-      } else {
-        emptyEl.classList.add('hidden');
-
-        let html = '';
-        actions.forEach(function (act, idx) {
-          const dt     = escHtml(act.date || '—');
-          const aname  = escHtml(act.attendee_name || '—');
-          const desig  = escHtml(act.attendee_desig || '');
-          const summ   = escHtml(act.summary || '—');
-          const taken  = escHtml(act.action_taken || '—');
-          const by     = escHtml(act.created_by || '');
-
-          html +=
-            '<div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">' +
-              '<div class="flex items-center justify-between gap-2 mb-3 flex-wrap">' +
-                '<div class="flex items-center gap-2">' +
-                  '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-emerald-300 bg-white text-emerald-700">Entry ' + (idx + 1) + '</span>' +
-                  '<span class="text-[11px] text-slate-600 flex items-center">' +
-                    '<i data-lucide="calendar" class="w-3.5 h-3.5 mr-1 text-emerald-700"></i>' + dt +
+            html +=
+              '<div class="rounded-xl border border-teal-200 bg-teal-50/40 p-4">' +
+                '<div class="flex items-center justify-between gap-2 mb-3 flex-wrap">' +
+                  '<div class="flex items-center gap-2">' +
+                    '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-teal-300 bg-white text-teal-700">Entry ' + (idx + 1) + '</span>' +
+                    '<span class="text-[11px] text-teal-900/70 flex items-center">' +
+                      '<i data-lucide="calendar" class="w-3.5 h-3.5 mr-1 text-teal-600"></i>' + dt +
+                    '</span>' +
+                  '</div>' +
+                  '<span class="text-[11px] text-teal-900/70 flex items-center">' +
+                    '<i data-lucide="user-check" class="w-3.5 h-3.5 mr-1 text-teal-600"></i>' +
+                    aname + (desig ? ' — ' + desig : '') +
                   '</span>' +
                 '</div>' +
-                '<span class="text-[11px] text-slate-600 flex items-center">' +
-                  '<i data-lucide="user-check" class="w-3.5 h-3.5 mr-1 text-emerald-700"></i>' +
-                  aname + (desig ? ' — ' + desig : '') +
-                '</span>' +
-              '</div>' +
-              '<div class="mb-2">' +
-                '<p class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mb-0.5">Grievance Summary</p>' +
-                '<p class="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap break-words">' + summ + '</p>' +
-              '</div>' +
-              '<div class="pt-2 border-t border-emerald-200/60">' +
-                '<p class="text-[10px] uppercase tracking-wider font-bold text-slate-500 mb-0.5">Action Taken</p>' +
-                '<p class="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap break-words">' + taken + '</p>' +
-              '</div>' +
-              (by ? '<p class="text-[10px] text-slate-500 mt-2">Submitted by: ' + by + '</p>' : '') +
-            '</div>';
-        });
-        listEl.innerHTML = html;
+                '<div class="mb-2">' +
+                  '<p class="text-[10px] uppercase tracking-wider font-bold text-teal-900/60 mb-0.5">Grievance Summary</p>' +
+                  '<p class="text-sm text-teal-900 leading-relaxed whitespace-pre-wrap break-words">' + summ + '</p>' +
+                '</div>' +
+                '<div class="pt-2 border-t border-teal-200/60">' +
+                  '<p class="text-[10px] uppercase tracking-wider font-bold text-teal-900/60 mb-0.5">Action Taken</p>' +
+                  '<p class="text-sm text-teal-900 leading-relaxed whitespace-pre-wrap break-words">' + taken + '</p>' +
+                '</div>' +
+                (by ? '<p class="text-[10px] text-teal-900/50 mt-2">Submitted by: ' + by + '</p>' : '') +
+              '</div>';
+          });
+          listEl.innerHTML = html;
+        }
+
+        actionSummaryModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
       }
 
-      actionSummaryModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    function closeActionSummary() {
-      if (!actionSummaryModal) return;
-      actionSummaryModal.classList.add('hidden');
-      const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
-                   || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'))
-                   || (lightbox && !lightbox.classList.contains('hidden'));
-      if (!anyOpen) document.body.classList.remove('overflow-hidden');
-    }
-
-    /* ============================================================
-       LOGOUT MODAL
-       ============================================================ */
-    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
-    const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
-    const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
-    const LOGOUT_URL = '../logout.php?role=admin';
-
-    function openLogoutModal() {
-      logoutConfirmModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (logoutConfirmPanel) {
-        logoutConfirmPanel.classList.remove('animate-confirm-shake');
-        void logoutConfirmPanel.offsetWidth;
-        logoutConfirmPanel.classList.add('animate-confirm-shake');
+      window.closeActionSummary = function () {
+        if (!actionSummaryModal) return;
+        actionSummaryModal.classList.add('hidden');
+        const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
+                     || (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden'))
+                     || (lightbox && !lightbox.classList.contains('hidden'));
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
       }
-      setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeLogoutModal() {
-      logoutConfirmModal.classList.add('hidden');
-      const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
-                   || (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
-                   || (lightbox && !lightbox.classList.contains('hidden'));
-      if (!anyOpen) document.body.classList.remove('overflow-hidden');
-    }
 
-    (function () {
-      const triggers = [
-        document.getElementById('sidebarLogoutBtn'),
-        document.getElementById('dropdownLogoutBtn'),
-      ];
-      triggers.forEach(function (btn) {
+      /* LOGOUT MODAL */
+      const logoutConfirmModal = document.getElementById('logoutConfirmModal');
+      const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
+      const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
+      const LOGOUT_URL = '../logout.php?role=admin';
+
+      window.openLogoutModal = function () {
+        logoutConfirmModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (logoutConfirmPanel) {
+          logoutConfirmPanel.classList.remove('animate-confirm-shake');
+          void logoutConfirmPanel.offsetWidth;
+          logoutConfirmPanel.classList.add('animate-confirm-shake');
+        }
+        setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      window.closeLogoutModal = function () {
+        logoutConfirmModal.classList.add('hidden');
+        const anyOpen = (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden'))
+                     || (actionSummaryModal && !actionSummaryModal.classList.contains('hidden'))
+                     || (lightbox && !lightbox.classList.contains('hidden'));
+        if (!anyOpen) document.body.classList.remove('overflow-hidden');
+      }
+
+      [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
         if (!btn) return;
         btn.addEventListener('click', function (e) {
           e.preventDefault(); e.stopPropagation();
-          openLogoutModal();
+          window.openLogoutModal();
         });
       });
-    })();
 
-    if (confirmLogoutBtn) {
-      confirmLogoutBtn.addEventListener('click', function () {
-        confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
-        window.location.href = LOGOUT_URL;
+      if (confirmLogoutBtn) {
+        confirmLogoutBtn.addEventListener('click', function () {
+          confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
+          window.location.href = LOGOUT_URL;
+        });
+      }
+
+      /* Escape key */
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (lightbox && !lightbox.classList.contains('hidden')) { closeLightbox(); return; }
+        if (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden')) window.closeViewGrievanceModal();
+        if (actionSummaryModal && !actionSummaryModal.classList.contains('hidden')) window.closeActionSummary();
+        if (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden')) window.closeLogoutModal();
       });
-    }
 
-    /* Escape key */
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      if (lightbox && !lightbox.classList.contains('hidden')) { closeLightbox(); return; }
-      if (viewGrievanceModal && !viewGrievanceModal.classList.contains('hidden')) closeViewGrievanceModal();
-      if (actionSummaryModal && !actionSummaryModal.classList.contains('hidden')) closeActionSummary();
-      if (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden')) closeLogoutModal();
+      /* Entries dropdown — auto-submit */
+      (function () {
+        const entriesSelect = document.getElementById('entriesPerPage');
+        const filterForm    = document.getElementById('filterForm');
+        if (!entriesSelect || !filterForm) return;
+        entriesSelect.addEventListener('change', function () { filterForm.submit(); });
+      })();
+
+      /* Live client-side search + debounced server-side search */
+      (function () {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody   = document.getElementById('grievancesTableBody');
+        if (!searchInput || !tableBody) return;
+
+        let debounceTimer = null;
+        searchInput.addEventListener('input', function () {
+          const term = this.value.toLowerCase().trim();
+          tableBody.querySelectorAll('tr').forEach(function (row) {
+            row.style.display = (term === '' || row.textContent.toLowerCase().indexOf(term) !== -1) ? '' : 'none';
+          });
+
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            const form = document.getElementById('filterForm');
+            if (form) form.submit();
+          }, 600);
+        });
+      })();
+
+      /* Header frosted-on-scroll */
+      (function () {
+        const header = document.querySelector('header');
+        if (!header) return;
+        const onScroll = function () {
+          if (window.scrollY > 10) header.classList.add('header-scrolled');
+          else header.classList.remove('header-scrolled');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      })();
+
+      /* Back-to-top */
+      (function () {
+        const btn = document.getElementById('backToTop');
+        if (!btn) return;
+        const onScroll = function () {
+          if (window.scrollY > 400) btn.classList.add('show');
+          else btn.classList.remove('show');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
+
     });
-
-    /* Entries dropdown — auto-submit */
-    (function () {
-      const entriesSelect = document.getElementById('entriesPerPage');
-      const filterForm    = document.getElementById('filterForm');
-      if (!entriesSelect || !filterForm) return;
-      entriesSelect.addEventListener('change', function () { filterForm.submit(); });
-    })();
-
-    /* Live client-side search + debounced server-side search */
-    (function () {
-      const searchInput = document.getElementById('searchInput');
-      const tableBody   = document.getElementById('grievancesTableBody');
-      if (!searchInput || !tableBody) return;
-
-      let debounceTimer = null;
-      searchInput.addEventListener('input', function () {
-        const term = this.value.toLowerCase().trim();
-        tableBody.querySelectorAll('tr').forEach(function (row) {
-          row.style.display = (term === '' || row.textContent.toLowerCase().indexOf(term) !== -1) ? '' : 'none';
-        });
-
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function () {
-          const form = document.getElementById('filterForm');
-          if (form) form.submit();
-        }, 600);
-      });
-    })();
   </script>
 
   <script src="../assets/js/index.js"></script>

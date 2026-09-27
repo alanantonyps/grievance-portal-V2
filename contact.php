@@ -26,21 +26,30 @@ function e(?string $v): string
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Contact the Rajagiri College Grievance Redressal team — email, phone, and campus location.">
   <title>Contact Us — Rajagiri College Grievance Portal</title>
   <link rel="icon" type="image/svg+xml" href="public/favicon.svg" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink:   '#E5097F',
-            brandGreen:  '#006837',
-            brandGold:   '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
             fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
@@ -61,45 +70,63 @@ function e(?string $v): string
     };
   </script>
 
-  <link rel="stylesheet" href="assets/css/index.css" />
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    /* Subtle dot-grid texture for the hero band */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+    /* Thin campus-roofline motif used as a footer divider */
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-pink-100 selection:text-pink-700 flex flex-col">
+<body class="min-h-screen bg-white text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700 flex flex-col">
 
   <!-- ====================== HEADER ====================== -->
-  <header class="bg-white shadow-md sticky top-0 z-50 border-b-2 border-slate-100">
+  <header class="bg-white sticky top-0 z-50 border-b-2 border-teal-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16 md:h-20">
 
         <!-- Logo -->
-        <div class="flex items-center space-x-4">
-          <a href="index.php" class="flex items-center space-x-3 group">
-            <div class="relative">
-              <img
-                src="public/rcss-logo.png"
-                alt="RCSS Logo"
-                class="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div class="hidden sm:flex items-center space-x-2 pl-4 border-l-2 border-[#006837]">
-              <img
-                src="public/orel-grievance.png"
-                alt="Oréll Grievance"
-                class="h-8 md:h-10 w-auto"
-              />
-            </div>
-          </a>
-        </div>
+        <a href="index.php" class="flex items-center gap-3 md:gap-4 shrink-0">
+          <img
+            src="public/rcss-logo.webp"
+            alt="Rajagiri College of Social Sciences"
+            class="h-8 md:h-10 w-auto"
+          />
+          <span class="hidden sm:block logo-divider h-8 md:h-10"></span>
+          <span class="hidden sm:flex items-baseline gap-1">
+            <span class="text-xl md:text-2xl font-bold text-teal-600 tracking-tight">grievance</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+          </span>
+        </a>
 
-        <!-- Right side: Back to Home button (desktop) -->
+        <!-- Desktop: Back to Home -->
         <a
           href="index.php"
-          class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
-                 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F]
-                 text-white text-sm font-bold
-                 hover:shadow-xl hover:shadow-pink-500/30
-                 transition-all duration-300 hover:-translate-y-0.5 active:scale-95
-                 ring-2 ring-transparent hover:ring-pink-300"
+          class="group hidden md:inline-flex items-center gap-2 text-teal-900 hover:text-teal-600 transition-colors text-sm font-medium"
         >
           <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
           <span>Back to Home</span>
@@ -112,7 +139,7 @@ function e(?string $v): string
           aria-label="Toggle menu"
           aria-expanded="false"
           aria-controls="mobile-menu"
-          class="md:hidden text-[#4A154B] hover:bg-slate-100 p-2 rounded-lg transition-colors cursor-pointer"
+          class="md:hidden text-teal-600 hover:bg-teal-50 p-2 rounded-lg transition-colors cursor-pointer"
         >
           <i data-lucide="menu" id="mobile-menu-icon" class="w-6 h-6"></i>
         </button>
@@ -120,14 +147,11 @@ function e(?string $v): string
     </div>
 
     <!-- Mobile Menu Drawer -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white border-t-2 border-slate-100 shadow-xl">
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t-2 border-teal-100 shadow-lg">
       <div class="px-4 py-4">
         <a
           href="index.php"
-          class="flex items-center gap-3 px-4 py-3 rounded-lg
-                 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F]
-                 text-white text-sm font-bold
-                 transition-all duration-200 active:scale-95"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-teal-900 hover:text-teal-600 hover:bg-teal-50 transition-colors text-sm font-medium"
         >
           <i data-lucide="arrow-left" class="w-4 h-4"></i>
           <span>Back to Home</span>
@@ -137,50 +161,38 @@ function e(?string $v): string
   </header>
 
   <!-- ====================== HERO BANNER ====================== -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F]">
-    <div class="absolute inset-0 opacity-10 pointer-events-none">
-      <div class="absolute top-0 left-0 w-full h-full hero-radial-dots"></div>
-    </div>
-
-    <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-1/3 right-1/4 w-48 h-48 bg-yellow-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
-    <div class="absolute inset-0 opacity-5 hero-grid-lines pointer-events-none"></div>
+  <section class="relative overflow-hidden bg-teal-600">
+    <div class="absolute inset-0 hero-dots opacity-40 pointer-events-none"></div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
       <div class="flex flex-col md:flex-row items-center justify-between gap-10 md:gap-12">
 
         <!-- Left: heading -->
         <div class="text-center md:text-left animate-fade-in-up">
-          <div class="inline-flex items-center space-x-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-full px-5 py-2.5 mb-6">
-            <i data-lucide="headphones" class="w-4 h-4 text-[#C5A059]"></i>
-            <span class="text-white text-xs md:text-sm font-semibold tracking-wide">We're Here to Help</span>
+          <div class="inline-flex items-center gap-2 bg-white/10 border border-white/25 rounded-full px-4 py-1.5 mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            <span class="text-white text-xs font-medium tracking-wide">We're Here to Help</span>
           </div>
 
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-[1.1]">
             Contact Us
           </h1>
-          <p class="text-base md:text-lg text-white/90 max-w-xl mx-auto md:mx-0 leading-relaxed">
+          <p class="text-base md:text-lg text-teal-50 max-w-xl mx-auto md:mx-0 leading-relaxed">
             Have a question, feedback, or need support with the grievance portal?
             Reach out to the RCSS Grievance Redressal team — we're happy to assist.
           </p>
 
-          <div class="mt-6 flex flex-wrap items-center justify-center md:justify-start gap-3">
-            <a href="#map" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
-                                 bg-white text-[#4A154B] font-bold text-sm
-                                 shadow-lg shadow-black/10
-                                 hover:shadow-xl hover:-translate-y-0.5
-                                 transition-all duration-300 active:scale-95">
-              <i data-lucide="map-pin" class="w-4 h-4 text-[#E5097F]"></i>
+          <div class="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3">
+            <a href="#map" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg
+                                 bg-white text-teal-700 font-semibold text-base
+                                 hover:bg-teal-50 transition-colors duration-200">
+              <i data-lucide="map-pin" class="w-5 h-5"></i>
               <span>View Location</span>
             </a>
-            <a href="index.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
-                                      bg-white/10 hover:bg-white/20 backdrop-blur-md
-                                      border border-white/30 hover:border-white/60
-                                      text-white font-semibold text-sm
-                                      transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
-              <i data-lucide="home" class="w-4 h-4"></i>
+            <a href="index.php" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg
+                                      border border-white/40 text-white font-semibold text-base
+                                      hover:bg-white/10 transition-colors duration-200">
+              <i data-lucide="home" class="w-5 h-5"></i>
               <span>Back to Home</span>
             </a>
           </div>
@@ -193,12 +205,12 @@ function e(?string $v): string
           <div class="flex flex-col items-center origin-top animate-swing-a">
             <div class="w-[2px] h-12 md:h-16 bg-gradient-to-b from-white/70 to-white/20"></div>
             <div class="relative -mt-1">
-              <div class="absolute inset-0 bg-[#6A2C8A] rounded-full blur-md opacity-70"></div>
+              <div class="absolute inset-0 bg-teal-800 rounded-full blur-md opacity-70"></div>
               <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-full
-                          bg-gradient-to-br from-[#B57BE8] to-[#7E3FBF]
-                          flex items-center justify-center shadow-xl shadow-purple-900/40
-                          ring-2 ring-white/40">
-                <i data-lucide="mail" class="w-7 h-7 md:w-9 md:h-9 text-white"></i>
+                          bg-white
+                          flex items-center justify-center shadow-xl
+                          ring-2 ring-white/50">
+                <i data-lucide="mail" class="w-7 h-7 md:w-9 md:h-9 text-teal-600"></i>
               </div>
             </div>
           </div>
@@ -207,12 +219,12 @@ function e(?string $v): string
           <div class="flex flex-col items-center origin-top animate-swing-b mt-2">
             <div class="w-[2px] h-12 md:h-16 bg-gradient-to-b from-white/70 to-white/20"></div>
             <div class="relative -mt-1">
-              <div class="absolute inset-0 bg-[#6A2C8A] rounded-full blur-md opacity-70"></div>
+              <div class="absolute inset-0 bg-teal-800 rounded-full blur-md opacity-70"></div>
               <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-full
-                          bg-gradient-to-br from-[#B57BE8] to-[#7E3FBF]
-                          flex items-center justify-center shadow-xl shadow-purple-900/40
-                          ring-2 ring-white/40">
-                <i data-lucide="phone" class="w-7 h-7 md:w-9 md:h-9 text-white"></i>
+                          bg-white
+                          flex items-center justify-center shadow-xl
+                          ring-2 ring-white/50">
+                <i data-lucide="phone" class="w-7 h-7 md:w-9 md:h-9 text-teal-600"></i>
               </div>
             </div>
           </div>
@@ -221,12 +233,12 @@ function e(?string $v): string
           <div class="flex flex-col items-center origin-top animate-swing-c mt-4">
             <div class="w-[2px] h-12 md:h-16 bg-gradient-to-b from-white/70 to-white/20"></div>
             <div class="relative -mt-1">
-              <div class="absolute inset-0 bg-[#6A2C8A] rounded-full blur-md opacity-70"></div>
+              <div class="absolute inset-0 bg-teal-800 rounded-full blur-md opacity-70"></div>
               <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-full
-                          bg-gradient-to-br from-[#B57BE8] to-[#7E3FBF]
-                          flex items-center justify-center shadow-xl shadow-purple-900/40
-                          ring-2 ring-white/40">
-                <i data-lucide="smartphone" class="w-7 h-7 md:w-9 md:h-9 text-white"></i>
+                          bg-white
+                          flex items-center justify-center shadow-xl
+                          ring-2 ring-white/50">
+                <i data-lucide="smartphone" class="w-7 h-7 md:w-9 md:h-9 text-teal-600"></i>
               </div>
             </div>
           </div>
@@ -235,12 +247,12 @@ function e(?string $v): string
           <div class="flex flex-col items-center origin-top animate-swing-d mt-1">
             <div class="w-[2px] h-12 md:h-16 bg-gradient-to-b from-white/70 to-white/20"></div>
             <div class="relative -mt-1">
-              <div class="absolute inset-0 bg-[#6A2C8A] rounded-full blur-md opacity-70"></div>
+              <div class="absolute inset-0 bg-teal-800 rounded-full blur-md opacity-70"></div>
               <div class="relative w-16 h-16 md:w-20 md:h-20 rounded-full
-                          bg-gradient-to-br from-[#B57BE8] to-[#7E3FBF]
-                          flex items-center justify-center shadow-xl shadow-purple-900/40
-                          ring-2 ring-white/40">
-                <span class="text-white text-3xl md:text-4xl font-bold leading-none">@</span>
+                          bg-white
+                          flex items-center justify-center shadow-xl
+                          ring-2 ring-white/50">
+                <span class="text-teal-600 text-3xl md:text-4xl font-bold leading-none">@</span>
               </div>
             </div>
           </div>
@@ -248,29 +260,26 @@ function e(?string $v): string
         </div>
       </div>
     </div>
-
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
   </section>
 
   <!-- ====================== ADDRESS CARD ====================== -->
   <section class="relative -mt-8 md:-mt-12 z-10">
     <div class="max-w-3xl mx-auto px-4 sm:px-6">
-      <div class="bg-white border-2 border-[#4A154B]/20 rounded-3xl shadow-2xl px-6 py-8 md:px-10 md:py-10 text-center animate-fade-in-up">
+      <div class="bg-white border-2 border-teal-100 rounded-3xl shadow-xl px-6 py-8 md:px-10 md:py-10 text-center animate-fade-in-up">
 
         <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl
-                    bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F]
-                    shadow-lg shadow-purple-500/30 mb-4">
+                    bg-teal-600 shadow-sm mb-4">
           <i data-lucide="map-pin" class="w-7 h-7 text-white"></i>
         </div>
 
-        <h2 class="text-2xl md:text-3xl font-bold text-[#4A154B] mb-4">
+        <h2 class="text-2xl md:text-3xl font-bold text-teal-900 mb-4">
           Contact Address
         </h2>
 
-        <p class="text-base md:text-lg font-semibold text-slate-800">
+        <p class="text-base md:text-lg font-semibold text-teal-900">
           Rajagiri College of Social Sciences
         </p>
-        <p class="text-sm md:text-base text-slate-600 mt-1 leading-relaxed">
+        <p class="text-sm md:text-base text-teal-900/70 mt-1 leading-relaxed">
           Rajagiri P.O., Kalamassery,<br class="sm:hidden" />
           Cochin – 683 104, Kerala, India
         </p>
@@ -278,13 +287,11 @@ function e(?string $v): string
         <div class="mt-6 flex items-center justify-center">
           <a href="https://www.google.com/maps/dir/?api=1&destination=Rajagiri+College+of+Social+Sciences+Kalamassery"
              target="_blank" rel="noopener"
-             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
-                    bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F]
-                    text-white font-semibold text-sm
-                    shadow-md hover:shadow-xl shadow-pink-500/30
-                    transition-all duration-300
-                    hover:-translate-y-0.5 active:scale-95">
-            <i data-lucide="navigation" class="w-4 h-4"></i>
+             class="inline-flex items-center gap-2 px-7 py-3.5 rounded-lg
+                    bg-teal-600 hover:bg-teal-700
+                    text-white font-semibold text-base
+                    shadow-sm hover:shadow-md transition-colors duration-200">
+            <i data-lucide="navigation" class="w-5 h-5"></i>
             <span>Get Directions</span>
           </a>
         </div>
@@ -296,83 +303,80 @@ function e(?string $v): string
   <!-- ====================== CONTACT INFO TILES ====================== -->
   <section class="pt-12 md:pt-16 pb-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10 animate-fade-in-up">
-        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full
-                     bg-[#4A154B]/10 text-[#4A154B] text-xs font-bold uppercase tracking-wider">
-          <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
-          <span>Get in Touch</span>
-        </span>
-        <h2 class="text-3xl md:text-4xl font-bold text-[#4A154B] mt-3 mb-2">Multiple Ways to Reach Us</h2>
-        <div class="flex items-center justify-center space-x-2 mb-3">
-          <span class="w-16 h-1 bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] rounded-full"></span>
-          <span class="w-3 h-3 bg-[#E5097F] rounded-full"></span>
-          <span class="w-16 h-1 bg-gradient-to-r from-[#E5097F] to-[#8B1E7E] rounded-full"></span>
+      <div class="max-w-2xl mb-10 animate-fade-in-up">
+        <div class="inline-flex items-center gap-2 mb-3">
+          <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600"></span>
+          <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Get in Touch</p>
         </div>
-        <p class="text-slate-600 max-w-2xl mx-auto">
+        <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-3">Multiple ways to reach us</h2>
+        <p class="text-base md:text-lg text-teal-900/70 leading-relaxed">
           Choose the channel that works best for you — we're here to help.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
 
         <!-- Email -->
-        <div class="group bg-white rounded-2xl border-2 border-slate-100 hover:border-[#8B1E7E]
-                    shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 p-6 text-center relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-purple-100/0 to-pink-100/0 group-hover:from-purple-100/40 group-hover:to-pink-100/40 rounded-full transition-all duration-500"></div>
+        <div class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 bg-white
+                    hover:border-teal-600 hover:shadow-lg transition-all duration-200">
 
-          <div class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl
-                      bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                      shadow-lg shadow-purple-500/30 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-            <i data-lucide="mail" class="w-8 h-8 text-white"></i>
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5
+                      group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="mail" class="w-6 h-6"></i>
           </div>
-          <h3 class="text-sm font-bold uppercase tracking-wider text-[#4A154B] mb-3 relative">Email Us</h3>
-          <p class="text-slate-600 text-sm leading-relaxed relative">
-            <a href="mailto:grievance@rajagiri.edu" class="hover:text-[#E5097F] font-medium transition-colors">
-              grievance@rajagiri.edu
+
+          <h3 class="text-base font-bold text-teal-900 mb-1">Email Us</h3>
+          <p class="text-xs font-semibold text-teal-900/50 uppercase tracking-wider mb-4">Fastest Response</p>
+
+          <div class="space-y-2 mt-auto">
+            <a href="mailto:grievance@rajagiri.edu" class="flex items-center gap-2 text-sm text-teal-900/80 hover:text-teal-600 transition-colors">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span class="break-all">grievance@rajagiri.edu</span>
             </a>
-          </p>
-          <p class="text-slate-600 text-sm leading-relaxed relative mt-1">
-            <a href="mailto:principal@rajagiri.edu" class="hover:text-[#E5097F] font-medium transition-colors">
-              principal@rajagiri.edu
+            <a href="mailto:principal@rajagiri.edu" class="flex items-center gap-2 text-sm text-teal-900/80 hover:text-teal-600 transition-colors">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span class="break-all">principal@rajagiri.edu</span>
             </a>
-          </p>
+          </div>
         </div>
 
         <!-- Phone -->
-        <div class="group bg-white rounded-2xl border-2 border-slate-100 hover:border-[#006837]
-                    shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 p-6 text-center relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-emerald-100/0 to-green-100/0 group-hover:from-emerald-100/40 group-hover:to-green-100/40 rounded-full transition-all duration-500"></div>
+        <div class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 bg-white
+                    hover:border-teal-600 hover:shadow-lg transition-all duration-200">
 
-          <div class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl
-                      bg-gradient-to-br from-[#006837] to-[#008a4a]
-                      shadow-lg shadow-emerald-500/30 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-            <i data-lucide="phone" class="w-8 h-8 text-white"></i>
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5
+                      group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="phone" class="w-6 h-6"></i>
           </div>
-          <h3 class="text-sm font-bold uppercase tracking-wider text-[#006837] mb-3 relative">Call Us</h3>
-          <p class="text-slate-600 text-sm leading-relaxed relative">
-            <a href="tel:+914842554000" class="hover:text-[#E5097F] font-medium transition-colors">
-              +91 484 255 4000
+
+          <h3 class="text-base font-bold text-teal-900 mb-1">Call Us</h3>
+          <p class="text-xs font-semibold text-teal-900/50 uppercase tracking-wider mb-4">Mon–Fri, 9 AM – 5 PM</p>
+
+          <div class="space-y-2 mt-auto">
+            <a href="tel:+914842554000" class="flex items-center gap-2 text-sm text-teal-900/80 hover:text-teal-600 transition-colors">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span>+91 484 255 4000</span>
             </a>
-          </p>
-          <p class="text-slate-600 text-sm leading-relaxed relative mt-1">
-            <a href="tel:+914842554100" class="hover:text-[#E5097F] font-medium transition-colors">
-              +91 484 255 4100
+            <a href="tel:+914842554100" class="flex items-center gap-2 text-sm text-teal-900/80 hover:text-teal-600 transition-colors">
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span>+91 484 255 4100</span>
             </a>
-          </p>
+          </div>
         </div>
 
         <!-- Address -->
-        <div class="group bg-white rounded-2xl border-2 border-slate-100 hover:border-[#E5097F]
-                    shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 p-6 text-center relative overflow-hidden">
-          <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-pink-100/0 to-purple-100/0 group-hover:from-pink-100/40 group-hover:to-purple-100/40 rounded-full transition-all duration-500"></div>
+        <div class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 bg-white
+                    hover:border-teal-600 hover:shadow-lg transition-all duration-200">
 
-          <div class="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl
-                      bg-gradient-to-br from-[#E5097F] to-[#C43A7A]
-                      shadow-lg shadow-pink-500/30 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-            <i data-lucide="map-pin" class="w-8 h-8 text-white"></i>
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5
+                      group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="map-pin" class="w-6 h-6"></i>
           </div>
-          <h3 class="text-sm font-bold uppercase tracking-wider text-[#E5097F] mb-3 relative">Visit Us</h3>
-          <p class="text-slate-600 text-sm leading-relaxed relative">
+
+          <h3 class="text-base font-bold text-teal-900 mb-1">Visit Us</h3>
+          <p class="text-xs font-semibold text-teal-900/50 uppercase tracking-wider mb-4">Campus Location</p>
+
+          <p class="text-sm text-teal-900/80 leading-relaxed mt-auto">
             Rajagiri P.O., Kalamassery,<br />
             Cochin – 683 104,<br />
             Kerala, India
@@ -384,24 +388,21 @@ function e(?string $v): string
   </section>
 
   <!-- ====================== GOOGLE MAP ====================== -->
-  <section id="map" class="pb-14 md:pb-20 scroll-mt-24">
+  <section id="map" class="pb-14 md:pb-20 scroll-mt-24 bg-teal-50/40 py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-6 animate-fade-in-up">
-        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full
-                     bg-[#4A154B]/10 text-[#4A154B] text-xs font-bold uppercase tracking-wider">
-          <i data-lucide="map" class="w-3.5 h-3.5"></i>
-          <span>Locate Us</span>
-        </span>
-        <h2 class="text-2xl md:text-3xl font-bold text-[#4A154B] mt-3 tracking-tight">
-          Find Us on the Map
-        </h2>
-        <p class="text-slate-500 text-sm mt-2 max-w-xl mx-auto">
+
+      <div class="max-w-2xl mb-10 animate-fade-in-up">
+        <div class="inline-flex items-center gap-2 mb-3">
+          <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600"></span>
+          <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Locate Us</p>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-3">Find us on the map</h2>
+        <p class="text-base md:text-lg text-teal-900/70 leading-relaxed">
           Rajagiri College of Social Sciences, Kalamassery, Kochi — open in Google Maps for directions.
         </p>
       </div>
 
-      <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white
-                  ring-1 ring-slate-200 bg-white">
+      <div class="relative rounded-2xl overflow-hidden border-2 border-teal-100 shadow-sm bg-white">
         <iframe
           title="Rajagiri College of Social Sciences Location"
           src="https://www.google.com/maps?q=Rajagiri%20College%20of%20Social%20Sciences%20Kalamassery&output=embed"
@@ -414,16 +415,14 @@ function e(?string $v): string
           class="block w-full h-[360px] md:h-[480px]"
         ></iframe>
 
-        <!-- Map overlay badge (right side) -->
-        <div class="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl
-                    shadow-lg border border-slate-200 px-4 py-3 flex items-center gap-3 max-w-xs">
-          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[#006837] to-[#008a4a]
-                      flex items-center justify-center flex-shrink-0">
+        <!-- Map overlay badge (top right) -->
+        <div class="absolute top-4 right-4 bg-white rounded-xl shadow-md border border-teal-100 px-4 py-3 flex items-center gap-3 max-w-xs">
+          <div class="w-10 h-10 rounded-lg bg-teal-600 flex items-center justify-center flex-shrink-0">
             <i data-lucide="school" class="w-5 h-5 text-white"></i>
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-bold text-slate-800 truncate">Rajagiri College of Social Sciences</p>
-            <p class="text-[11px] text-slate-500 truncate">Kalamassery, Kochi, Kerala</p>
+            <p class="text-xs font-bold text-teal-900 truncate">Rajagiri College of Social Sciences</p>
+            <p class="text-[11px] text-teal-900/60 truncate">Kalamassery, Kochi, Kerala</p>
           </div>
         </div>
       </div>
@@ -431,84 +430,55 @@ function e(?string $v): string
   </section>
 
   <!-- ====================== FOOTER ====================== -->
-  <footer class="bg-gradient-to-br from-[#4A154B] via-[#3a1040] to-[#2a0a30] text-white py-12 relative overflow-hidden mt-auto">
-    <div class="absolute top-0 right-0 w-96 h-96 bg-[#E5097F]/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-[#006837]/10 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-
+  <footer class="bg-teal-900 text-white mt-auto">
+    <div class="roofline"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
         <div>
-          <div class="flex items-center space-x-3 mb-4">
-            <img src="public/rcss-logo.png" alt="RCSS Logo" class="h-12 w-auto" />
-            <img src="public/orel-grievance.png" alt="Oréll Grievance" class="h-8 w-auto" />
+          <div class="flex items-center gap-3 mb-4 bg-white rounded-lg px-3 py-2 w-fit">
+            <img src="public/rcss-logo.webp" alt="Rajagiri College of Social Sciences" class="h-9 w-auto" />
           </div>
-          <p class="text-slate-300 text-sm leading-relaxed">
-            Rajagiri College of Social Sciences - Committed to excellence in grievance redressal, powered by Oréll.
+          <p class="text-teal-100/80 text-sm leading-relaxed max-w-xs">
+            Rajagiri College of Social Sciences — committed to fairness, transparency and prompt grievance redressal.
           </p>
         </div>
 
         <div>
-          <h4 class="font-bold mb-4 text-[#C5A059]">Quick Links</h4>
-          <ul class="space-y-2 text-sm">
-            <li>
-              <a href="login.php?role=student" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Student</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=parent" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Parent</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=staff" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Staff</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=management" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Grievance Member</span>
-              </a>
-            </li>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Quick links</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="login.php?role=student" class="text-teal-100/80 hover:text-white transition-colors">Student</a></li>
+            <li><a href="login.php?role=parent" class="text-teal-100/80 hover:text-white transition-colors">Parent</a></li>
+            <li><a href="login.php?role=staff" class="text-teal-100/80 hover:text-white transition-colors">Staff</a></li>
+            <li><a href="login.php?role=management" class="text-teal-100/80 hover:text-white transition-colors">Grievance Member</a></li>
           </ul>
         </div>
 
         <div>
-          <h4 class="font-bold mb-4 text-[#C5A059]">Contact</h4>
-          <ul class="space-y-3 text-sm text-slate-300">
-            <li class="flex items-center space-x-2">
-              <i data-lucide="mail" class="w-4 h-4 text-[#E5097F]"></i>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Contact</h4>
+          <ul class="space-y-3 text-sm text-teal-100/80">
+            <li class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-teal-300"></i>
               <span>grievance@rajagiri.edu</span>
             </li>
-            <li class="flex items-center space-x-2">
-              <i data-lucide="phone" class="w-4 h-4 text-[#E5097F]"></i>
+            <li class="flex items-center gap-2">
+              <i data-lucide="phone" class="w-4 h-4 text-teal-300"></i>
               <span>+91 484 255 4000</span>
             </li>
-            <li class="flex items-center space-x-2">
-              <i data-lucide="map-pin" class="w-4 h-4 text-[#E5097F]"></i>
+            <li class="flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-teal-300"></i>
               <span>Kalamassery, Kochi, Kerala</span>
             </li>
           </ul>
         </div>
-
       </div>
 
-      <div class="border-t border-white/10 pt-8 text-center text-sm text-slate-400">
+      <div class="border-t border-white/10 pt-6 text-center text-xs text-teal-200/70">
         <p>
           &copy; <?= date('Y') ?>
-          <span class="font-bold text-[#C5A059]">Rajagiri College of Social Sciences</span>.
-          All rights reserved.
+          <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
         </p>
-        <p class="mt-2 text-xs">
-          Powered by
-          <span class="font-bold bg-gradient-to-r from-[#C5A059] to-[#E5097F] bg-clip-text text-transparent ml-1">
-            Oréll Grievance
-          </span>
+        <p class="mt-2">
+          Powered by <span class="font-bold text-white">RLabZ</span>
         </p>
       </div>
     </div>

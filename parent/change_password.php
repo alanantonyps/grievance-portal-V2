@@ -226,36 +226,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <title>Change Password — Parent | Rajagiri College Grievance Portal</title>
   <link rel="icon" type="image/svg+xml" href="../public/favicon.svg" />
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Tailwind Theme -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink: '#E5097F',
-            brandGreen: '#006837',
-            brandGold: '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
-            fadeInUp: {
-              '0%':   { opacity: '0', transform: 'translateY(12px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            },
-            dropdownFade: {
-              '0%':   { opacity: '0', transform: 'translateY(-8px) scale(0.98)' },
-              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
-            },
-            countdown: {
-              '0%':   { width: '100%' },
-              '100%': { width: '0%' }
-            }
+            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            dropdownFade: { '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+            countdown: { '0%': { width: '100%' }, '100%': { width: '0%' } }
           },
           animation: {
             'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -267,250 +262,208 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     };
   </script>
 
-  <!-- Local Styles -->
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+    .hero-dots { background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px); background-size: 22px 22px; }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid #CFE6E7;
+      border-radius: 0.5rem;
+      background-color: rgba(234, 244, 244, 0.4);
+      color: #003134;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .form-input::placeholder { color: rgba(0, 49, 52, 0.4); }
+    .form-input:hover { border-color: #9FCDCF; }
+    .form-input:focus {
+      outline: none;
+      border-color: #006E74;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(0, 110, 116, 0.1);
+    }
+    .form-input.pl-12 { padding-left: 3rem; }
+    .form-input.pr-12 { padding-right: 3rem; }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen bg-teal-50/40 text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700 flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- ============================================================
-         SIDEBAR
-         ============================================================ -->
+    <!-- SIDEBAR (no brand logo) -->
     <aside id="parentSidebar"
-           class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837]
-                  flex flex-col py-4 shadow-2xl fixed inset-y-0 left-0 z-40
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
                   transition-all duration-300 ease-in-out overflow-hidden">
 
-      <button id="sidebarToggle"
-              class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors
-                     flex items-center justify-center w-14 mx-auto"
-              aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
-      </button>
+      <div class="flex items-center justify-end px-3 mb-6 flex-shrink-0">
+        <button id="sidebarToggle"
+                class="text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors
+                       flex items-center justify-center flex-shrink-0" aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-5 h-5 flex-shrink-0"></i>
+        </button>
+      </div>
 
-      <nav class="flex flex-col space-y-2 flex-1 w-full px-3">
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
 
-        <!-- Dashboard -->
-        <a href="dashboard.php"
-           class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-white/20
-                  flex items-center text-white transition-all px-3">
+        <a href="dashboard.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
           <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
-          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap
-                       opacity-0 w-0 overflow-hidden transition-all duration-200">
-            Dashboard
-          </span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap
-                       bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Dashboard
-          </span>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <!-- Profile -->
-        <a href="profile.php"
-           class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-white/20
-                  flex items-center text-white transition-all px-3">
+        <a href="profile.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
           <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
-          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap
-                       opacity-0 w-0 overflow-hidden transition-all duration-200">
-            My Profile
-          </span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap
-                       bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            My Profile
-          </span>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
         </a>
 
-        <!-- Change Password (active) -->
-        <a href="change_password.php"
-           class="group relative w-full h-12 rounded-xl bg-white/20 backdrop-blur-sm
-                  flex items-center text-white shadow-lg ring-2 ring-white/30
-                  transition-all px-3">
+        <a href="change_password.php" class="group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
           <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
-          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap
-                       opacity-0 w-0 overflow-hidden transition-all duration-200">
-            Change Password
-          </span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap
-                       bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Change Password
-          </span>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
 
       </nav>
 
-      <!-- Logout -->
-      <a href="#"
-         data-logout-trigger="1"
-         id="sidebarLogoutBtn"
-         class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-red-500/40
-                flex items-center text-white transition-all
-                mx-3 px-3"
-         style="width: calc(100% - 1.5rem);"
-         title="Logout">
+      <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
+         class="group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
         <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
-        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap
-                     opacity-0 w-0 overflow-hidden transition-all duration-200">
-          Logout
-        </span>
-        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap
-                     bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-          Logout
-        </span>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
-
     </aside>
 
-    <!-- ============================================================
-         MAIN CONTENT
-         ============================================================ -->
+    <!-- MAIN CONTENT -->
     <div id="parentMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <!-- ============ TOP HEADER ============ -->
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
-
-          <div class="flex items-center space-x-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo"
-                   class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
+            </a>
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <a href="dashboard.php"
+               class="group hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                      text-teal-600 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                      transition-all duration-200">
+              <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+              <span class="text-sm font-semibold">Back to Dashboard</span>
             </a>
 
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
+            <div class="relative" id="parent-dropdown-container">
+              <button id="parent-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
+                      class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
 
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance"
-                 class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
-          </div>
+                <?php if ($hasProfilePicture): ?>
+                  <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                       class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
+                <?php else: ?>
+                  <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                    <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                  </div>
+                <?php endif; ?>
 
-          <!-- Right Side: Profile Dropdown -->
-          <div class="relative" id="parent-dropdown-container">
-            <button id="parent-dropdown-btn"
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+                <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+                <i data-lucide="chevron-down" id="parent-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
+              </button>
 
-              <?php if ($hasProfilePicture): ?>
-                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
-                     class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
-              <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                            flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
-                </div>
-              <?php endif; ?>
-
-              <span class="hidden sm:block text-sm font-semibold text-slate-700">
-                <?= e($displayName) ?>
-              </span>
-              <i data-lucide="chevron-down" id="parent-chevron"
-                 class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
-            </button>
-
-            <div id="parent-dropdown-menu"
-                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl
-                        border border-slate-200 py-2 z-50 overflow-hidden">
-
-              <!-- Dropdown Header -->
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
-                  <?php if ($hasProfilePicture): ?>
-                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
-                         class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
-                  <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                                flex items-center justify-center text-white">
-                      <i data-lucide="user" class="w-6 h-6 text-white"></i>
+              <div id="parent-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
+                <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                  <div class="flex items-center gap-3">
+                    <?php if ($hasProfilePicture): ?>
+                      <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
+                    <?php else: ?>
+                      <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white"><i data-lucide="user" class="w-6 h-6 text-white"></i></div>
+                    <?php endif; ?>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                      <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                     </div>
-                  <?php endif; ?>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
-              </div>
 
-              <!-- Dashboard link -->
-              <a href="dashboard.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700
-                        hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50
-                        hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard"
-                   class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
-                <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right"
-                   class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
-              </a>
-
-              <!-- My Profile link -->
-              <a href="profile.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700
-                        hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50
-                        hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user"
-                   class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
-                <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right"
-                   class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
-              </a>
-
-              <!-- Change Password (active) -->
-              <a href="change_password.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-[#8B1E7E] bg-purple-50/50 font-medium">
-                <i data-lucide="key" class="w-4 h-4 mr-3"></i>
-                <span>Change Password</span>
-              </a>
-
-              <!-- Logout -->
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn"
-                   class="flex items-center px-4 py-2.5 text-sm text-red-600
-                          hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
-                  <span class="font-medium">Logout</span>
+                <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i><span class="font-medium">Dashboard</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
                 </a>
+                <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                  <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i><span class="font-medium">My Profile</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
+                </a>
+                <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-600 bg-teal-50 font-semibold">
+                  <i data-lucide="key" class="w-4 h-4 mr-3"></i><span>Change Password</span>
+                </a>
+
+                <div class="border-t border-teal-100 mt-1 pt-1">
+                  <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-3"></i><span class="font-medium">Logout</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
       </header>
 
-      <!-- ============ PAGE CONTENT ============ -->
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <!-- Breadcrumb -->
-        <div class="max-w-5xl mx-auto mb-8 animate-fade-in-up">
-          <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-3 flex items-center tracking-tight">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4A154B] to-[#E5097F] flex items-center justify-center mr-3 shadow-lg shadow-purple-500/20">
-              <i data-lucide="key" class="w-5 h-5 text-white"></i>
-            </div>
-            Change Password
-          </h1>
-          <nav class="flex items-center space-x-2 text-sm text-slate-500 ml-1">
-            <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-              <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i>
-              Dashboard
+        <div class="max-w-5xl mx-auto mb-6 animate-fade-in-up">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600"></span>
+            <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Parent Portal</p>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-2">Change Password</h1>
+          <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+            <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>Dashboard
             </a>
-            <span class="text-slate-300">/</span>
-            <span class="text-[#E5097F] font-semibold">Change Password</span>
+            <span class="text-teal-900/30">/</span>
+            <span class="text-teal-600 font-semibold">Change Password</span>
           </nav>
         </div>
 
-        <!-- Success Message (with auto-redirect countdown) -->
         <?php if ($passwordChanged && $successMessage !== ''): ?>
           <div id="success-banner"
-               class="max-w-2xl mx-auto mb-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4 flex items-start space-x-3 shadow-lg shadow-emerald-500/10">
+               class="max-w-2xl mx-auto mb-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 px-5 py-4 flex items-start gap-3">
             <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
               <i data-lucide="check-circle" class="w-6 h-6 text-white"></i>
             </div>
             <div class="flex-1">
-              <p class="text-sm font-bold text-emerald-800">
-                <?= e($successMessage) ?>
-              </p>
+              <p class="text-sm font-bold text-emerald-800"><?= e($successMessage) ?></p>
               <p class="text-xs text-emerald-700 mt-1">
                 Redirecting you to the dashboard in <span id="countdown-text">3</span> seconds…
               </p>
@@ -538,9 +491,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </script>
         <?php endif; ?>
 
-        <!-- Error Messages -->
         <?php if (!empty($formErrors)): ?>
-          <div class="max-w-2xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start space-x-2">
+          <div class="max-w-2xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
             <div class="text-sm text-red-700 space-y-1">
               <?php foreach ($formErrors as $err): ?>
@@ -550,298 +502,217 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
         <?php endif; ?>
 
-        <!-- ============ CHANGE PASSWORD CARD ============ -->
-        <div class="max-w-2xl mx-auto animate-fade-in-up" style="animation-delay: 100ms;">
-          <div class="relative group/card">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-2xl blur opacity-10 group-hover/card:opacity-20 transition duration-500"></div>
+        <div class="max-w-2xl mx-auto animate-fade-in-up">
+          <div class="bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
 
-            <div class="relative bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+            <div class="bg-teal-600 px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center border border-white/25">
+                  <i data-lucide="shield" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                  <h2 class="text-xl font-bold text-white">Update Your Password</h2>
+                  <p class="text-sm text-teal-50 mt-1">Ensure your account security with a strong password</p>
+                </div>
+              </div>
+            </div>
 
-              <!-- Card Header -->
-              <div class="bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] px-6 py-5 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl translate-y-1/2 -translate-x-1/2"></div>
+            <form action="change_password.php" method="POST" class="p-6 sm:p-8 space-y-6" novalidate>
 
-                <div class="relative flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center transition-transform duration-300 group-hover/card:scale-110 group-hover/card:rotate-12">
-                    <i data-lucide="shield" class="w-6 h-6 text-white"></i>
+              <div class="space-y-2">
+                <label for="current_password" class="block text-sm font-semibold text-teal-900">
+                  Current Password <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i data-lucide="lock" class="w-5 h-5 text-teal-600/60"></i>
                   </div>
-                  <div>
-                    <h2 class="text-xl font-bold text-white">Update Your Password</h2>
-                    <p class="text-sm text-white/80 mt-1">Ensure your account security with a strong password</p>
+                  <input type="password" id="current_password" name="current_password" required
+                         autocomplete="current-password" placeholder="Enter your current password"
+                         class="form-input pl-12 pr-12" />
+                  <button type="button" onclick="togglePasswordVisibility('current_password', this)"
+                          class="absolute inset-y-0 right-0 pr-4 flex items-center text-teal-600/60 hover:text-teal-600 transition-colors"
+                          aria-label="Toggle password visibility">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label for="new_password" class="block text-sm font-semibold text-teal-900">
+                  New Password <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i data-lucide="key" class="w-5 h-5 text-teal-600/60"></i>
+                  </div>
+                  <input type="password" id="new_password" name="new_password" required minlength="6"
+                         autocomplete="new-password" placeholder="Enter new password"
+                         oninput="updatePasswordStrength(this.value)"
+                         class="form-input pl-12 pr-12" />
+                  <button type="button" onclick="togglePasswordVisibility('new_password', this)"
+                          class="absolute inset-y-0 right-0 pr-4 flex items-center text-teal-600/60 hover:text-teal-600 transition-colors"
+                          aria-label="Toggle password visibility">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                  </button>
+                </div>
+
+                <div id="strength-wrapper" class="mt-3 space-y-2 hidden">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-teal-900/70">Password Strength</span>
+                    <span id="strength-text" class="text-xs font-bold text-teal-900/60">Weak</span>
+                  </div>
+                  <div class="h-2 bg-teal-50 rounded-full overflow-hidden">
+                    <div id="strength-bar" class="h-full transition-all duration-500 ease-out bg-red-500" style="width: 0%;"></div>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                    <div class="flex items-center gap-2 req-row" data-req="minLength">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-teal-200 flex-shrink-0"></i>
+                      <span class="text-xs text-teal-900/60">At least 8 characters</span>
+                    </div>
+                    <div class="flex items-center gap-2 req-row" data-req="hasUppercase">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-teal-200 flex-shrink-0"></i>
+                      <span class="text-xs text-teal-900/60">One uppercase letter</span>
+                    </div>
+                    <div class="flex items-center gap-2 req-row" data-req="hasLowercase">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-teal-200 flex-shrink-0"></i>
+                      <span class="text-xs text-teal-900/60">One lowercase letter</span>
+                    </div>
+                    <div class="flex items-center gap-2 req-row" data-req="hasNumber">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-teal-200 flex-shrink-0"></i>
+                      <span class="text-xs text-teal-900/60">One number</span>
+                    </div>
+                    <div class="flex items-center gap-2 req-row" data-req="hasSpecialChar">
+                      <i data-lucide="alert-circle" class="w-4 h-4 text-teal-200 flex-shrink-0"></i>
+                      <span class="text-xs text-teal-900/60">One special character</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Form -->
-              <form action="change_password.php" method="POST" class="p-6 sm:p-8 space-y-6" novalidate>
-
-                <!-- Current Password -->
-                <div class="space-y-2">
-                  <label for="current_password" class="flex items-center text-sm font-semibold text-slate-700">
-                    Current Password <span class="text-[#E5097F] ml-1">*</span>
-                  </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
-                    </div>
-                    <input
-                      type="password"
-                      id="current_password"
-                      name="current_password"
-                      required
-                      autocomplete="current-password"
-                      placeholder="Enter your current password"
-                      class="w-full pl-12 pr-12 py-3.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium
-                             focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                             transition-all duration-200 hover:border-[#4A154B]/40"
-                    />
-                    <button
-                      type="button"
-                      onclick="togglePasswordVisibility('current_password', this)"
-                      class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#4A154B] transition-colors"
-                      aria-label="Toggle password visibility"
-                    >
-                      <i data-lucide="eye" class="w-5 h-5"></i>
-                    </button>
+              <div class="space-y-2">
+                <label for="confirm_password" class="block text-sm font-semibold text-teal-900">
+                  Confirm Password <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i data-lucide="lock" class="w-5 h-5 text-teal-600/60"></i>
                   </div>
-                </div>
-
-                <!-- New Password -->
-                <div class="space-y-2">
-                  <label for="new_password" class="flex items-center text-sm font-semibold text-slate-700">
-                    New Password <span class="text-[#E5097F] ml-1">*</span>
-                  </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <i data-lucide="key" class="w-5 h-5 text-slate-400"></i>
-                    </div>
-                    <input
-                      type="password"
-                      id="new_password"
-                      name="new_password"
-                      required
-                      minlength="6"
-                      autocomplete="new-password"
-                      placeholder="Enter new password"
-                      oninput="updatePasswordStrength(this.value)"
-                      class="w-full pl-12 pr-12 py-3.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium
-                             focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                             transition-all duration-200 hover:border-[#4A154B]/40"
-                    />
-                    <button
-                      type="button"
-                      onclick="togglePasswordVisibility('new_password', this)"
-                      class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#4A154B] transition-colors"
-                      aria-label="Toggle password visibility"
-                    >
-                      <i data-lucide="eye" class="w-5 h-5"></i>
-                    </button>
-                  </div>
-
-                  <!-- Password Strength Indicator -->
-                  <div id="strength-wrapper" class="mt-3 space-y-2 hidden">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs font-semibold text-slate-600">Password Strength</span>
-                      <span id="strength-text" class="text-xs font-bold text-slate-500">Weak</span>
-                    </div>
-                    <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div id="strength-bar" class="h-full transition-all duration-500 ease-out bg-red-500" style="width: 0%;"></div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-                      <div class="flex items-center space-x-2 req-row" data-req="minLength">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>
-                        <span class="text-xs text-slate-500">At least 8 characters</span>
-                      </div>
-                      <div class="flex items-center space-x-2 req-row" data-req="hasUppercase">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>
-                        <span class="text-xs text-slate-500">One uppercase letter</span>
-                      </div>
-                      <div class="flex items-center space-x-2 req-row" data-req="hasLowercase">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>
-                        <span class="text-xs text-slate-500">One lowercase letter</span>
-                      </div>
-                      <div class="flex items-center space-x-2 req-row" data-req="hasNumber">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>
-                        <span class="text-xs text-slate-500">One number</span>
-                      </div>
-                      <div class="flex items-center space-x-2 req-row" data-req="hasSpecialChar">
-                        <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>
-                        <span class="text-xs text-slate-500">One special character</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Confirm Password -->
-                <div class="space-y-2">
-                  <label for="confirm_password" class="flex items-center text-sm font-semibold text-slate-700">
-                    Confirm Password <span class="text-[#E5097F] ml-1">*</span>
-                  </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
-                    </div>
-                    <input
-                      type="password"
-                      id="confirm_password"
-                      name="confirm_password"
-                      required
-                      autocomplete="new-password"
-                      placeholder="Re-enter new password"
-                      oninput="checkPasswordMatch()"
-                      class="w-full pl-12 pr-12 py-3.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium
-                             focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                             transition-all duration-200 hover:border-[#4A154B]/40"
-                    />
-                    <button
-                      type="button"
-                      onclick="togglePasswordVisibility('confirm_password', this)"
-                      class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-[#4A154B] transition-colors"
-                      aria-label="Toggle password visibility"
-                    >
-                      <i data-lucide="eye" class="w-5 h-5"></i>
-                    </button>
-                    <div id="confirm-check" class="absolute inset-y-0 right-12 flex items-center pointer-events-none hidden">
-                      <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
-                    </div>
-                  </div>
-                  <p id="match-error" class="text-sm text-red-500 flex items-center mt-1 hidden">
-                    <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
-                    Passwords do not match
-                  </p>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-4 border-t border-slate-200">
-
-                  <a href="dashboard.php"
-                     class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl border-2 border-slate-200 bg-white hover:border-[#4A154B]/40 hover:bg-slate-50 transition-all duration-300 hover:scale-[1.02] active:scale-95">
-                    <div class="relative flex items-center justify-center space-x-2 py-3 px-6 text-slate-700 font-bold group-hover/btn:text-[#4A154B] transition-colors">
-                      <i data-lucide="arrow-left" class="w-4 h-4 group-hover/btn:-translate-x-1 transition-transform duration-300"></i>
-                      <span>Back to Dashboard</span>
-                    </div>
-                  </a>
-
-                  <button
-                    type="submit"
-                    class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-[1.02] active:scale-95 transition-all duration-300"
-                  >
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F]"></div>
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#E5097F] via-[#8B1E7E] to-[#4A154B] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-                    <div class="relative flex items-center justify-center space-x-2 py-3 px-8 text-white font-bold">
-                      <i data-lucide="shield" class="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-300"></i>
-                      <span>Change Password</span>
-                    </div>
+                  <input type="password" id="confirm_password" name="confirm_password" required
+                         autocomplete="new-password" placeholder="Re-enter new password"
+                         oninput="checkPasswordMatch()"
+                         class="form-input pl-12 pr-12" />
+                  <button type="button" onclick="togglePasswordVisibility('confirm_password', this)"
+                          class="absolute inset-y-0 right-0 pr-4 flex items-center text-teal-600/60 hover:text-teal-600 transition-colors"
+                          aria-label="Toggle password visibility">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
                   </button>
-
+                  <div id="confirm-check" class="absolute inset-y-0 right-12 flex items-center pointer-events-none hidden">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                  </div>
                 </div>
+                <p id="match-error" class="text-sm text-red-500 flex items-center mt-1 hidden">
+                  <i data-lucide="alert-circle" class="w-4 h-4 mr-1"></i>
+                  Passwords do not match
+                </p>
+              </div>
 
-                <!-- Security Tips -->
-                <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                  <h3 class="text-sm font-bold text-blue-900 mb-2 flex items-center">
-                    <i data-lucide="shield" class="w-4 h-4 mr-2"></i>
-                    Security Tips
-                  </h3>
-                  <ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">
-                    <li>Never share your password with anyone</li>
-                    <li>Use a unique password for each account</li>
-                    <li>Change your password regularly (every 90 days)</li>
-                    <li>Avoid using personal information in your password</li>
-                  </ul>
-                </div>
+              <div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-3 pt-4 border-t border-teal-100">
 
-              </form>
+                <a href="dashboard.php"
+                   class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg font-semibold
+                          text-teal-600 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                          transition-all duration-200">
+                  <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                  <span>Back to Dashboard</span>
+                </a>
 
-            </div>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-white
+                               bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                  <i data-lucide="shield" class="w-5 h-5"></i>
+                  <span>Change Password</span>
+                </button>
+
+              </div>
+
+              <div class="mt-2 p-4 bg-teal-50 rounded-xl border-2 border-teal-100">
+                <h3 class="text-sm font-bold text-teal-900 mb-2 flex items-center gap-2">
+                  <i data-lucide="shield" class="w-4 h-4 text-teal-600"></i>
+                  Security Tips
+                </h3>
+                <ul class="text-xs text-teal-900/80 space-y-1 list-disc list-inside">
+                  <li>Never share your password with anyone</li>
+                  <li>Use a unique password for each account</li>
+                  <li>Change your password regularly (every 90 days)</li>
+                  <li>Avoid using personal information in your password</li>
+                </ul>
+              </div>
+
+            </form>
           </div>
         </div>
 
       </main>
 
-      <!-- ============ FOOTER ============ -->
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-6">
           <div class="max-w-7xl mx-auto text-center">
-            <p class="text-xs text-slate-700">
+            <p class="text-xs text-teal-200/70">
               &copy; <?= date('Y') ?>
-              <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>.
-              All rights reserved.
+              <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
             </p>
-            <p class="text-xs text-slate-700 mt-1">
-              Powered by
-              <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">
-                Oréll Grievance
-              </span>
+            <p class="text-xs text-teal-200/70 mt-1">
+              Powered by <span class="font-bold text-white">RLabZ</span>
             </p>
           </div>
         </div>
       </footer>
-
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- CUSTOM LOGOUT CONFIRMATION MODAL                              -->
-  <!-- ============================================================= -->
+  <!-- LOGOUT CONFIRMATION MODAL -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4
-                    bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
-          You are about to log out of
-          <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+        <p class="text-sm text-teal-900/70 leading-relaxed">
+          You are about to log out of <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i>
           You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
-        <button type="button"
-                onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700
-                       bg-slate-100 hover:bg-slate-200 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+        <button type="button" onclick="closeLogoutModal()"
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
-
-        <button type="button"
-                id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white
-                       bg-gradient-to-r from-red-500 via-red-600 to-rose-600
-                       hover:from-red-600 hover:via-red-700 hover:to-rose-700
-                       shadow-lg shadow-red-500/30 hover:shadow-red-500/50
-                       transition-all duration-300 hover:-translate-y-0.5 active:scale-95
-                       flex items-center justify-center gap-2">
+        <button type="button" id="confirmLogoutBtn"
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- ====================== SCRIPTS ====================== -->
   <script>
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // ---- Toggle Password Visibility ----
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
@@ -856,7 +727,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
-    // ---- Password Strength Meter ----
     function updatePasswordStrength(password) {
       const wrapper = document.getElementById('strength-wrapper');
       const bar     = document.getElementById('strength-bar');
@@ -879,7 +749,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       };
 
       const score = Object.values(reqs).filter(Boolean).length;
-
       const percent = (score / 5) * 100;
       bar.style.width = percent + '%';
 
@@ -887,21 +756,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       text.classList.remove('text-red-500', 'text-yellow-500', 'text-blue-500', 'text-emerald-500');
 
       if (score <= 2) {
-        bar.classList.add('bg-red-500');
-        text.classList.add('text-red-500');
-        text.textContent = 'Weak';
+        bar.classList.add('bg-red-500'); text.classList.add('text-red-500'); text.textContent = 'Weak';
       } else if (score <= 3) {
-        bar.classList.add('bg-yellow-500');
-        text.classList.add('text-yellow-500');
-        text.textContent = 'Fair';
+        bar.classList.add('bg-yellow-500'); text.classList.add('text-yellow-500'); text.textContent = 'Fair';
       } else if (score <= 4) {
-        bar.classList.add('bg-blue-500');
-        text.classList.add('text-blue-500');
-        text.textContent = 'Good';
+        bar.classList.add('bg-blue-500'); text.classList.add('text-blue-500'); text.textContent = 'Good';
       } else {
-        bar.classList.add('bg-emerald-500');
-        text.classList.add('text-emerald-500');
-        text.textContent = 'Strong';
+        bar.classList.add('bg-emerald-500'); text.classList.add('text-emerald-500'); text.textContent = 'Strong';
       }
 
       document.querySelectorAll('.req-row').forEach(function (row) {
@@ -911,14 +772,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!key || !icon) return;
 
         const met = !!reqs[key];
-
         icon.setAttribute('data-lucide', met ? 'check-circle' : 'alert-circle');
         icon.classList.toggle('text-emerald-500', met);
-        icon.classList.toggle('text-slate-300', !met);
+        icon.classList.toggle('text-teal-200', !met);
 
         if (label) {
           label.classList.toggle('text-emerald-700', met);
-          label.classList.toggle('text-slate-500', !met);
+          label.classList.toggle('text-teal-900/60', !met);
         }
       });
 
@@ -927,7 +787,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
-    // ---- Confirm Password Match Check ----
     function checkPasswordMatch() {
       const newPwd     = document.getElementById('new_password').value;
       const confirmPwd = document.getElementById('confirm_password').value;
@@ -955,9 +814,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
 
-    // ============================================================
-    // SIDEBAR EXPAND / COLLAPSE
-    // ============================================================
+    // Sidebar toggle
     (function () {
       const toggleBtn = document.getElementById('sidebarToggle');
       const sidebar   = document.getElementById('parentSidebar');
@@ -966,94 +823,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       const labels   = sidebar.querySelectorAll('.sidebar-label');
       const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
-
       let expanded = false;
 
       toggleBtn.addEventListener('click', function () {
         expanded = !expanded;
-
         if (expanded) {
-          sidebar.classList.remove('w-20');
-          sidebar.classList.add('w-64');
-          main.classList.remove('ml-20');
-          main.classList.add('ml-64');
-
-          labels.forEach(function (el) {
-            el.classList.remove('opacity-0', 'w-0');
-            el.classList.add('opacity-100', 'w-auto');
-          });
+          sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+          main.classList.remove('ml-20'); main.classList.add('ml-64');
+          labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
           tooltips.forEach(function (el) { el.classList.add('hidden'); });
         } else {
-          sidebar.classList.add('w-20');
-          sidebar.classList.remove('w-64');
-          main.classList.add('ml-20');
-          main.classList.remove('ml-64');
-
-          labels.forEach(function (el) {
-            el.classList.add('opacity-0', 'w-0');
-            el.classList.remove('opacity-100', 'w-auto');
-          });
+          sidebar.classList.add('w-20'); sidebar.classList.remove('w-64');
+          main.classList.add('ml-20'); main.classList.remove('ml-64');
+          labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
           tooltips.forEach(function (el) { el.classList.remove('hidden'); });
         }
-
-        setTimeout(function () {
-          if (typeof lucide !== 'undefined') lucide.createIcons();
-        }, 250);
+        setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
       });
     })();
 
-    // ============================================================
-    // PARENT PROFILE DROPDOWN
-    // ============================================================
+    // Parent dropdown
     (function () {
-      const btn       = document.getElementById('parent-dropdown-btn');
-      const menu      = document.getElementById('parent-dropdown-menu');
-      const chevron   = document.getElementById('parent-chevron');
+      const btn = document.getElementById('parent-dropdown-btn');
+      const menu = document.getElementById('parent-dropdown-menu');
+      const chevron = document.getElementById('parent-chevron');
       const container = document.getElementById('parent-dropdown-container');
-
       if (!btn || !menu || !container) return;
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = !menu.classList.contains('hidden');
         if (isOpen) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         } else {
-          menu.classList.remove('hidden');
-          menu.classList.add('animate-dropdown');
+          menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
           if (chevron) chevron.classList.add('rotate-180');
-          btn.setAttribute('aria-expanded', 'true');
+          btn.setAttribute('aria-expanded','true');
         }
       });
-
       document.addEventListener('click', function (e) {
         if (!container.contains(e.target)) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         }
       });
-
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         }
       });
     })();
 
-    // ============================================================
-    // LOGOUT CONFIRMATION MODAL
-    // ============================================================
+    // Logout modal
     const logoutConfirmModal = document.getElementById('logoutConfirmModal');
     const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
-
     const LOGOUT_URL = '../logout.php?role=parent';
 
     function openLogoutModal() {
@@ -1061,34 +889,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       document.body.classList.add('overflow-hidden');
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
-
     function closeLogoutModal() {
       logoutConfirmModal.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     }
-
-    (function () {
-      const triggers = [
-        document.getElementById('sidebarLogoutBtn'),
-        document.getElementById('dropdownLogoutBtn'),
-      ];
-      triggers.forEach(function (btn) {
-        if (!btn) return;
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openLogoutModal();
-        });
+    [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
+      if (!btn) return;
+      btn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        openLogoutModal();
       });
-    })();
-
+    });
     if (confirmLogoutBtn) {
       confirmLogoutBtn.addEventListener('click', function () {
         confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
         window.location.href = LOGOUT_URL;
       });
     }
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden')) {
         closeLogoutModal();

@@ -18,59 +18,112 @@ require_once 'db_connect.php';
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Google Fonts: Poppins used only as a fallback until the licensed Coolvetica
+       font files are added to assets/fonts/ (see comment in the @font-face block below) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Custom Tailwind Theme Config -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink: '#E5097F',
-            brandGreen: '#006837',
-            brandGold: '#C5A059'
+            teal: {
+              50:  '#EAF4F4',
+              100: '#CFE6E7',
+              200: '#9FCDCF',
+              300: '#6FB4B7',
+              400: '#3F9B9F',
+              500: '#128287',
+              600: '#006E74',   // brand primary
+              700: '#005A5F',
+              800: '#00454A',
+              900: '#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           }
         }
       }
     }
   </script>
 
-  <!-- Local Page CSS Link -->
-  <link rel="stylesheet" href="assets/css/index.css">
+  <!--
+    COOLVETICA FONT
+    Coolvetica is a licensed display typeface and isn't available on a free CDN,
+    so it can't be pulled in automatically. Drop the licensed files into
+    assets/fonts/ with these exact names (or edit the paths below) and every
+    piece of text on this page will render in Coolvetica. Until then, the page
+    falls back to Poppins so it still looks clean.
+  -->
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700;
+      font-display: swap;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    /* Subtle dot-grid texture for the hero band, drawn with pure CSS (no images) */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+
+    /* Thin campus-roofline motif used as a footer divider */
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                         linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px;
+      background-repeat: repeat-x;
+    }
+
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+  </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-pink-100 selection:text-pink-700">
+<body class="min-h-screen bg-white text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700">
 
   <!-- Header -->
-  <header class="bg-white shadow-md sticky top-0 z-50 border-b-2 border-slate-100">
+  <header class="bg-white sticky top-0 z-50 border-b-2 border-teal-600">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16 md:h-20">
         <!-- Logo -->
-        <div class="flex items-center space-x-4">
-          <a href="index.php" class="flex items-center space-x-3 group">
-            <div class="relative">
-              <img
-                src="public/rcss-logo.png"
-                alt="RCSS Logo"
-                class="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <div class="hidden sm:flex items-center space-x-2 pl-4 border-l-2 border-[#006837]">
-              <img
-                src="public/orel-grievance.png"
-                alt="Oréll Grievance"
-                class="h-8 md:h-10 w-auto"
-              />
-            </div>
-          </a>
-        </div>
+        <a href="index.php" class="flex items-center gap-3 md:gap-4 shrink-0">
+          <img
+            src="public/rcss-logo.webp"
+            alt="Rajagiri College of Social Sciences"
+            class="h-8 md:h-10 w-auto"
+          />
+          <span class="hidden sm:block logo-divider h-8 md:h-10"></span>
+          <span class="hidden sm:flex items-baseline gap-1">
+            <span class="text-xl md:text-2xl font-bold text-teal-600 tracking-tight">grievance</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+          </span>
+        </a>
 
         <!-- Desktop Navigation -->
-        <nav class="hidden md:flex items-center space-x-8">
+        <nav class="hidden md:flex items-center gap-8">
           <a
             href="contact.php"
-            class="relative text-slate-700 hover:text-[#006837] transition-colors text-sm font-semibold tracking-wide group"
+            class="relative text-teal-900 hover:text-teal-600 transition-colors text-sm font-medium"
           >
             Contact
-            <span class="absolute -bottom-2 left-0 w-full h-0.5 bg-[#006837] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
           </a>
 
           <!-- Login Dropdown -->
@@ -81,60 +134,40 @@ require_once 'db_connect.php';
               aria-haspopup="true"
               aria-expanded="false"
               aria-controls="login-dropdown-menu"
-              class="bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:shadow-xl hover:shadow-pink-500/30 transition-all duration-300 flex items-center space-x-2 ring-2 ring-transparent hover:ring-pink-300 cursor-pointer"
+              class="bg-teal-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-teal-700 transition-colors duration-200 flex items-center gap-2 cursor-pointer"
             >
               <span>Login</span>
-              <i data-lucide="chevron-down" id="login-chevron" class="w-4 h-4 transition-transform duration-300"></i>
+              <i data-lucide="chevron-down" id="login-chevron" class="w-4 h-4 transition-transform duration-200"></i>
             </button>
 
-            <div id="login-dropdown-menu" class="hidden absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 py-2 overflow-hidden" role="menu">
-              <div class="px-4 py-3 bg-gradient-to-r from-[#4A154B] to-[#8B1E7E]">
-                <p class="text-white text-xs font-bold uppercase tracking-wider">Login As</p>
+            <div id="login-dropdown-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-teal-100 z-50 py-2 overflow-hidden" role="menu">
+              <div class="px-4 py-3 bg-teal-600">
+                <p class="text-white text-xs font-semibold uppercase tracking-wide">Login as</p>
               </div>
-              <a
-                href="login.php?role=admin"
-                class="group flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 border-b border-slate-50"
-                role="menuitem"
-              >
-                <i data-lucide="lock" class="w-4 h-4 text-[#8B1E7E]"></i>
-                <span class="font-medium">Admin</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="login.php?role=admin" class="group flex items-center gap-3 px-4 py-3 text-sm text-teal-900 hover:bg-teal-50 transition-colors border-b border-teal-50" role="menuitem">
+                <i data-lucide="lock" class="w-4 h-4 text-teal-600"></i>
+                <span>Admin</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a
-                href="login.php?role=management"
-                class="group flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 border-b border-slate-50"
-                role="menuitem"
-              >
-                <i data-lucide="layers" class="w-4 h-4 text-[#8B1E7E]"></i>
-                <span class="font-medium">Grievance Member</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="login.php?role=management" class="group flex items-center gap-3 px-4 py-3 text-sm text-teal-900 hover:bg-teal-50 transition-colors border-b border-teal-50" role="menuitem">
+                <i data-lucide="layers" class="w-4 h-4 text-teal-600"></i>
+                <span>Grievance Member</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a
-                href="login.php?role=staff"
-                class="group flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 border-b border-slate-50"
-                role="menuitem"
-              >
-                <i data-lucide="briefcase" class="w-4 h-4 text-[#8B1E7E]"></i>
-                <span class="font-medium">Teachers & Non-Teaching Staffs</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="login.php?role=staff" class="group flex items-center gap-3 px-4 py-3 text-sm text-teal-900 hover:bg-teal-50 transition-colors border-b border-teal-50" role="menuitem">
+                <i data-lucide="briefcase" class="w-4 h-4 text-teal-600"></i>
+                <span>Teachers & Non-Teaching Staff</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a
-                href="login.php?role=parent"
-                class="group flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 border-b border-slate-50"
-                role="menuitem"
-              >
-                <i data-lucide="users" class="w-4 h-4 text-[#8B1E7E]"></i>
-                <span class="font-medium">Parents</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="login.php?role=parent" class="group flex items-center gap-3 px-4 py-3 text-sm text-teal-900 hover:bg-teal-50 transition-colors border-b border-teal-50" role="menuitem">
+                <i data-lucide="users" class="w-4 h-4 text-teal-600"></i>
+                <span>Parents</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a
-                href="login.php?role=student"
-                class="group flex items-center space-x-3 px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200"
-                role="menuitem"
-              >
-                <i data-lucide="graduation-cap" class="w-4 h-4 text-[#8B1E7E]"></i>
-                <span class="font-medium">Students</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="login.php?role=student" class="group flex items-center gap-3 px-4 py-3 text-sm text-teal-900 hover:bg-teal-50 transition-colors" role="menuitem">
+                <i data-lucide="graduation-cap" class="w-4 h-4 text-teal-600"></i>
+                <span>Students</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
             </div>
           </div>
@@ -147,7 +180,7 @@ require_once 'db_connect.php';
           aria-label="Toggle menu"
           aria-expanded="false"
           aria-controls="mobile-menu"
-          class="md:hidden text-[#4A154B] hover:bg-slate-100 p-2 rounded-lg transition-colors cursor-pointer"
+          class="md:hidden text-teal-600 hover:bg-teal-50 p-2 rounded-lg transition-colors cursor-pointer"
         >
           <i data-lucide="menu" id="mobile-menu-icon" class="w-6 h-6"></i>
         </button>
@@ -155,48 +188,28 @@ require_once 'db_connect.php';
     </div>
 
     <!-- Mobile Menu Drawer -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white border-t-2 border-slate-100 shadow-xl">
-      <div class="px-4 py-4 space-y-2">
-        <a href="contact.php" class="block text-slate-700 hover:text-[#006837] text-sm font-semibold px-4 py-3 hover:bg-slate-50 rounded-lg transition-colors">
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t-2 border-teal-100 shadow-lg">
+      <div class="px-4 py-4 space-y-1">
+        <a href="contact.php" class="block text-teal-900 hover:text-teal-600 text-sm font-medium px-4 py-3 hover:bg-teal-50 rounded-lg transition-colors">
           Contact
         </a>
 
-        <div class="border-t-2 border-slate-100 pt-3 mt-3">
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-4">Login As</p>
-          <a
-            href="login.php?role=admin"
-            class="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:text-[#8B1E7E] hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 rounded-lg text-sm font-medium transition-all duration-200"
-          >
-            <i data-lucide="lock" class="w-4 h-4 text-[#8B1E7E]"></i>
-            <span>Admin</span>
+        <div class="border-t border-teal-100 pt-3 mt-3">
+          <p class="text-xs font-semibold text-teal-400 uppercase tracking-wide mb-2 px-4">Login as</p>
+          <a href="login.php?role=admin" class="flex items-center gap-3 px-4 py-3 text-teal-900 hover:text-teal-600 hover:bg-teal-50 rounded-lg text-sm transition-colors">
+            <i data-lucide="lock" class="w-4 h-4 text-teal-600"></i><span>Admin</span>
           </a>
-          <a
-            href="login.php?role=management"
-            class="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:text-[#8B1E7E] hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 rounded-lg text-sm font-medium transition-all duration-200"
-          >
-            <i data-lucide="layers" class="w-4 h-4 text-[#8B1E7E]"></i>
-            <span>Grievance Member</span>
+          <a href="login.php?role=management" class="flex items-center gap-3 px-4 py-3 text-teal-900 hover:text-teal-600 hover:bg-teal-50 rounded-lg text-sm transition-colors">
+            <i data-lucide="layers" class="w-4 h-4 text-teal-600"></i><span>Grievance Member</span>
           </a>
-          <a
-            href="login.php?role=staff"
-            class="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:text-[#8B1E7E] hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 rounded-lg text-sm font-medium transition-all duration-200"
-          >
-            <i data-lucide="briefcase" class="w-4 h-4 text-[#8B1E7E]"></i>
-            <span>Teachers & Non-Teaching Staffs</span>
+          <a href="login.php?role=staff" class="flex items-center gap-3 px-4 py-3 text-teal-900 hover:text-teal-600 hover:bg-teal-50 rounded-lg text-sm transition-colors">
+            <i data-lucide="briefcase" class="w-4 h-4 text-teal-600"></i><span>Teachers & Non-Teaching Staff</span>
           </a>
-          <a
-            href="login.php?role=parent"
-            class="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:text-[#8B1E7E] hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 rounded-lg text-sm font-medium transition-all duration-200"
-          >
-            <i data-lucide="users" class="w-4 h-4 text-[#8B1E7E]"></i>
-            <span>Parents</span>
+          <a href="login.php?role=parent" class="flex items-center gap-3 px-4 py-3 text-teal-900 hover:text-teal-600 hover:bg-teal-50 rounded-lg text-sm transition-colors">
+            <i data-lucide="users" class="w-4 h-4 text-teal-600"></i><span>Parents</span>
           </a>
-          <a
-            href="login.php?role=student"
-            class="flex items-center space-x-3 px-4 py-3 text-slate-700 hover:text-[#8B1E7E] hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 rounded-lg text-sm font-medium transition-all duration-200"
-          >
-            <i data-lucide="graduation-cap" class="w-4 h-4 text-[#8B1E7E]"></i>
-            <span>Students</span>
+          <a href="login.php?role=student" class="flex items-center gap-3 px-4 py-3 text-teal-900 hover:text-teal-600 hover:bg-teal-50 rounded-lg text-sm transition-colors">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-teal-600"></i><span>Students</span>
           </a>
         </div>
       </div>
@@ -204,361 +217,192 @@ require_once 'db_connect.php';
   </header>
 
   <!-- Hero Banner -->
-  <section class="relative overflow-hidden bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F]">
-    <div class="absolute inset-0 opacity-10 pointer-events-none">
-      <div class="absolute top-0 left-0 w-full h-full hero-radial-dots"></div>
-    </div>
+  <section class="relative overflow-hidden bg-teal-600">
+    <div class="absolute inset-0 hero-dots opacity-40 pointer-events-none"></div>
 
-    <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-1/3 right-1/4 w-48 h-48 bg-yellow-500/20 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/25 rounded-full px-4 py-1.5 mb-7">
+        <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+        <span class="text-white text-xs font-medium tracking-wide">Rajagiri College of Social Sciences</span>
+      </div>
 
-    <div class="absolute inset-0 opacity-5 hero-grid-lines pointer-events-none"></div>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1]">
+        Your voice deserves<br class="hidden sm:block"> a fair hearing
+      </h1>
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-      <div class="text-center max-w-4xl mx-auto">
-        <div class="inline-flex items-center space-x-2 bg-white/15 backdrop-blur-md border border-white/30 rounded-full px-5 py-2.5 mb-8">
-          <i data-lucide="sparkles" class="w-4 h-4 text-[#C5A059]"></i>
-          <span class="text-white text-sm font-semibold tracking-wide">Powered by Oréll Grievance</span>
-        </div>
+      <p class="text-base md:text-lg text-teal-50 mb-10 max-w-2xl mx-auto leading-relaxed">
+        Submit a grievance, follow every step of its review and get a resolution you can trust — all in one secure portal built for students, parents and staff.
+      </p>
 
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-          Fair, Transparent & Prompt
-          <br />
-          <span class="relative inline-block mt-2">
-            <span class="bg-gradient-to-r from-[#C5A059] via-yellow-300 to-[#C5A059] bg-clip-text text-transparent">
-              Grievance Resolution
-            </span>
-            <span class="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></span>
-          </span>
-        </h1>
-
-        <p class="text-lg md:text-xl text-white/95 mb-10 max-w-3xl mx-auto leading-relaxed">
-          Your voice matters. Submit your concerns with confidence and track their resolution in real-time through our transparent and secure platform.
-        </p>
-
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            data-scroll-to="choose-portal"
-            class="group inline-flex items-center space-x-3 bg-white text-[#4A154B] px-8 py-4 rounded-xl text-lg font-bold hover:shadow-2xl hover:shadow-white/30 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
-          >
-            <i data-lucide="file-text" class="w-5 h-5 text-[#E5097F]"></i>
-            <span>File a Grievance Now</span>
-            <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300"></i>
-          </button>
-        </div>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          data-scroll-to="choose-portal"
+          class="inline-flex items-center gap-2 bg-white text-teal-700 px-7 py-3.5 rounded-lg text-base font-semibold hover:bg-teal-50 transition-colors duration-200 cursor-pointer"
+        >
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          <span>File a grievance</span>
+        </button>
+        <a
+          href="#choose-portal"
+          class="inline-flex items-center gap-2 border border-white/40 text-white px-7 py-3.5 rounded-lg text-base font-semibold hover:bg-white/10 transition-colors duration-200"
+        >
+          <span>Track a grievance</span>
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
       </div>
     </div>
-
-    <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent"></div>
   </section>
 
   <!-- Role Selection Cards -->
-  <section id="choose-portal" class="py-16 md:py-20 bg-gradient-to-b from-slate-50 to-white scroll-mt-24">
+  <section id="choose-portal" class="py-16 md:py-24 bg-white scroll-mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-14">
-        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4A154B] mb-4">
-          Choose Your Portal
+      <div class="max-w-2xl mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-4">
+          Choose your portal
         </h2>
-        <div class="flex items-center justify-center space-x-2 mb-4">
-          <span class="w-16 h-1 bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] rounded-full"></span>
-          <span class="w-3 h-3 bg-[#E5097F] rounded-full"></span>
-          <span class="w-16 h-1 bg-gradient-to-r from-[#E5097F] to-[#8B1E7E] rounded-full"></span>
-        </div>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-          Select your role to access the appropriate grievance management interface
+        <p class="text-base md:text-lg text-teal-900/70 leading-relaxed">
+          Every role sees a portal built around what it actually needs — pick yours to file, track or manage a grievance.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
 
         <!-- Student Portal Card -->
-        <a
-          href="login.php?role=student"
-          class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-slate-100 hover:border-[#8B1E7E] portal-card"
-        >
-          <div class="bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] p-6 text-white relative overflow-hidden">
-            <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700 delay-75"></div>
-            <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-
-            <div class="relative">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm mb-4 group-hover:bg-white/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ring-1 ring-white/30">
-                <i data-lucide="graduation-cap" class="w-7 h-7"></i>
-              </div>
-              <h3 class="text-lg font-bold mb-1 group-hover:translate-x-1 transition-transform duration-300">Student Portal</h3>
-              <p class="text-xs text-white/80 font-medium">View & Track Grievances</p>
-            </div>
+        <a href="login.php?role=student" class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 hover:border-teal-600 hover:shadow-lg transition-all duration-200">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
           </div>
-
-          <div class="p-6 relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/40 group-hover:to-pink-50/40 transition-all duration-500 pointer-events-none"></div>
-
-            <p class="text-slate-600 text-sm leading-relaxed mb-4 relative">
-              Access grievance submission and tracking specifically for enrolled students
-            </p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-4 relative">
-              <span class="text-[#006837] font-bold text-sm group-hover:text-[#008a4a] transition-colors">
-                Access Portal
-              </span>
-              <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#E5097F]/10 transition-colors">
-                <i data-lucide="arrow-right" class="w-5 h-5 text-[#E5097F] group-hover:translate-x-1 transition-transform duration-300"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+          <h3 class="text-base font-bold text-teal-900 mb-1">Student</h3>
+          <p class="text-xs text-teal-900/60 font-medium mb-4">View & track grievances</p>
+          <p class="text-sm text-teal-900/70 leading-relaxed mb-6 flex-1">
+            Submit and follow up on grievances as an enrolled student.
+          </p>
+          <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+            Access portal
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"></i>
+          </span>
         </a>
 
         <!-- Parent Portal Card -->
-        <a
-          href="login.php?role=parent"
-          class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-slate-100 hover:border-[#8B1E7E] portal-card"
-        >
-          <div class="bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] p-6 text-white relative overflow-hidden">
-            <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700 delay-75"></div>
-            <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-
-            <div class="relative">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm mb-4 group-hover:bg-white/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ring-1 ring-white/30">
-                <i data-lucide="users" class="w-7 h-7"></i>
-              </div>
-              <h3 class="text-lg font-bold mb-1 group-hover:translate-x-1 transition-transform duration-300">Parent Portal</h3>
-              <p class="text-xs text-white/80 font-medium">Monitor Ward Progress</p>
-            </div>
+        <a href="login.php?role=parent" class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 hover:border-teal-600 hover:shadow-lg transition-all duration-200">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="users" class="w-6 h-6"></i>
           </div>
-
-          <div class="p-6 relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/40 group-hover:to-pink-50/40 transition-all duration-500 pointer-events-none"></div>
-
-            <p class="text-slate-600 text-sm leading-relaxed mb-4 relative">
-              Dedicated portal for parents to submit and monitor grievances regarding their wards
-            </p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-4 relative">
-              <span class="text-[#006837] font-bold text-sm group-hover:text-[#008a4a] transition-colors">
-                Access Portal
-              </span>
-              <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#E5097F]/10 transition-colors">
-                <i data-lucide="arrow-right" class="w-5 h-5 text-[#E5097F] group-hover:translate-x-1 transition-transform duration-300"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+          <h3 class="text-base font-bold text-teal-900 mb-1">Parent</h3>
+          <p class="text-xs text-teal-900/60 font-medium mb-4">Monitor ward progress</p>
+          <p class="text-sm text-teal-900/70 leading-relaxed mb-6 flex-1">
+            Submit and monitor grievances raised on behalf of your ward.
+          </p>
+          <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+            Access portal
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"></i>
+          </span>
         </a>
 
         <!-- Teachers & Non-Teaching Staffs Card -->
-        <a
-          href="login.php?role=staff"
-          class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-slate-100 hover:border-[#8B1E7E] portal-card"
-        >
-          <div class="bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] p-6 text-white relative overflow-hidden">
-            <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700 delay-75"></div>
-            <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-
-            <div class="relative">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm mb-4 group-hover:bg-white/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ring-1 ring-white/30">
-                <i data-lucide="briefcase" class="w-7 h-7"></i>
-              </div>
-              <h3 class="text-lg font-bold mb-1 group-hover:translate-x-1 transition-transform duration-300">Teachers & Staff</h3>
-              <p class="text-xs text-white/80 font-medium">Priority Resolution</p>
-            </div>
+        <a href="login.php?role=staff" class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 hover:border-teal-600 hover:shadow-lg transition-all duration-200">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="briefcase" class="w-6 h-6"></i>
           </div>
-
-          <div class="p-6 relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/40 group-hover:to-pink-50/40 transition-all duration-500 pointer-events-none"></div>
-
-            <p class="text-slate-600 text-sm leading-relaxed mb-4 relative">
-              Submit and manage grievances for teaching and non-teaching staff members
-            </p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-4 relative">
-              <span class="text-[#006837] font-bold text-sm group-hover:text-[#008a4a] transition-colors">
-                Access Portal
-              </span>
-              <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#E5097F]/10 transition-colors">
-                <i data-lucide="arrow-right" class="w-5 h-5 text-[#E5097F] group-hover:translate-x-1 transition-transform duration-300"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+          <h3 class="text-base font-bold text-teal-900 mb-1">Teachers & Staff</h3>
+          <p class="text-xs text-teal-900/60 font-medium mb-4">Priority resolution</p>
+          <p class="text-sm text-teal-900/70 leading-relaxed mb-6 flex-1">
+            Submit and manage grievances for teaching and non-teaching staff.
+          </p>
+          <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+            Access portal
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"></i>
+          </span>
         </a>
 
         <!-- Grievance Member Card -->
-        <a
-          href="login.php?role=management"
-          class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-slate-100 hover:border-[#8B1E7E] portal-card"
-        >
-          <div class="bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] p-6 text-white relative overflow-hidden">
-            <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700 delay-75"></div>
-            <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-
-            <div class="relative">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm mb-4 group-hover:bg-white/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ring-1 ring-white/30">
-                <i data-lucide="layers" class="w-7 h-7"></i>
-              </div>
-              <h3 class="text-lg font-bold mb-1 group-hover:translate-x-1 transition-transform duration-300">Grievance Member</h3>
-              <p class="text-xs text-white/80 font-medium">Committee Dashboard</p>
-            </div>
+        <a href="login.php?role=management" class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 hover:border-teal-600 hover:shadow-lg transition-all duration-200">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="layers" class="w-6 h-6"></i>
           </div>
-
-          <div class="p-6 relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/40 group-hover:to-pink-50/40 transition-all duration-500 pointer-events-none"></div>
-
-            <p class="text-slate-600 text-sm leading-relaxed mb-4 relative">
-              Administrative panel for grievance resolution, oversight, and committee management
-            </p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-4 relative">
-              <span class="text-[#006837] font-bold text-sm group-hover:text-[#008a4a] transition-colors">
-                Access Portal
-              </span>
-              <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#E5097F]/10 transition-colors">
-                <i data-lucide="arrow-right" class="w-5 h-5 text-[#E5097F] group-hover:translate-x-1 transition-transform duration-300"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+          <h3 class="text-base font-bold text-teal-900 mb-1">Grievance Member</h3>
+          <p class="text-xs text-teal-900/60 font-medium mb-4">Committee dashboard</p>
+          <p class="text-sm text-teal-900/70 leading-relaxed mb-6 flex-1">
+            Review, resolve and oversee grievances as a committee member.
+          </p>
+          <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+            Access portal
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"></i>
+          </span>
         </a>
 
         <!-- Admin Portal Card -->
-        <a
-          href="login.php?role=admin"
-          class="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-slate-100 hover:border-[#8B1E7E] portal-card"
-        >
-          <div class="bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] p-6 text-white relative overflow-hidden">
-            <div class="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700"></div>
-            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-700 delay-75"></div>
-            <div class="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-
-            <div class="relative">
-              <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm mb-4 group-hover:bg-white/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ring-1 ring-white/30">
-                <i data-lucide="lock" class="w-7 h-7"></i>
-              </div>
-              <h3 class="text-lg font-bold mb-1 group-hover:translate-x-1 transition-transform duration-300">Admin Portal</h3>
-              <p class="text-xs text-white/80 font-medium">Full System Control</p>
-            </div>
+        <a href="login.php?role=admin" class="group flex flex-col p-6 rounded-2xl border-2 border-teal-100 hover:border-teal-600 hover:shadow-lg transition-all duration-200">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-50 text-teal-600 mb-5 group-hover:bg-teal-600 group-hover:text-white transition-colors duration-200">
+            <i data-lucide="lock" class="w-6 h-6"></i>
           </div>
-
-          <div class="p-6 relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-pink-50/0 group-hover:from-purple-50/40 group-hover:to-pink-50/40 transition-all duration-500 pointer-events-none"></div>
-
-            <p class="text-slate-600 text-sm leading-relaxed mb-4 relative">
-              Super admin access for system configuration, user management, and global oversight
-            </p>
-            <div class="flex items-center justify-between border-t border-slate-100 pt-4 relative">
-              <span class="text-[#006837] font-bold text-sm group-hover:text-[#008a4a] transition-colors">
-                Access Portal
-              </span>
-              <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#E5097F]/10 transition-colors">
-                <i data-lucide="arrow-right" class="w-5 h-5 text-[#E5097F] group-hover:translate-x-1 transition-transform duration-300"></i>
-              </div>
-            </div>
-          </div>
-
-          <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+          <h3 class="text-base font-bold text-teal-900 mb-1">Admin</h3>
+          <p class="text-xs text-teal-900/60 font-medium mb-4">Full system control</p>
+          <p class="text-sm text-teal-900/70 leading-relaxed mb-6 flex-1">
+            Configure the system and manage users with full oversight.
+          </p>
+          <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-sm">
+            Access portal
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"></i>
+          </span>
         </a>
 
       </div>
     </div>
   </section>
 
-  <!-- Key Highlights Grid -->
-  <section class="py-16 md:py-20 bg-white">
+  <!-- Key Highlights -->
+  <section class="py-16 md:py-24 bg-teal-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-14">
-        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4A154B] mb-4">
-          Why Choose Our Portal?
+      <div class="max-w-2xl mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-teal-900 mb-4">
+          Why this portal
         </h2>
-        <div class="flex items-center justify-center space-x-2 mb-4">
-          <span class="w-16 h-1 bg-gradient-to-r from-[#006837] to-[#008a4a] rounded-full"></span>
-          <span class="w-3 h-3 bg-[#006837] rounded-full"></span>
-          <span class="w-16 h-1 bg-gradient-to-r from-[#008a4a] to-[#006837] rounded-full"></span>
-        </div>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-          Built on principles of transparency, security, and efficiency
+        <p class="text-base md:text-lg text-teal-900/70 leading-relaxed">
+          Built on the same principles that guide the college itself: fairness, transparency and follow-through.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
 
-        <!-- Highlight 1 -->
-        <div class="relative text-center p-8 rounded-2xl bg-gradient-to-b from-slate-50 to-white hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 hover:border-[#8B1E7E] group">
-          <div class="absolute top-4 right-4">
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] text-white px-3 py-1 rounded-full">
-              Secure
-            </span>
+        <div class="flex gap-5 pb-8 border-b border-teal-200/60">
+          <div class="shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white text-teal-600">
+            <i data-lucide="shield" class="w-6 h-6"></i>
           </div>
-          <div class="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#006837] to-[#008a4a] text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-emerald-500/30">
-            <i data-lucide="shield" class="w-8 h-8 md:w-10 md:h-10"></i>
+          <div>
+            <h3 class="text-lg font-bold text-teal-900 mb-1.5">100% confidentiality</h3>
+            <p class="text-sm text-teal-900/70 leading-relaxed">Your identity and complaint details are protected with encryption at every step of the process.</p>
           </div>
-          <h3 class="text-lg md:text-xl font-bold text-[#4A154B] mb-3">
-            100% Confidentiality
-          </h3>
-          <p class="text-slate-600 text-sm leading-relaxed">
-            Your identity and complaint details are protected with enterprise-grade security and encryption protocols
-          </p>
-          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#4A154B] to-[#E5097F] rounded-full group-hover:w-full transition-all duration-300"></div>
         </div>
 
-        <!-- Highlight 2 -->
-        <div class="relative text-center p-8 rounded-2xl bg-gradient-to-b from-slate-50 to-white hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 hover:border-[#8B1E7E] group">
-          <div class="absolute top-4 right-4">
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] text-white px-3 py-1 rounded-full">
-              Compliant
-            </span>
+        <div class="flex gap-5 pb-8 border-b border-teal-200/60">
+          <div class="shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white text-teal-600">
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
           </div>
-          <div class="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#006837] to-[#008a4a] text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-emerald-500/30">
-            <i data-lucide="check-circle" class="w-8 h-8 md:w-10 md:h-10"></i>
+          <div>
+            <h3 class="text-lg font-bold text-teal-900 mb-1.5">UGC norms compliant</h3>
+            <p class="text-sm text-teal-900/70 leading-relaxed">Fully aligned with University Grants Commission guidelines and regulatory requirements.</p>
           </div>
-          <h3 class="text-lg md:text-xl font-bold text-[#4A154B] mb-3">
-            UGC Norms Compliant
-          </h3>
-          <p class="text-slate-600 text-sm leading-relaxed">
-            Fully aligned with University Grants Commission guidelines and regulatory requirements
-          </p>
-          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#4A154B] to-[#E5097F] rounded-full group-hover:w-full transition-all duration-300"></div>
         </div>
 
-        <!-- Highlight 3 -->
-        <div class="relative text-center p-8 rounded-2xl bg-gradient-to-b from-slate-50 to-white hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 hover:border-[#8B1E7E] group">
-          <div class="absolute top-4 right-4">
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] text-white px-3 py-1 rounded-full">
-              Structured
-            </span>
+        <div class="flex gap-5 pb-8 md:pb-0 border-b md:border-b-0 border-teal-200/60">
+          <div class="shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white text-teal-600">
+            <i data-lucide="layers" class="w-6 h-6"></i>
           </div>
-          <div class="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#006837] to-[#008a4a] text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-emerald-500/30">
-            <i data-lucide="layers" class="w-8 h-8 md:w-10 md:h-10"></i>
+          <div>
+            <h3 class="text-lg font-bold text-teal-900 mb-1.5">Two-tier resolution</h3>
+            <p class="text-sm text-teal-900/70 leading-relaxed">A structured escalation path that ensures thorough review and a fair outcome at every level.</p>
           </div>
-          <h3 class="text-lg md:text-xl font-bold text-[#4A154B] mb-3">
-            Two-Tier Resolution System
-          </h3>
-          <p class="text-slate-600 text-sm leading-relaxed">
-            Structured escalation process ensuring thorough investigation and fair resolution at every level
-          </p>
-          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#4A154B] to-[#E5097F] rounded-full group-hover:w-full transition-all duration-300"></div>
         </div>
 
-        <!-- Highlight 4 -->
-        <div class="relative text-center p-8 rounded-2xl bg-gradient-to-b from-slate-50 to-white hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 hover:border-[#8B1E7E] group">
-          <div class="absolute top-4 right-4">
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-[#4A154B] to-[#8B1E7E] text-white px-3 py-1 rounded-full">
-              Timely
-            </span>
+        <div class="flex gap-5">
+          <div class="shrink-0 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white text-teal-600">
+            <i data-lucide="clock" class="w-6 h-6"></i>
           </div>
-          <div class="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#006837] to-[#008a4a] text-white mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-emerald-500/30">
-            <i data-lucide="clock" class="w-8 h-8 md:w-10 md:h-10"></i>
+          <div>
+            <h3 class="text-lg font-bold text-teal-900 mb-1.5">Clear resolution timelines</h3>
+            <p class="text-sm text-teal-900/70 leading-relaxed">Committed turnaround times with transparent, regularly updated progress tracking.</p>
           </div>
-          <h3 class="text-lg md:text-xl font-bold text-[#4A154B] mb-3">
-            Strict SLA Resolution Timelines
-          </h3>
-          <p class="text-slate-600 text-sm leading-relaxed">
-            Committed to timely resolution with transparent progress tracking and regular updates
-          </p>
-          <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#4A154B] to-[#E5097F] rounded-full group-hover:w-full transition-all duration-300"></div>
         </div>
 
       </div>
@@ -566,86 +410,95 @@ require_once 'db_connect.php';
   </section>
 
   <!-- Footer -->
-  <footer class="bg-gradient-to-br from-[#4A154B] via-[#3a1040] to-[#2a0a30] text-white py-12 relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-96 h-96 bg-[#E5097F]/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-[#006837]/10 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+  <footer class="bg-teal-900 text-white">
+    <div class="roofline"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
         <div>
-          <div class="flex items-center space-x-3 mb-4">
-            <img
-              src="public/rcss-logo.png"
-              alt="RCSS Logo"
-              class="h-12 w-auto"
-            />
-            <img
-              src="public/orel-grievance.png"
-              alt="Oréll Grievance"
-              class="h-8 w-auto"
-            />
+          <div class="flex items-center gap-3 mb-4 bg-white rounded-lg px-3 py-2 w-fit">
+            <img src="public/rcss-logo.webp" alt="Rajagiri College of Social Sciences" class="h-9 w-auto" />
           </div>
-          <p class="text-slate-300 text-sm leading-relaxed">
-            Rajagiri College of Social Sciences - Committed to excellence in grievance redressal, powered by Oréll.
+          <p class="text-teal-100/80 text-sm leading-relaxed max-w-xs">
+            Rajagiri College of Social Sciences — committed to fairness, transparency and prompt grievance redressal.
           </p>
         </div>
 
         <div>
-          <h4 class="font-bold mb-4 text-[#C5A059]">Quick Links</h4>
-          <ul class="space-y-2 text-sm">
-            <li>
-              <a href="login.php?role=student" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Student</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=parent" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Parent</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=staff" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Staff</span>
-              </a>
-            </li>
-            <li>
-              <a href="login.php?role=management" class="text-slate-300 hover:text-[#E5097F] transition-colors flex items-center space-x-2 group">
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-                <span>Grievance Member</span>
-              </a>
-            </li>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Quick links</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="login.php?role=student" class="text-teal-100/80 hover:text-white transition-colors">Student</a></li>
+            <li><a href="login.php?role=parent" class="text-teal-100/80 hover:text-white transition-colors">Parent</a></li>
+            <li><a href="login.php?role=staff" class="text-teal-100/80 hover:text-white transition-colors">Staff</a></li>
+            <li><a href="login.php?role=management" class="text-teal-100/80 hover:text-white transition-colors">Grievance Member</a></li>
           </ul>
         </div>
 
         <div>
-          <h4 class="font-bold mb-4 text-[#C5A059]">Contact</h4>
-          <ul class="space-y-3 text-sm text-slate-300">
-            <li class="flex items-center space-x-2">
-              <i data-lucide="mail" class="w-4 h-4 text-[#E5097F]"></i>
-              <span>grievance@rajarigircss.edu</span>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Contact</h4>
+          <ul class="space-y-3 text-sm text-teal-100/80">
+            <li class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-teal-300"></i>
+              <span>grievance@rajagiricss.edu</span>
             </li>
-            <li class="flex items-center space-x-2">
-              <i data-lucide="phone" class="w-4 h-4 text-[#E5097F]"></i>
+            <li class="flex items-center gap-2">
+              <i data-lucide="phone" class="w-4 h-4 text-teal-300"></i>
               <span>+91 484 XXX XXXX</span>
             </li>
-            <li class="flex items-center space-x-2">
-              <i data-lucide="map-pin" class="w-4 h-4 text-[#E5097F]"></i>
+            <li class="flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-teal-300"></i>
               <span>Aluva, Kochi, Kerala</span>
             </li>
           </ul>
         </div>
       </div>
 
-      <div class="border-t border-white/10 pt-8 text-center text-sm text-slate-400">
+      <div class="border-t border-white/10 pt-6 text-center text-xs text-teal-200/70">
         <p>&copy; <?php echo date('Y'); ?> Rajagiri College of Social Sciences. All rights reserved.</p>
       </div>
     </div>
   </footer>
 
   <!-- Page Scripts -->
-  <script src="assets/js/index.js"></script>
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+    mobileMenuBtn.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.toggle('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', String(!isHidden));
+      mobileMenuIcon.setAttribute('data-lucide', isHidden ? 'menu' : 'x');
+      lucide.createIcons();
+    });
+
+    // Login dropdown toggle (desktop)
+    const loginBtn = document.getElementById('login-dropdown-btn');
+    const loginMenu = document.getElementById('login-dropdown-menu');
+    const loginChevron = document.getElementById('login-chevron');
+    loginBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = loginMenu.classList.toggle('hidden');
+      loginBtn.setAttribute('aria-expanded', String(!isHidden));
+      loginChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+    });
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('login-dropdown-container').contains(e.target)) {
+        loginMenu.classList.add('hidden');
+        loginBtn.setAttribute('aria-expanded', 'false');
+        loginChevron.style.transform = 'rotate(0deg)';
+      }
+    });
+
+    // Smooth scroll for data-scroll-to buttons
+    document.querySelectorAll('[data-scroll-to]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const target = document.getElementById(el.getAttribute('data-scroll-to'));
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
 </body>
 </html>

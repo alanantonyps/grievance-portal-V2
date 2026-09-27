@@ -14,9 +14,6 @@
 
 declare(strict_types=1);
 
-// ---------------------------------------------------------------------------
-// 1. SESSION START
-// ---------------------------------------------------------------------------
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -25,9 +22,7 @@ ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
-// ---------------------------------------------------------------------------
-// 2. AUTH GUARD
-// ---------------------------------------------------------------------------
+// AUTH GUARD
 $sessionRole = isset($_SESSION['role']) ? strtoupper((string) $_SESSION['role']) : '';
 
 if (empty($_SESSION['user_id']) || $sessionRole !== 'ADMIN') {
@@ -35,9 +30,7 @@ if (empty($_SESSION['user_id']) || $sessionRole !== 'ADMIN') {
     exit;
 }
 
-// ---------------------------------------------------------------------------
-// 3. DATABASE CONNECTION
-// ---------------------------------------------------------------------------
+// DATABASE CONNECTION
 $dbFile = __DIR__ . '/../db_connect.php';
 
 if (!file_exists($dbFile)) {
@@ -64,9 +57,7 @@ if ($conn && $conn->connect_errno) {
     $conn    = null;
 }
 
-// ---------------------------------------------------------------------------
-// 4. FETCH ADMIN PROFILE DATA (LEFT JOIN)
-// ---------------------------------------------------------------------------
+// FETCH ADMIN PROFILE DATA (LEFT JOIN)
 $profile = [
     'username'        => 'Admin',
     'name'            => '',
@@ -78,10 +69,7 @@ $profile = [
 
 if ($conn !== null) {
     try {
-        $sql = "SELECT  u.id,
-                        u.username,
-                        u.role,
-                        u.status,
+        $sql = "SELECT  u.id, u.username, u.role, u.status,
                         ap.name            AS name,
                         ap.address         AS address,
                         ap.email           AS email,
@@ -119,20 +107,12 @@ if ($conn !== null) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// 5. FALLBACK LOGIC FOR DISPLAY NAME
-// ---------------------------------------------------------------------------
-$displayName = !empty($profile['name'])
-    ? $profile['name']
-    : $profile['username'];
+$displayName = !empty($profile['name']) ? $profile['name'] : $profile['username'];
 
 $displayAddress = !empty($profile['address'])       ? $profile['address']       : 'Not provided';
 $displayEmail   = !empty($profile['email'])         ? $profile['email']         : 'Not provided';
 $displayMobile  = !empty($profile['mobile_number']) ? $profile['mobile_number'] : 'Not provided';
 
-// ---------------------------------------------------------------------------
-// 6. PROFILE PICTURE RESOLUTION
-// ---------------------------------------------------------------------------
 $hasProfilePicture = false;
 $profilePictureUrl = '';
 
@@ -145,22 +125,6 @@ if (!empty($profile['profile_picture'])) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// 7. INITIALS (used in the fallback avatar)
-// ---------------------------------------------------------------------------
-$initials = 'A';
-if (!empty($displayName)) {
-    $parts = preg_split('/[\s._-]+/', trim((string) $displayName));
-    if (is_array($parts) && count($parts) >= 2) {
-        $initials = strtoupper(substr($parts[0], 0, 1) . substr(end($parts), 0, 1));
-    } else {
-        $initials = strtoupper(substr((string) $displayName, 0, 2));
-    }
-}
-
-// ---------------------------------------------------------------------------
-// 8. HELPER
-// ---------------------------------------------------------------------------
 function e(?string $v): string
 {
     return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -177,191 +141,386 @@ function e(?string $v): string
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink: '#E5097F',
-            brandGreen: '#006837',
-            brandGold: '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
-            fadeInUp: {
-              '0%':   { opacity: '0', transform: 'translateY(12px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            },
-            softFloat: {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%':      { transform: 'translateY(-4px)' }
-            },
-            modalFadeIn: {
-              '0%':   { opacity: '0', transform: 'scale(0.96)' },
-              '100%': { opacity: '1', transform: 'scale(1)' }
-            },
-            confirmShake: {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '20%':      { transform: 'translateX(-6px)' },
-              '40%':      { transform: 'translateX(6px)' },
-              '60%':      { transform: 'translateX(-4px)' },
-              '80%':      { transform: 'translateX(4px)' }
-            }
+            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            dropdownFade: { '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+            modalFadeIn: { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+            confirmShake: { '0%, 100%': { transform: 'translateX(0)' }, '20%': { transform: 'translateX(-6px)' }, '40%': { transform: 'translateX(6px)' }, '60%': { transform: 'translateX(-4px)' }, '80%': { transform: 'translateX(4px)' } },
+            shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+            pulseRing: { '0%': { boxShadow: '0 0 0 0 rgba(0,110,116,0.45)' }, '70%': { boxShadow: '0 0 0 12px rgba(0,110,116,0)' }, '100%': { boxShadow: '0 0 0 0 rgba(0,110,116,0)' } }
           },
           animation: {
             'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'soft-float': 'softFloat 4s ease-in-out infinite',
+            'dropdown':   'dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             'modal-in':   'modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'confirm-shake': 'confirmShake 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+            'confirm-shake': 'confirmShake 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+            'shimmer':    'shimmer 3s linear infinite',
+            'pulse-ring': 'pulseRing 2s ease-out infinite'
           }
         }
       }
     };
   </script>
 
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    /* ============================================================
+       FONT FACES
+       ============================================================ */
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    /* ============================================================
+       AMBIENT BACKGROUND MESH (fixed only on desktop)
+       ============================================================ */
+    body {
+      background-color: #EAF4F4;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(0,110,116,0.08) 0px, transparent 50%),
+        radial-gradient(at 88% 4%, rgba(63,155,159,0.10) 0px, transparent 50%),
+        radial-gradient(at 78% 92%, rgba(0,110,116,0.07) 0px, transparent 50%),
+        radial-gradient(at 4% 88%, rgba(63,155,159,0.08) 0px, transparent 50%);
+    }
+    @media (min-width: 1024px) and (hover: hover) {
+      body { background-attachment: fixed; }
+    }
+
+    /* ============================================================
+       CUSTOM SCROLLBAR (desktop only)
+       ============================================================ */
+    @media (hover: hover) and (pointer: fine) {
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #128287, #006E74);
+        border-radius: 8px;
+        border: 2px solid #EAF4F4;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: #005A5F; }
+    }
+
+    ::selection { background: #9FCDCF; color: #003134; }
+
+    /* ============================================================
+       DECORATIVE PATTERNS
+       ============================================================ */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+      position: relative;
+      overflow: hidden;
+    }
+    .roofline::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 4s linear infinite;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-track { background: transparent; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    #sidebarNav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+    /* ============================================================
+       SIDEBAR ACTIVE GLOW + LINK HOVER SLIDE
+       ============================================================ */
+    .sidebar-active-glow {
+      box-shadow: 0 0 0 1px rgba(255,255,255,.3),
+                  0 6px 20px -6px rgba(0,0,0,.35),
+                  inset 0 0 20px rgba(255,255,255,.06);
+    }
+    .sidebar-link { position: relative; overflow: hidden; }
+    .sidebar-link::after {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #fff;
+      transform: translateX(-4px);
+      opacity: 0;
+      transition: all .25s ease;
+      border-radius: 0 4px 4px 0;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .sidebar-link:hover::after { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ============================================================
+       HEADER FROSTED-ON-SCROLL
+       ============================================================ */
+    .header-scrolled {
+      background: rgba(255,255,255,.92) !important;
+      box-shadow: 0 4px 24px -8px rgba(0,69,74,.15);
+    }
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+      @media (hover: hover) and (min-width: 1024px) {
+        .header-scrolled {
+          background: rgba(255,255,255,.85) !important;
+          backdrop-filter: saturate(180%) blur(14px);
+          -webkit-backdrop-filter: saturate(180%) blur(14px);
+        }
+      }
+    }
+
+    /* ============================================================
+       HEADING UNDERLINE
+       ============================================================ */
+    .heading-underline { position: relative; display: inline-block; }
+    .heading-underline::after {
+      content: '';
+      position: absolute; left: 0; bottom: -6px;
+      height: 3px; width: 100%;
+      background: linear-gradient(90deg, #006E74, #3F9B9F 60%, transparent);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underlineIn .8s .3s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes underlineIn { to { transform: scaleX(1); } }
+
+    /* ============================================================
+       BUTTON SHEEN
+       ============================================================ */
+    .btn-sheen { position: relative; overflow: hidden; }
+    .btn-sheen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%);
+      background-size: 200% 100%;
+      transform: translateX(-100%);
+      transition: transform .8s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-sheen:hover::before { transform: translateX(100%); }
+    }
+
+    /* ============================================================
+       BACK TO TOP
+       ============================================================ */
+    #backToTop {
+      transition: opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1), background-color .25s ease;
+      opacity: 0;
+      transform: translateY(10px) scale(.9);
+      pointer-events: none;
+    }
+    #backToTop.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       FOCUS RING
+       ============================================================ */
+    :focus-visible {
+      outline: 2px solid #3F9B9F;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ============================================================
+       LOW-END DEVICE STRIP-OUT
+       ============================================================ */
+    @media (max-width: 480px) {
+      .roofline::after { animation: none; }
+      .heading-underline::after { animation: none; transform: scaleX(1); }
+      .animate-pulse-ring { animation: none; }
+      .btn-sheen::before { display: none; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+      .heading-underline::after { transform: scaleX(1); }
+      html { scroll-behavior: auto; }
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen text-teal-900 antialiased flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- SIDEBAR -->
-    <aside class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837] flex flex-col items-center py-4 shadow-2xl fixed inset-y-0 left-0 z-40">
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside id="adminSidebar"
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
+                  transition-all duration-300 ease-in-out overflow-hidden">
 
-      <button class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
-
-      <nav class="flex flex-col items-center space-y-6 flex-1">
-
+      <!-- Brand row: "grievance" text + toggle (logo removed) -->
+      <div class="flex items-center gap-2 px-3 mb-6 flex-shrink-0">
         <a href="dashboard.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110"
-           title="Dashboard">
-          <i data-lucide="home" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Dashboard
+           class="sidebar-brand inline-flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+          <span class="sidebar-label text-white font-bold text-lg whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">
+            grievance
           </span>
+          <span class="sidebar-label w-1.5 h-1.5 rounded-full bg-white mb-1 flex-shrink-0 opacity-0 w-0 overflow-hidden transition-all duration-200"></span>
+        </a>
+        <button id="sidebarToggle"
+                class="text-white/80 hover:text-white p-2.5 rounded-xl hover:bg-white/10
+                       transition-colors flex items-center justify-center flex-shrink-0"
+                aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
+        </button>
+      </div>
+
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
+
+        <a href="dashboard.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <a href="profile.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-lg ring-2 ring-white/30 transition-all hover:scale-110 hover:bg-white/30"
-           title="Profile">
-          <i data-lucide="user" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Profile
-          </span>
+        <a href="profile.php" class="sidebar-link sidebar-active-glow group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
+          <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
+        </a>
+
+        <a href="settings.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="settings" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Settings</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Settings</span>
+        </a>
+
+        <a href="change_password.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
 
       </nav>
 
-      <!-- Logout Trigger -->
-      <a href="#" data-logout-trigger="1"
-         id="sidebarLogoutBtn"
-         class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center justify-center text-white transition-all hover:scale-110"
-         title="Logout">
-        <i data-lucide="log-out" class="w-6 h-6 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-          Logout
-        </span>
+      <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
+         class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
+        <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
-
     </aside>
 
-    <!-- MAIN CONTENT WRAPPER -->
-    <div class="flex-1 ml-20 flex flex-col min-h-screen">
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <div id="adminMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30 transition-all duration-300">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
 
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img
-                src="../public/rcss-logo.png"
-                alt="RCSS Logo"
-                class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105"
-              />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-
-            <img
-              src="../public/orel-grievance.png"
-              alt="Oréll Grievance"
-              class="hidden sm:block h-8 md:h-9 w-auto object-contain"
-            />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
           <div class="relative" id="admin-dropdown-container">
-            <button id="admin-dropdown-btn"
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+            <button id="admin-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
 
               <?php if ($hasProfilePicture): ?>
-                <img
-                  src="<?= e($profilePictureUrl) ?>"
-                  alt="Admin Profile"
-                  class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100"
-                />
+                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                     class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
                   <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
 
-              <span class="hidden sm:block text-sm font-semibold text-slate-700">
-                <?= e($displayName) ?>
-              </span>
-
-              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
             <div id="admin-dropdown-menu"
-                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden">
+                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
 
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($hasProfilePicture): ?>
-                    <img
-                      src="<?= e($profilePictureUrl) ?>"
-                      alt="Admin Profile"
-                      class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]"
-                    />
+                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                         class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white">
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white">
                       <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                   <?php endif; ?>
-
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
+                    <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                    <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
               </div>
 
-              <a href="profile.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-[#8B1E7E] bg-purple-50/50 font-medium">
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i>
+                <span class="font-medium">Dashboard</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
+              </a>
+
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-600 bg-teal-50 font-semibold">
                 <i data-lucide="user" class="w-4 h-4 mr-3"></i>
                 <span>My Profile</span>
               </a>
 
-              <a href="change_password.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group">
-                <i data-lucide="key" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover:scale-110 transition-transform"></i>
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
 
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1"
-                   id="dropdownLogoutBtn"
-                   class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover:scale-110 transition-transform"></i>
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn"
+                   class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
                   <span class="font-medium">Logout</span>
                 </a>
               </div>
@@ -371,27 +530,28 @@ function e(?string $v): string
         </div>
       </header>
 
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <div class="max-w-5xl mx-auto mb-8 animate-fade-in-up">
-          <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-3 flex items-center tracking-tight">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4A154B] to-[#E5097F] flex items-center justify-center mr-3 shadow-lg shadow-purple-500/20">
-              <i data-lucide="user" class="w-5 h-5 text-white"></i>
-            </div>
-            User Details
+        <div class="max-w-5xl mx-auto mb-6 animate-fade-in-up">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600 animate-pulse-ring"></span>
+            <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Admin Console</p>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-3">
+            <span class="heading-underline">User Details</span>
           </h1>
-          <nav class="flex items-center space-x-2 text-sm text-slate-500 ml-1">
-            <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-              <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i>
+          <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+            <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
               Dashboard
             </a>
-            <span class="text-slate-300">/</span>
-            <span class="text-[#E5097F] font-semibold">User Details</span>
+            <span class="text-teal-900/30">/</span>
+            <span class="text-teal-600 font-semibold">User Details</span>
           </nav>
         </div>
 
         <?php if ($dbError): ?>
-          <div class="max-w-3xl mx-auto mb-6 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-start space-x-2">
+          <div class="max-w-3xl mx-auto mb-6 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-2">
             <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-amber-700"><?= e($dbError) ?></p>
           </div>
@@ -399,212 +559,180 @@ function e(?string $v): string
 
         <div class="max-w-3xl mx-auto">
 
-          <div class="relative group/card animate-fade-in-up" style="animation-delay: 100ms;">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-3xl blur opacity-10 group-hover/card:opacity-30 transition duration-500"></div>
+          <div class="bg-white rounded-2xl border-2 border-teal-100 shadow-sm overflow-hidden animate-fade-in-up">
 
-            <div class="relative bg-white rounded-3xl shadow-xl border border-slate-200/60 overflow-hidden transition-shadow duration-300 group-hover/card:shadow-2xl">
+            <!-- Header bar -->
+            <div class="bg-teal-50/60 border-b border-teal-100 px-6 py-4">
+              <h2 class="text-lg md:text-xl font-bold text-teal-900 flex items-center gap-2">
+                <i data-lucide="id-card" class="w-5 h-5 text-teal-600"></i>
+                User Details
+              </h2>
+            </div>
 
-              <div class="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
-                <h2 class="text-lg md:text-xl font-bold text-slate-800 flex items-center">
-                  <i data-lucide="id-card" class="w-5 h-5 mr-2 text-[#8B1E7E]"></i>
-                  User Details
-                </h2>
-              </div>
+            <!-- Avatar block -->
+            <div class="px-6 py-8 bg-white">
+              <div class="flex flex-col items-center justify-center">
 
-              <div class="relative px-6 py-12 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-br from-pink-100 via-purple-50 to-pink-50"></div>
-
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-[#E5097F]/10 to-transparent rounded-full blur-2xl"></div>
-                <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-br from-[#4A154B]/10 to-transparent rounded-full blur-2xl"></div>
-                <div class="absolute top-4 right-8 w-16 h-16 bg-[#C5A059]/10 rounded-full blur-xl"></div>
-
-                <div class="relative flex flex-col items-center justify-center">
-
-                  <div class="relative animate-soft-float">
-                    <div class="absolute -inset-2 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-full blur-md opacity-40"></div>
-
-                    <div class="relative w-32 h-32 md:w-36 md:h-36 rounded-full bg-white p-1.5 shadow-2xl">
-                      <div class="w-full h-full rounded-full overflow-hidden ring-4 ring-white">
-                        <?php if ($hasProfilePicture): ?>
-                          <img
-                            src="<?= e($profilePictureUrl) ?>"
-                            alt="<?= e($displayName) ?>"
-                            class="w-full h-full object-cover"
-                          />
-                        <?php else: ?>
-                          <div class="w-full h-full bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] flex items-center justify-center text-white">
-                            <i data-lucide="user" class="w-14 h-14 md:w-16 md:h-16 text-white"></i>
-                          </div>
-                        <?php endif; ?>
-                      </div>
+                <div class="relative">
+                  <?php if ($hasProfilePicture): ?>
+                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
+                         class="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-teal-600 shadow-sm" />
+                  <?php else: ?>
+                    <div class="w-28 h-28 md:w-32 md:h-32 rounded-full bg-teal-600 flex items-center justify-center text-white shadow-sm">
+                      <i data-lucide="user" class="w-14 h-14 md:w-16 md:h-16 text-white"></i>
                     </div>
-                  </div>
-
-                  <h3 class="mt-5 text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">
-                    <?= e($displayName) ?>
-                  </h3>
-
-                  <div class="mt-2 inline-flex items-center space-x-1.5 bg-white/80 backdrop-blur-sm border border-purple-200 px-3 py-1 rounded-full shadow-sm">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#8B1E7E]"></i>
-                    <span class="text-xs font-bold text-[#4A154B] uppercase tracking-wider">Administrator</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="px-6 md:px-10 py-8 bg-slate-50/30 border-t border-slate-100">
-                <div class="flex items-center mb-5">
-                  <i data-lucide="clipboard-list" class="w-4 h-4 text-[#8B1E7E] mr-2"></i>
-                  <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Personal Information</h4>
+                  <?php endif; ?>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                  <table class="w-full">
-                    <tbody class="divide-y divide-slate-100">
+                <h3 class="mt-5 text-2xl md:text-3xl font-bold text-teal-900 tracking-tight">
+                  <?= e($displayName) ?>
+                </h3>
 
-                      <tr class="group/row hover:bg-gradient-to-r hover:from-pink-50/40 hover:to-purple-50/40 transition-all duration-200">
-                        <td class="w-1/3 px-5 py-5 align-top">
-                          <div class="flex items-center text-xs font-bold text-slate-500 uppercase tracking-wider group-hover/row:text-[#8B1E7E] transition-colors">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mr-2.5 group-hover/row:scale-110 transition-transform">
-                              <i data-lucide="user" class="w-4 h-4 text-[#8B1E7E]"></i>
-                            </div>
-                            Name
-                          </div>
-                        </td>
-                        <td class="px-5 py-5 align-top">
-                          <p class="text-slate-800 font-semibold text-base">
-                            <?= e($displayName) ?>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr class="group/row hover:bg-gradient-to-r hover:from-pink-50/40 hover:to-purple-50/40 transition-all duration-200">
-                        <td class="w-1/3 px-5 py-5 align-top">
-                          <div class="flex items-center text-xs font-bold text-slate-500 uppercase tracking-wider group-hover/row:text-[#8B1E7E] transition-colors">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mr-2.5 group-hover/row:scale-110 transition-transform">
-                              <i data-lucide="map-pin" class="w-4 h-4 text-[#8B1E7E]"></i>
-                            </div>
-                            Address
-                          </div>
-                        </td>
-                        <td class="px-5 py-5 align-top">
-                          <p class="text-slate-700 text-base leading-relaxed <?= $displayAddress === 'Not provided' ? 'italic text-slate-400' : '' ?>">
-                            <?= e($displayAddress) ?>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr class="group/row hover:bg-gradient-to-r hover:from-pink-50/40 hover:to-purple-50/40 transition-all duration-200">
-                        <td class="w-1/3 px-5 py-5 align-top">
-                          <div class="flex items-center text-xs font-bold text-slate-500 uppercase tracking-wider group-hover/row:text-[#8B1E7E] transition-colors">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mr-2.5 group-hover/row:scale-110 transition-transform">
-                              <i data-lucide="mail" class="w-4 h-4 text-[#8B1E7E]"></i>
-                            </div>
-                            Email
-                          </div>
-                        </td>
-                        <td class="px-5 py-5 align-top">
-                          <p class="text-slate-700 text-base break-all <?= $displayEmail === 'Not provided' ? 'italic text-slate-400' : '' ?>">
-                            <?= e($displayEmail) ?>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr class="group/row hover:bg-gradient-to-r hover:from-pink-50/40 hover:to-purple-50/40 transition-all duration-200">
-                        <td class="w-1/3 px-5 py-5 align-top">
-                          <div class="flex items-center text-xs font-bold text-slate-500 uppercase tracking-wider group-hover/row:text-[#8B1E7E] transition-colors">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center mr-2.5 group-hover/row:scale-110 transition-transform">
-                              <i data-lucide="phone" class="w-4 h-4 text-[#8B1E7E]"></i>
-                            </div>
-                            Contact Number
-                          </div>
-                        </td>
-                        <td class="px-5 py-5 align-top">
-                          <p class="text-slate-700 text-base <?= $displayMobile === 'Not provided' ? 'italic text-slate-400' : '' ?>">
-                            <?= e($displayMobile) ?>
-                          </p>
-                        </td>
-                      </tr>
-
-                    </tbody>
-                  </table>
+                <div class="mt-2 inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-3 py-1 rounded-full">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-teal-600"></i>
+                  <span class="text-xs font-bold text-teal-700 uppercase tracking-wider">Administrator</span>
                 </div>
               </div>
+            </div>
 
-              <div class="px-6 md:px-10 py-6 bg-white border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-
-                <a href="dashboard.php"
-                   class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl border-2 border-slate-200 bg-white hover:border-[#8B1E7E]/40 hover:bg-slate-50 transition-all duration-300 hover:scale-[1.02] active:scale-95">
-                  <div class="relative flex items-center justify-center space-x-2 py-2.5 px-6 text-slate-700 font-bold group-hover/btn:text-[#8B1E7E] transition-colors">
-                    <i data-lucide="arrow-left" class="w-4 h-4 group-hover/btn:-translate-x-1 transition-transform duration-300"></i>
-                    <span>Back to Dashboard</span>
-                  </div>
-                </a>
-
-                <a href="edit_profile.php"
-                   class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-2xl hover:shadow-pink-500/40 transition-all duration-300 hover:scale-[1.03] active:scale-95">
-
-                  <div class="absolute inset-0 bg-gradient-to-r from-[#4A154B] via-[#7A2E82] to-[#C41574]"></div>
-
-                  <div class="absolute inset-0 bg-gradient-to-r from-[#C41574] via-[#7A2E82] to-[#4A154B] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-
-                  <div class="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
-
-                  <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-
-                  <div class="relative flex items-center justify-center space-x-2 py-2.5 px-8 text-white font-bold">
-                    <i data-lucide="pencil" class="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300"></i>
-                    <span>Edit</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300"></i>
-                  </div>
-                </a>
-
+            <!-- Info table -->
+            <div class="px-6 md:px-10 py-8 bg-teal-50/40 border-t border-teal-100">
+              <div class="flex items-center mb-5 gap-2">
+                <i data-lucide="clipboard-list" class="w-4 h-4 text-teal-600"></i>
+                <h4 class="text-xs font-bold text-teal-900/60 uppercase tracking-wider">Personal Information</h4>
               </div>
+
+              <div class="bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
+                <table class="w-full">
+                  <tbody class="divide-y divide-teal-100">
+
+                    <tr class="hover:bg-teal-50/60 transition-colors">
+                      <td class="w-1/3 px-5 py-5 align-top">
+                        <div class="flex items-center text-xs font-bold text-teal-900/60 uppercase tracking-wider gap-2">
+                          <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-teal-600"></i>
+                          </div>
+                          Name
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 align-top">
+                        <p class="text-teal-900 font-semibold text-base"><?= e($displayName) ?></p>
+                      </td>
+                    </tr>
+
+                    <tr class="hover:bg-teal-50/60 transition-colors">
+                      <td class="w-1/3 px-5 py-5 align-top">
+                        <div class="flex items-center text-xs font-bold text-teal-900/60 uppercase tracking-wider gap-2">
+                          <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-teal-600"></i>
+                          </div>
+                          Address
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 align-top">
+                        <p class="text-teal-900/80 text-base leading-relaxed <?= $displayAddress === 'Not provided' ? 'italic text-teal-900/40' : '' ?>">
+                          <?= e($displayAddress) ?>
+                        </p>
+                      </td>
+                    </tr>
+
+                    <tr class="hover:bg-teal-50/60 transition-colors">
+                      <td class="w-1/3 px-5 py-5 align-top">
+                        <div class="flex items-center text-xs font-bold text-teal-900/60 uppercase tracking-wider gap-2">
+                          <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                            <i data-lucide="mail" class="w-4 h-4 text-teal-600"></i>
+                          </div>
+                          Email
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 align-top">
+                        <p class="text-teal-900/80 text-base break-all <?= $displayEmail === 'Not provided' ? 'italic text-teal-900/40' : '' ?>">
+                          <?= e($displayEmail) ?>
+                        </p>
+                      </td>
+                    </tr>
+
+                    <tr class="hover:bg-teal-50/60 transition-colors">
+                      <td class="w-1/3 px-5 py-5 align-top">
+                        <div class="flex items-center text-xs font-bold text-teal-900/60 uppercase tracking-wider gap-2">
+                          <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                            <i data-lucide="phone" class="w-4 h-4 text-teal-600"></i>
+                          </div>
+                          Contact Number
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 align-top">
+                        <p class="text-teal-900/80 text-base <?= $displayMobile === 'Not provided' ? 'italic text-teal-900/40' : '' ?>">
+                          <?= e($displayMobile) ?>
+                        </p>
+                      </td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="px-6 md:px-10 py-6 bg-white border-t border-teal-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+
+              <a href="dashboard.php"
+                 class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold
+                        text-teal-600 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                        transition-all duration-200 w-full sm:w-auto">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Back to Dashboard</span>
+              </a>
+
+              <a href="edit_profile.php"
+                 class="btn-sheen group inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold text-white
+                        bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                        transition-all duration-200 w-full sm:w-auto">
+                <i data-lucide="pencil" class="w-4 h-4"></i>
+                <span>Edit</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+              </a>
 
             </div>
+
           </div>
         </div>
 
       </main>
 
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-8">
           <div class="max-w-7xl mx-auto">
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
 
-              <div class="flex items-start space-x-3">
-                <img
-                  src="../public/rcss-logo.png"
-                  alt="RCSS Logo"
-                  class="h-12 w-auto"
-                />
-                <div>
-                  <p class="font-bold text-[#4A154B] text-sm">
-                    Rajagiri College of Social Sciences
-                  </p>
-                  <p class="text-xs text-slate-600 mt-1">
-                    Grievance Redressal Portal
-                  </p>
+              <div>
+                <div class="flex items-center gap-3 mb-3 bg-white rounded-lg px-3 py-2 w-fit">
+                  <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-8 w-auto" />
                 </div>
+                <p class="text-teal-100/80 text-sm leading-relaxed max-w-xs">
+                  Committed to fairness, transparency and prompt grievance redressal.
+                </p>
               </div>
 
               <div>
-                <h4 class="font-bold text-sm text-[#4A154B] mb-2">Quick Links</h4>
-                <ul class="space-y-1.5 text-xs text-slate-700">
+                <h4 class="font-bold text-sm uppercase tracking-wide text-teal-200 mb-3">Quick Links</h4>
+                <ul class="space-y-2 text-sm">
                   <li>
-                    <a href="dashboard.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group">
+                    <a href="dashboard.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5 group">
                       <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i>
                       <span>Dashboard</span>
                     </a>
                   </li>
                   <li>
-                    <a href="profile.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group">
+                    <a href="profile.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5 group">
                       <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i>
                       <span>My Profile</span>
                     </a>
                   </li>
                   <li>
-                    <a href="change_password.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group">
+                    <a href="change_password.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5 group">
                       <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i>
                       <span>Change Password</span>
                     </a>
@@ -613,18 +741,18 @@ function e(?string $v): string
               </div>
 
               <div>
-                <h4 class="font-bold text-sm text-[#4A154B] mb-2">Contact Support</h4>
-                <ul class="space-y-1.5 text-xs text-slate-700">
-                  <li class="flex items-center space-x-2">
-                    <i data-lucide="mail" class="w-3.5 h-3.5 text-[#E5097F]"></i>
+                <h4 class="font-bold text-sm uppercase tracking-wide text-teal-200 mb-3">Contact Support</h4>
+                <ul class="space-y-2 text-sm text-teal-100/80">
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4 text-teal-300"></i>
                     <span>admin.support@rajagiri.edu</span>
                   </li>
-                  <li class="flex items-center space-x-2">
-                    <i data-lucide="phone" class="w-3.5 h-3.5 text-[#E5097F]"></i>
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-teal-300"></i>
                     <span>+91 484 XXX XXXX</span>
                   </li>
-                  <li class="flex items-center space-x-2">
-                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#E5097F]"></i>
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-teal-300"></i>
                     <span>Kalamassery, Kochi, Kerala</span>
                   </li>
                 </ul>
@@ -632,18 +760,15 @@ function e(?string $v): string
 
             </div>
 
-            <div class="border-t border-purple-300/50 pt-4">
-              <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
-                <p class="text-xs text-slate-700 text-center sm:text-left">
+            <div class="border-t border-white/10 pt-4">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+                <p class="text-xs text-teal-200/70 text-center sm:text-left">
                   &copy; <?= date('Y') ?>
-                  <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>.
+                  <span class="font-bold text-white">Rajagiri College of Social Sciences</span>.
                   All rights reserved.
                 </p>
-                <p class="text-xs text-slate-700">
-                  Powered by
-                  <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">
-                    Oréll Grievance
-                  </span>
+                <p class="text-xs text-teal-200/70">
+                  Powered by <span class="font-bold text-white">RLabZ</span>
                 </p>
               </div>
             </div>
@@ -655,39 +780,49 @@ function e(?string $v): string
     </div>
   </div>
 
-  <!-- ============================================================= -->
-  <!-- LOGOUT CONFIRMATION MODAL                                     -->
-  <!-- ============================================================= -->
+  <!-- BACK TO TOP -->
+  <button id="backToTop" aria-label="Back to top"
+          class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-teal-600 hover:bg-teal-700
+                 text-white shadow-lg hover:shadow-xl flex items-center justify-center
+                 hover:scale-110 transition-all duration-300">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
+  <!-- ============================================================ -->
+  <!-- LOGOUT CONFIRMATION MODAL                                    -->
+  <!-- ============================================================ -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div id="logoutConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
-          You are about to log out of <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+        <p class="text-sm text-teal-900/70 leading-relaxed">
+          You are about to log out of <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
           Any unsaved changes will be lost.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200
+                       hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
         <button type="button" id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
         </button>
@@ -698,11 +833,38 @@ function e(?string $v): string
   <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-      if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-      }
+      if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // ---- Admin Profile Dropdown ----
+      const sidebar = document.getElementById('adminSidebar');
+      const main    = document.getElementById('adminMain');
+
+      // Sidebar expand/collapse
+      (function () {
+        const toggleBtn = document.getElementById('sidebarToggle');
+        if (!toggleBtn || !sidebar || !main) return;
+
+        const labels   = sidebar.querySelectorAll('.sidebar-label');
+        const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
+        let expanded = false;
+
+        toggleBtn.addEventListener('click', function () {
+          expanded = !expanded;
+          if (expanded) {
+            sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+            main.classList.remove('ml-20');   main.classList.add('ml-64');
+            labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.add('hidden'); });
+          } else {
+            sidebar.classList.add('w-20');    sidebar.classList.remove('w-64');
+            main.classList.add('ml-20');      main.classList.remove('ml-64');
+            labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.remove('hidden'); });
+          }
+          setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
+        });
+      })();
+
+      // Admin dropdown
       (function () {
         const btn       = document.getElementById('admin-dropdown-btn');
         const menu      = document.getElementById('admin-dropdown-menu');
@@ -714,11 +876,11 @@ function e(?string $v): string
           e.stopPropagation();
           const isOpen = !menu.classList.contains('hidden');
           if (isOpen) {
-            menu.classList.add('hidden');
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
             if (chevron) chevron.classList.remove('rotate-180');
             btn.setAttribute('aria-expanded', 'false');
           } else {
-            menu.classList.remove('hidden');
+            menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
             if (chevron) chevron.classList.add('rotate-180');
             btn.setAttribute('aria-expanded', 'true');
           }
@@ -726,7 +888,7 @@ function e(?string $v): string
 
         document.addEventListener('click', function (e) {
           if (!container.contains(e.target)) {
-            menu.classList.add('hidden');
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
             if (chevron) chevron.classList.remove('rotate-180');
             btn.setAttribute('aria-expanded', 'false');
           }
@@ -734,14 +896,14 @@ function e(?string $v): string
 
         document.addEventListener('keydown', function (e) {
           if (e.key === 'Escape') {
-            menu.classList.add('hidden');
+            menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
             if (chevron) chevron.classList.remove('rotate-180');
             btn.setAttribute('aria-expanded', 'false');
           }
         });
       })();
 
-      // ---- Logout Confirmation Modal ----
+      // Logout modal
       (function () {
         const logoutConfirmModal = document.getElementById('logoutConfirmModal');
         const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
@@ -769,8 +931,7 @@ function e(?string $v): string
         [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
           if (!btn) return;
           btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
             window.openLogoutModal();
           });
         });
@@ -789,6 +950,32 @@ function e(?string $v): string
         });
       })();
 
+      // Header frosted-on-scroll
+      (function () {
+        const header = document.querySelector('header');
+        if (!header) return;
+        const onScroll = function () {
+          if (window.scrollY > 10) header.classList.add('header-scrolled');
+          else header.classList.remove('header-scrolled');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      })();
+
+      // Back-to-top
+      (function () {
+        const btn = document.getElementById('backToTop');
+        if (!btn) return;
+        const onScroll = function () {
+          if (window.scrollY > 400) btn.classList.add('show');
+          else btn.classList.remove('show');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
     });
   </script>
 

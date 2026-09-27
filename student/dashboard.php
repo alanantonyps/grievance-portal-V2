@@ -17,9 +17,7 @@ ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
-// ---------------------------------------------------------------------------
 // AUTH GUARD
-// ---------------------------------------------------------------------------
 $sessionRole = isset($_SESSION['role']) ? strtoupper((string) $_SESSION['role']) : '';
 
 if (empty($_SESSION['user_id']) || $sessionRole !== 'STUDENT') {
@@ -29,9 +27,7 @@ if (empty($_SESSION['user_id']) || $sessionRole !== 'STUDENT') {
 
 $userId = (int) $_SESSION['user_id'];
 
-// ---------------------------------------------------------------------------
 // DATABASE
-// ---------------------------------------------------------------------------
 $dbFile = __DIR__ . '/../db_connect.php';
 $dbError = null;
 $conn    = null;
@@ -57,9 +53,6 @@ if (!file_exists($dbFile)) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
 function e(?string $v): string
 {
     return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -71,21 +64,19 @@ function statusBadge(string $status): string
 
     $map = [
         'Pending'     => 'bg-amber-100 text-amber-800 border-amber-200',
-        'In Progress' => 'bg-blue-100 text-blue-800 border-blue-200',
+        'In Progress' => 'bg-sky-100 text-sky-800 border-sky-200',
         'Disposed'    => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-        'Closed'      => 'bg-slate-200 text-slate-700 border-slate-300',
-        'Reopened'    => 'bg-rose-100 text-rose-800 border-rose-200',
+        'Closed'      => 'bg-slate-100 text-slate-700 border-slate-200',
+        'Reopened'    => 'bg-pink-100 text-pink-800 border-pink-200',
     ];
 
     $classes = $map[$status] ?? 'bg-slate-100 text-slate-700 border-slate-200';
 
-    return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border '
+    return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border '
         . $classes . '">' . e($status) . '</span>';
 }
 
-// ---------------------------------------------------------------------------
 // CSRF
-// ---------------------------------------------------------------------------
 if (empty($_SESSION['csrf_token'])) {
     try {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -95,15 +86,11 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrfToken = (string) $_SESSION['csrf_token'];
 
-// ---------------------------------------------------------------------------
 // FLASH
-// ---------------------------------------------------------------------------
 $flashSuccess = '';
 $flashError   = '';
 
-// ---------------------------------------------------------------------------
 // POST HANDLERS
-// ---------------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $conn instanceof mysqli) {
 
     $action = (string) ($_POST['action'] ?? '');
@@ -289,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $conn instanceof mysqli) {
         exit;
     }
 
-    // REOPEN (writes to dedicated reopen_reason column)
+    // REOPEN
     if ($action === 'reopen_grievance') {
         try {
             $grievanceId = (int) ($_POST['grievance_id'] ?? 0);
@@ -313,7 +300,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $conn instanceof mysqli) {
 
             $newStatus = 'Reopened';
 
-            // Store reason in dedicated column — reply_details is preserved.
             $stmt = $conn->prepare("UPDATE grievances
                                     SET status         = ?,
                                         reopen_reason  = ?,
@@ -373,9 +359,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $conn instanceof mysqli) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// PICK UP FLASHES
-// ---------------------------------------------------------------------------
 if (!empty($_SESSION['flash_success'])) {
     $flashSuccess = (string) $_SESSION['flash_success'];
     unset($_SESSION['flash_success']);
@@ -385,9 +368,7 @@ if (!empty($_SESSION['flash_error'])) {
     unset($_SESSION['flash_error']);
 }
 
-// ---------------------------------------------------------------------------
 // STUDENT PROFILE
-// ---------------------------------------------------------------------------
 $studentData = [
     'username'      => $_SESSION['username'] ?? 'Student',
     'name'          => '',
@@ -434,9 +415,7 @@ if (!empty($studentData['profile_image'])) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // GRIEVANCE TYPES
-// ---------------------------------------------------------------------------
 $grievanceTypes = [];
 if ($conn instanceof mysqli) {
     try {
@@ -447,9 +426,7 @@ if ($conn instanceof mysqli) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // FETCH GRIEVANCES
-// ---------------------------------------------------------------------------
 $grievances = [];
 
 if ($conn instanceof mysqli) {
@@ -499,15 +476,23 @@ $totalGrievances = count($grievances);
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink:   '#E5097F',
-            brandGreen:  '#006837',
-            brandGold:   '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
             fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
@@ -530,47 +515,75 @@ $totalGrievances = count($grievances);
     };
   </script>
 
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+    .hero-dots { background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px); background-size: 22px 22px; }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen bg-teal-50/40 text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700 flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR (no brand logo, per request) -->
     <aside id="studentSidebar"
-           class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837]
-                  flex flex-col py-4 shadow-2xl fixed inset-y-0 left-0 z-40
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
                   transition-all duration-300 ease-in-out overflow-hidden">
 
-      <button id="sidebarToggle"
-              class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors
-                     flex items-center justify-center w-14 mx-auto" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
-      </button>
+      <div class="flex items-center justify-end px-3 mb-6 flex-shrink-0">
+        <button id="sidebarToggle"
+                class="text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors
+                       flex items-center justify-center flex-shrink-0" aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-5 h-5 flex-shrink-0"></i>
+        </button>
+      </div>
 
-      <nav class="flex flex-col space-y-2 flex-1 w-full px-3">
-        <a href="dashboard.php" class="group relative w-full h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center text-white shadow-lg ring-2 ring-white/30 transition-all hover:bg-white/30 px-3">
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
+
+        <a href="dashboard.php" class="group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
           <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
           <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <a href="profile.php" class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center text-white transition-all px-3">
+        <a href="profile.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
           <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
           <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
         </a>
 
-        <a href="change_password.php" class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center text-white transition-all px-3">
+        <a href="change_password.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
           <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
           <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
-          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
+
       </nav>
 
       <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
-         class="group relative w-full h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center text-white transition-all mx-3 px-3"
+         class="group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
          style="width: calc(100% - 1.5rem);" title="Logout">
         <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
         <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
@@ -581,68 +594,69 @@ $totalGrievances = count($grievances);
     <!-- MAIN -->
     <div id="studentMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
-          <div class="flex items-center space-x-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo" class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance" class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
           <div class="relative" id="student-dropdown-container">
             <button id="student-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
               <?php if ($hasProfilePicture): ?>
                 <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
-                     class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
+                     class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                  <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
-              <span class="hidden sm:block text-sm font-semibold text-slate-700"><?= e($displayName) ?></span>
-              <i data-lucide="chevron-down" id="student-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+              <i data-lucide="chevron-down" id="student-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
-            <div id="student-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden">
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+            <div id="student-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($hasProfilePicture): ?>
-                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
+                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white">
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white">
                       <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                   <?php endif; ?>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
+                    <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                    <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
               </div>
 
-              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="key" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
                   <span class="font-medium">Logout</span>
                 </a>
               </div>
@@ -652,10 +666,10 @@ $totalGrievances = count($grievances);
       </header>
 
       <!-- PAGE CONTENT -->
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
         <?php if ($dbError): ?>
-          <div class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-start space-x-2">
+          <div class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-2">
             <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-amber-700"><?= e($dbError) ?></p>
           </div>
@@ -664,36 +678,41 @@ $totalGrievances = count($grievances);
         <div class="max-w-7xl mx-auto mb-6 animate-fade-in-up">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 tracking-tight">Grievance Details</h1>
-              <nav class="flex items-center space-x-2 text-sm text-slate-500">
-                <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-                  <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i> Dashboard
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600"></span>
+                <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Student Portal</p>
+              </div>
+              <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-2">Grievance Details</h1>
+              <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+                <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
                 </a>
-                <span class="text-slate-300">/</span>
-                <a href="dashboard.php" class="hover:text-[#8B1E7E] transition-colors">Grievance</a>
-                <span class="text-slate-300">/</span>
-                <span class="text-[#E5097F] font-semibold">Grievance Details</span>
+                <span class="text-teal-900/30">/</span>
+                <a href="dashboard.php" class="hover:text-teal-600 transition-colors">Grievance</a>
+                <span class="text-teal-900/30">/</span>
+                <span class="text-teal-600 font-semibold">Grievance Details</span>
               </nav>
             </div>
 
-            <button type="button" onclick="openCreateGrievanceModal()" title="Add Grievance"
-                    class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-[#4A154B] hover:bg-[#5A1B5C]
-                           text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                           transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+            <button type="button" onclick="openCreateGrievanceModal()"
+                    class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white
+                           bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                           transition-all duration-200 cursor-pointer shrink-0">
               <i data-lucide="plus" class="w-5 h-5"></i>
+              <span>Add Grievance</span>
             </button>
           </div>
         </div>
 
         <?php if ($flashSuccess !== ''): ?>
-          <div id="flashSuccessBox" class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
-            <i data-lucide="check-circle" class="w-5 h-5 text-[#006837] flex-shrink-0 mt-0.5"></i>
+          <div id="flashSuccessBox" class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-emerald-800 font-medium"><?= e($flashSuccess) ?></p>
           </div>
         <?php endif; ?>
 
         <?php if ($flashError !== ''): ?>
-          <div id="flashErrorBox" class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
+          <div id="flashErrorBox" class="max-w-7xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-red-700 font-medium"><?= e($flashError) ?></p>
           </div>
@@ -701,28 +720,28 @@ $totalGrievances = count($grievances);
 
         <!-- TABLE CONTROLS -->
         <div class="max-w-7xl mx-auto mb-5 animate-fade-in-up" style="animation-delay: 60ms;">
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200/70 px-5 py-4">
+          <div class="bg-white rounded-xl border-2 border-teal-100 px-5 py-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="flex items-center space-x-3">
-                <span class="text-sm text-slate-600">Show</span>
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-teal-900/70">Show</span>
                 <select id="entriesPerPage"
-                        class="px-3 py-1.5 border-2 border-slate-200 rounded-lg text-sm font-medium text-slate-700
-                               focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                               hover:border-[#4A154B]/40 transition-colors bg-white">
+                        class="px-3 py-1.5 border-2 border-teal-100 rounded-lg text-sm font-medium text-teal-900
+                               focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                               hover:border-teal-200 transition-colors bg-white">
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
-                <span class="text-sm text-slate-600">entries</span>
+                <span class="text-sm text-teal-900/70">entries</span>
               </div>
 
               <div class="relative w-full sm:w-80">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" id="searchInput" placeholder="Search.." autocomplete="off"
-                       class="w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg text-sm
-                              focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                              hover:border-[#4A154B]/40 transition-all bg-white" />
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-900/40"></i>
+                <input type="text" id="searchInput" placeholder="Search..." autocomplete="off"
+                       class="w-full pl-10 pr-4 py-2 border-2 border-teal-100 rounded-lg text-sm bg-white text-teal-900 placeholder-teal-900/40
+                              focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                              hover:border-teal-200 transition-all" />
               </div>
             </div>
           </div>
@@ -730,222 +749,221 @@ $totalGrievances = count($grievances);
 
         <!-- DATA TABLE -->
         <div class="max-w-7xl mx-auto animate-fade-in-up" style="animation-delay: 100ms;">
-          <div class="bg-white rounded-2xl shadow-lg border border-slate-200/70 overflow-hidden">
+          <div class="bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
 
-            <table class="w-full table-fixed" id="grievancesTable">
-              <colgroup>
-                <col style="width: 4%;">
-                <col style="width: 13%;">
-                <col style="width: 13%;">
-                <col style="width: 9%;">
-                <col style="width: 20%;">
-                <col style="width: 9%;">
-                <col style="width: 12%;">
-                <col style="width: 20%;">
-              </colgroup>
-              <thead>
-                <tr class="bg-[#4A154B] text-white">
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Sl.No.</th>
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Grievance Number</th>
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Grievance Type</th>
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Date</th>
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Subject</th>
-                  <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Status</th>
-                  <th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider">Actions</th>
-                  <th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider">Reopen</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100" id="grievancesTableBody">
-
-                <?php if (empty($grievances)): ?>
-                  <tr>
-                    <td colspan="8" class="px-4 py-16 text-center text-slate-500">
-                      <div class="flex flex-col items-center justify-center">
-                        <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-4">
-                          <i data-lucide="inbox" class="w-8 h-8 text-[#8B1E7E]"></i>
-                        </div>
-                        <p class="text-lg font-semibold text-slate-700">No data available in table</p>
-                        <p class="text-sm text-slate-500 mt-1">Click the "+" button above to submit your first grievance.</p>
-                      </div>
-                    </td>
+            <div class="overflow-x-auto">
+              <table class="w-full table-fixed" id="grievancesTable">
+                <colgroup>
+                  <col style="width: 4%;">
+                  <col style="width: 13%;">
+                  <col style="width: 13%;">
+                  <col style="width: 9%;">
+                  <col style="width: 20%;">
+                  <col style="width: 9%;">
+                  <col style="width: 12%;">
+                  <col style="width: 20%;">
+                </colgroup>
+                <thead>
+                  <tr class="bg-teal-600 text-white">
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Sl.No.</th>
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Grievance Number</th>
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Grievance Type</th>
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Date</th>
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Subject</th>
+                    <th class="px-2 py-3 text-left text-[10px] font-bold uppercase tracking-wider">Status</th>
+                    <th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider">Actions</th>
+                    <th class="px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wider">Reopen</th>
                   </tr>
-                <?php else: ?>
+                </thead>
+                <tbody class="divide-y divide-teal-100" id="grievancesTableBody">
 
-                  <?php foreach ($grievances as $index => $row): ?>
-                    <?php
-                      $gId          = (int) $row['id'];
-                      $gTypeId      = (int) ($row['grievance_type_id'] ?? 0);
-                      $gNumber      = (string) ($row['grievance_number'] ?? '—');
-                      $gType        = (string) ($row['type_name']        ?? '—');
-                      $gSubject     = (string) ($row['subject']          ?? '—');
-                      $gDesc        = (string) ($row['description']      ?? '');
-                      $gReply       = (string) ($row['reply_details']    ?? '');
-                      $gFeedback    = (string) ($row['feedback_details'] ?? '');
-                      $gReopen      = (string) ($row['reopen_reason']    ?? '');
-                      $gAttach      = (string) ($row['attachment_path']  ?? '');
-                      $gReplyAttach = (string) ($row['reply_attachment_path'] ?? '');
-                      $gStatus      = (string) ($row['status']           ?? 'Pending');
-                      $gCreatedRaw  = (string) ($row['created_at']       ?? '');
-                      $gCreated     = !empty($gCreatedRaw) ? date('d M y', strtotime($gCreatedRaw)) : '—';
-
-                      $canEdit     = in_array($gStatus, ['Pending', 'Reopened'], true);
-                      $canDispose  = in_array($gStatus, ['Pending', 'In Progress', 'Reopened'], true);
-                      $canFeedback = ($gStatus === 'Closed' && trim($gFeedback) === '');
-                      $canReopen   = in_array($gStatus, ['Disposed', 'Closed'], true);
-
-                      $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
-
-                      $attachUrl = ''; $attachExt = ''; $attachIsImg = false;
-                      if ($gAttach !== '') {
-                          $rel = ltrim($gAttach, '/');
-                          if (file_exists(__DIR__ . '/../' . $rel)) {
-                              $attachUrl   = '../' . $rel;
-                              $attachExt   = strtolower(pathinfo($rel, PATHINFO_EXTENSION));
-                              $attachIsImg = in_array($attachExt, $imageExts, true);
-                          }
-                      }
-
-                      $replyAttachUrl = ''; $replyAttachExt = ''; $replyAttachIsImg = false;
-                      if ($gReplyAttach !== '') {
-                          $rel2 = ltrim($gReplyAttach, '/');
-                          if (file_exists(__DIR__ . '/../' . $rel2)) {
-                              $replyAttachUrl   = '../' . $rel2;
-                              $replyAttachExt   = strtolower(pathinfo($rel2, PATHINFO_EXTENSION));
-                              $replyAttachIsImg = in_array($replyAttachExt, $imageExts, true);
-                          }
-                      }
-                    ?>
-                    <tr class="hover:bg-slate-50/80 transition-colors align-middle">
-
-                      <td class="px-2 py-4 text-xs font-medium text-slate-900"><?= $index + 1 ?></td>
-                      <td class="px-2 py-4 text-xs font-semibold text-[#4A154B] break-words"><?= e($gNumber) ?></td>
-                      <td class="px-2 py-4 text-xs text-slate-700 break-words"><?= e($gType) ?></td>
-                      <td class="px-2 py-4 text-xs text-slate-600 whitespace-nowrap"><?= e($gCreated) ?></td>
-                      <td class="px-2 py-4 text-xs text-slate-700 break-words" title="<?= e($gSubject) ?>"><?= e($gSubject) ?></td>
-                      <td class="px-2 py-4 whitespace-nowrap"><?= statusBadge($gStatus) ?></td>
-
-                      <td class="px-2 py-4">
-                        <div class="flex items-center justify-center gap-1">
-
-                          <!-- VIEW — uses data-* attributes to avoid quoting issues -->
-                          <button type="button"
-                                  title="View grievance"
-                                  data-view-trigger="1"
-                                  data-grievance='<?= e(json_encode([
-                                      "number"              => $gNumber,
-                                      "type"                => $gType,
-                                      "subject"             => $gSubject,
-                                      "description"         => $gDesc,
-                                      "status"              => $gStatus,
-                                      "reply"               => $gReply,
-                                      "feedback"            => $gFeedback,
-                                      "reopen_reason"       => $gReopen,
-                                      "date"                => $gCreated,
-                                      "attach_url"          => $attachUrl,
-                                      "attach_ext"          => $attachExt,
-                                      "attach_is_img"       => $attachIsImg,
-                                      "reply_attach_url"    => $replyAttachUrl,
-                                      "reply_attach_ext"    => $replyAttachExt,
-                                      "reply_attach_is_img" => $replyAttachIsImg,
-                                  ], JSON_HEX_APOS | JSON_HEX_QUOT)) ?>'
-                                  class="w-7 h-7 rounded-full bg-purple-50 hover:bg-[#4A154B]
-                                         inline-flex items-center justify-center text-[#4A154B] hover:text-white
-                                         transition-all duration-200 hover:scale-110 flex-shrink-0">
-                            <i data-lucide="eye" class="w-3.5 h-3.5 pointer-events-none"></i>
-                          </button>
-
-                          <?php if ($canEdit): ?>
-                            <button type="button"
-                                    title="Edit grievance"
-                                    data-edit-trigger="1"
-                                    data-grievance-id="<?= $gId ?>"
-                                    data-grievance-type-id="<?= $gTypeId ?>"
-                                    data-subject="<?= e($gSubject) ?>"
-                                    data-description="<?= e($gDesc) ?>"
-                                    class="w-7 h-7 rounded-full bg-blue-50 hover:bg-blue-600
-                                           inline-flex items-center justify-center text-blue-700 hover:text-white
-                                           transition-all duration-200 hover:scale-110 flex-shrink-0">
-                              <i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i>
-                            </button>
-                          <?php endif; ?>
-
-                          <?php if ($canDispose): ?>
-                            <button type="button"
-                                    title="Dispose grievance"
-                                    data-dispose-trigger="1"
-                                    data-grievance-id="<?= $gId ?>"
-                                    data-grievance-number="<?= e($gNumber) ?>"
-                                    class="w-7 h-7 rounded-full bg-red-50 hover:bg-red-600
-                                           inline-flex items-center justify-center text-red-600 hover:text-white
-                                           transition-all duration-200 hover:scale-110 flex-shrink-0">
-                              <i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i>
-                            </button>
-                          <?php endif; ?>
-
-                          <?php if ($canFeedback): ?>
-                            <button type="button"
-                                    title="Give Feedback"
-                                    data-feedback-trigger="1"
-                                    data-grievance-id="<?= $gId ?>"
-                                    data-grievance-number="<?= e($gNumber) ?>"
-                                    class="w-7 h-7 rounded-full bg-emerald-50 hover:bg-emerald-600
-                                           inline-flex items-center justify-center text-emerald-700 hover:text-white
-                                           transition-all duration-200 hover:scale-110 flex-shrink-0">
-                              <i data-lucide="message-square" class="w-3.5 h-3.5 pointer-events-none"></i>
-                            </button>
-                          <?php endif; ?>
-
+                  <?php if (empty($grievances)): ?>
+                    <tr>
+                      <td colspan="8" class="px-4 py-16 text-center text-teal-900/60">
+                        <div class="flex flex-col items-center justify-center">
+                          <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center mb-4">
+                            <i data-lucide="inbox" class="w-8 h-8 text-teal-600"></i>
+                          </div>
+                          <p class="text-lg font-semibold text-teal-900">No data available in table</p>
+                          <p class="text-sm text-teal-900/60 mt-1">Click the "+" button above to submit your first grievance.</p>
                         </div>
                       </td>
-
-                      <td class="px-2 py-4 text-center">
-                        <?php if ($canReopen): ?>
-                          <button type="button"
-                                  data-reopen-trigger="1"
-                                  data-grievance-id="<?= $gId ?>"
-                                  data-grievance-number="<?= e($gNumber) ?>"
-                                  class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold
-                                         bg-rose-50 hover:bg-rose-500 text-rose-700 hover:text-white
-                                         border border-rose-200 hover:border-rose-500
-                                         transition-all duration-200 hover:-translate-y-0.5 active:scale-95 whitespace-nowrap">
-                            <i data-lucide="rotate-ccw" class="w-3 h-3 pointer-events-none"></i>
-                            <span class="pointer-events-none">Reopen</span>
-                          </button>
-                        <?php else: ?>
-                          <span class="text-xs text-slate-400 italic">—</span>
-                        <?php endif; ?>
-                      </td>
-
                     </tr>
-                  <?php endforeach; ?>
+                  <?php else: ?>
 
-                <?php endif; ?>
+                    <?php foreach ($grievances as $index => $row): ?>
+                      <?php
+                        $gId          = (int) $row['id'];
+                        $gTypeId      = (int) ($row['grievance_type_id'] ?? 0);
+                        $gNumber      = (string) ($row['grievance_number'] ?? '—');
+                        $gType        = (string) ($row['type_name']        ?? '—');
+                        $gSubject     = (string) ($row['subject']          ?? '—');
+                        $gDesc        = (string) ($row['description']      ?? '');
+                        $gReply       = (string) ($row['reply_details']    ?? '');
+                        $gFeedback    = (string) ($row['feedback_details'] ?? '');
+                        $gReopen      = (string) ($row['reopen_reason']    ?? '');
+                        $gAttach      = (string) ($row['attachment_path']  ?? '');
+                        $gReplyAttach = (string) ($row['reply_attachment_path'] ?? '');
+                        $gStatus      = (string) ($row['status']           ?? 'Pending');
+                        $gCreatedRaw  = (string) ($row['created_at']       ?? '');
+                        $gCreated     = !empty($gCreatedRaw) ? date('d M y', strtotime($gCreatedRaw)) : '—';
 
-              </tbody>
-            </table>
+                        $canEdit     = in_array($gStatus, ['Pending', 'Reopened'], true);
+                        $canDispose  = in_array($gStatus, ['Pending', 'In Progress', 'Reopened'], true);
+                        $canFeedback = ($gStatus === 'Closed' && trim($gFeedback) === '');
+                        $canReopen   = in_array($gStatus, ['Disposed', 'Closed'], true);
 
-            <div class="px-4 py-4 bg-slate-50/50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p class="text-sm text-slate-600">
+                        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+
+                        $attachUrl = ''; $attachExt = ''; $attachIsImg = false;
+                        if ($gAttach !== '') {
+                            $rel = ltrim($gAttach, '/');
+                            if (file_exists(__DIR__ . '/../' . $rel)) {
+                                $attachUrl   = '../' . $rel;
+                                $attachExt   = strtolower(pathinfo($rel, PATHINFO_EXTENSION));
+                                $attachIsImg = in_array($attachExt, $imageExts, true);
+                            }
+                        }
+
+                        $replyAttachUrl = ''; $replyAttachExt = ''; $replyAttachIsImg = false;
+                        if ($gReplyAttach !== '') {
+                            $rel2 = ltrim($gReplyAttach, '/');
+                            if (file_exists(__DIR__ . '/../' . $rel2)) {
+                                $replyAttachUrl   = '../' . $rel2;
+                                $replyAttachExt   = strtolower(pathinfo($rel2, PATHINFO_EXTENSION));
+                                $replyAttachIsImg = in_array($replyAttachExt, $imageExts, true);
+                            }
+                        }
+                      ?>
+                      <tr class="hover:bg-teal-50/60 transition-colors align-middle">
+
+                        <td class="px-2 py-4 text-xs font-medium text-teal-900/70"><?= $index + 1 ?></td>
+                        <td class="px-2 py-4 text-xs font-semibold text-teal-700 break-words"><?= e($gNumber) ?></td>
+                        <td class="px-2 py-4 text-xs text-teal-900/80 break-words"><?= e($gType) ?></td>
+                        <td class="px-2 py-4 text-xs text-teal-900/70 whitespace-nowrap"><?= e($gCreated) ?></td>
+                        <td class="px-2 py-4 text-xs text-teal-900/80 break-words" title="<?= e($gSubject) ?>"><?= e($gSubject) ?></td>
+                        <td class="px-2 py-4 whitespace-nowrap"><?= statusBadge($gStatus) ?></td>
+
+                        <td class="px-2 py-4">
+                          <div class="flex items-center justify-center gap-1">
+
+                            <button type="button" title="View grievance"
+                                    data-view-trigger="1"
+                                    data-grievance='<?= e(json_encode([
+                                        "number"              => $gNumber,
+                                        "type"                => $gType,
+                                        "subject"             => $gSubject,
+                                        "description"         => $gDesc,
+                                        "status"              => $gStatus,
+                                        "reply"               => $gReply,
+                                        "feedback"            => $gFeedback,
+                                        "reopen_reason"       => $gReopen,
+                                        "date"                => $gCreated,
+                                        "attach_url"          => $attachUrl,
+                                        "attach_ext"          => $attachExt,
+                                        "attach_is_img"       => $attachIsImg,
+                                        "reply_attach_url"    => $replyAttachUrl,
+                                        "reply_attach_ext"    => $replyAttachExt,
+                                        "reply_attach_is_img" => $replyAttachIsImg,
+                                    ], JSON_HEX_APOS | JSON_HEX_QUOT)) ?>'
+                                    class="w-7 h-7 rounded-lg bg-teal-50 hover:bg-teal-600
+                                           inline-flex items-center justify-center text-teal-600 hover:text-white
+                                           transition-colors duration-200 flex-shrink-0">
+                              <i data-lucide="eye" class="w-3.5 h-3.5 pointer-events-none"></i>
+                            </button>
+
+                            <?php if ($canEdit): ?>
+                              <button type="button" title="Edit grievance"
+                                      data-edit-trigger="1"
+                                      data-grievance-id="<?= $gId ?>"
+                                      data-grievance-type-id="<?= $gTypeId ?>"
+                                      data-subject="<?= e($gSubject) ?>"
+                                      data-description="<?= e($gDesc) ?>"
+                                      class="w-7 h-7 rounded-lg bg-sky-50 hover:bg-sky-600
+                                             inline-flex items-center justify-center text-sky-700 hover:text-white
+                                             transition-colors duration-200 flex-shrink-0">
+                                <i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i>
+                              </button>
+                            <?php endif; ?>
+
+                            <?php if ($canDispose): ?>
+                              <button type="button" title="Dispose grievance"
+                                      data-dispose-trigger="1"
+                                      data-grievance-id="<?= $gId ?>"
+                                      data-grievance-number="<?= e($gNumber) ?>"
+                                      class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-500
+                                             inline-flex items-center justify-center text-red-500 hover:text-white
+                                             transition-colors duration-200 flex-shrink-0">
+                                <i data-lucide="x" class="w-3.5 h-3.5 pointer-events-none"></i>
+                              </button>
+                            <?php endif; ?>
+
+                            <?php if ($canFeedback): ?>
+                              <button type="button" title="Give Feedback"
+                                      data-feedback-trigger="1"
+                                      data-grievance-id="<?= $gId ?>"
+                                      data-grievance-number="<?= e($gNumber) ?>"
+                                      class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600
+                                             inline-flex items-center justify-center text-emerald-700 hover:text-white
+                                             transition-colors duration-200 flex-shrink-0">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5 pointer-events-none"></i>
+                              </button>
+                            <?php endif; ?>
+
+                          </div>
+                        </td>
+
+                        <td class="px-2 py-4 text-center">
+                          <?php if ($canReopen): ?>
+                            <button type="button"
+                                    data-reopen-trigger="1"
+                                    data-grievance-id="<?= $gId ?>"
+                                    data-grievance-number="<?= e($gNumber) ?>"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-bold
+                                           bg-pink-50 hover:bg-pink-500 text-pink-700 hover:text-white
+                                           border border-pink-200 hover:border-pink-500
+                                           transition-colors duration-200 whitespace-nowrap">
+                              <i data-lucide="rotate-ccw" class="w-3 h-3 pointer-events-none"></i>
+                              <span class="pointer-events-none">Reopen</span>
+                            </button>
+                          <?php else: ?>
+                            <span class="text-xs text-teal-900/40 italic">—</span>
+                          <?php endif; ?>
+                        </td>
+
+                      </tr>
+                    <?php endforeach; ?>
+
+                  <?php endif; ?>
+
+                </tbody>
+              </table>
+            </div>
+
+            <div class="px-4 py-4 bg-teal-50/50 border-t border-teal-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p class="text-sm text-teal-900/70">
                 Showing
-                <span class="font-semibold text-slate-900" id="infoStart"><?= $totalGrievances > 0 ? 1 : 0 ?></span>
+                <span class="font-semibold text-teal-900" id="infoStart"><?= $totalGrievances > 0 ? 1 : 0 ?></span>
                 to
-                <span class="font-semibold text-slate-900" id="infoEnd"><?= $totalGrievances ?></span>
+                <span class="font-semibold text-teal-900" id="infoEnd"><?= $totalGrievances ?></span>
                 of
-                <span class="font-semibold text-slate-900" id="infoTotal"><?= $totalGrievances ?></span>
+                <span class="font-semibold text-teal-900" id="infoTotal"><?= $totalGrievances ?></span>
                 entries
               </p>
 
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center gap-2">
                 <button type="button" id="prevPageBtn"
-                        class="px-4 py-2 rounded-lg text-sm font-medium text-slate-500
-                               hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white
+                               hover:bg-teal-50 border-2 border-teal-200
+                               disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         disabled>Previous</button>
                 <span id="currentPageBadge"
                       class="inline-flex items-center justify-center w-9 h-9 rounded-lg
-                             bg-[#4A154B] text-white text-sm font-bold shadow-md">1</span>
+                             bg-teal-600 text-white text-sm font-bold shadow-sm">1</span>
                 <button type="button" id="nextPageBtn"
-                        class="px-4 py-2 rounded-lg text-sm font-medium text-slate-500
-                               hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-teal-900 bg-white
+                               hover:bg-teal-50 border-2 border-teal-200
+                               disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         disabled>Next</button>
               </div>
             </div>
@@ -955,44 +973,73 @@ $totalGrievances = count($grievances);
 
       </main>
 
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-8">
           <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <div class="flex items-start space-x-3">
-                <img src="../public/rcss-logo.png" alt="RCSS Logo" class="h-12 w-auto" />
-                <div>
-                  <p class="font-bold text-[#4A154B] text-sm">Rajagiri College of Social Sciences</p>
-                  <p class="text-xs text-slate-600 mt-1">Grievance Redressal Portal</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+
+              <div>
+                <div class="flex items-center gap-3 mb-3 bg-white rounded-lg px-3 py-2 w-fit">
+                  <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-8 w-auto" />
                 </div>
+                <p class="text-teal-100/80 text-sm leading-relaxed max-w-xs">
+                  Committed to fairness, transparency and prompt grievance redressal.
+                </p>
               </div>
 
               <div>
-                <h4 class="font-bold text-sm text-[#4A154B] mb-2">Quick Links</h4>
-                <ul class="space-y-1.5 text-xs text-slate-700">
-                  <li><a href="dashboard.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group"><i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i><span>Dashboard</span></a></li>
-                  <li><a href="profile.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group"><i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i><span>My Profile</span></a></li>
-                  <li><a href="change_password.php" class="hover:text-[#E5097F] transition-colors inline-flex items-center space-x-1.5 group"><i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"></i><span>Change Password</span></a></li>
+                <h4 class="font-bold text-sm uppercase tracking-wide text-teal-200 mb-3">Quick Links</h4>
+                <ul class="space-y-2 text-sm">
+                  <li>
+                    <a href="dashboard.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5">
+                      <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                      <span>Dashboard</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="profile.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5">
+                      <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                      <span>My Profile</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="change_password.php" class="text-teal-100/80 hover:text-white transition-colors inline-flex items-center gap-1.5">
+                      <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                      <span>Change Password</span>
+                    </a>
+                  </li>
                 </ul>
               </div>
 
               <div>
-                <h4 class="font-bold text-sm text-[#4A154B] mb-2">Contact Support</h4>
-                <ul class="space-y-1.5 text-xs text-slate-700">
-                  <li class="flex items-center space-x-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-[#E5097F]"></i><span>student.grievance@rajagiri.edu</span></li>
-                  <li class="flex items-center space-x-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-[#E5097F]"></i><span>+91 484 XXX XXXX</span></li>
-                  <li class="flex items-center space-x-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#E5097F]"></i><span>Kalamassery, Kochi, Kerala</span></li>
+                <h4 class="font-bold text-sm uppercase tracking-wide text-teal-200 mb-3">Contact Support</h4>
+                <ul class="space-y-2 text-sm text-teal-100/80">
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4 text-teal-300"></i>
+                    <span>student.grievance@rajagiri.edu</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="phone" class="w-4 h-4 text-teal-300"></i>
+                    <span>+91 484 XXX XXXX</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-teal-300"></i>
+                    <span>Kalamassery, Kochi, Kerala</span>
+                  </li>
                 </ul>
               </div>
+
             </div>
 
-            <div class="border-t border-purple-300/50 pt-4">
-              <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
-                <p class="text-xs text-slate-700 text-center sm:text-left">
-                  &copy; <?= date('Y') ?> <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>. All rights reserved.
+            <div class="border-t border-white/10 pt-4">
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+                <p class="text-xs text-teal-200/70 text-center sm:text-left">
+                  &copy; <?= date('Y') ?>
+                  <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
                 </p>
-                <p class="text-xs text-slate-700">
-                  Powered by <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">Oréll Grievance</span>
+                <p class="text-xs text-teal-200/70">
+                  Powered by <span class="font-bold text-white">RLabZ</span>
                 </p>
               </div>
             </div>
@@ -1009,11 +1056,11 @@ $totalGrievances = count($grievances);
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCreateGrievanceModal()"></div>
 
     <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden max-h-[92vh] flex flex-col">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800">Create Grievance</h3>
-        <button type="button" onclick="closeCreateGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 class="text-lg md:text-xl font-bold text-teal-900">Create Grievance</h3>
+        <button type="button" onclick="closeCreateGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1023,11 +1070,11 @@ $totalGrievances = count($grievances);
         <input type="hidden" name="action" value="create_grievance" />
 
         <div class="space-y-2">
-          <label for="grievance_type_id" class="block text-sm font-semibold text-slate-700">Grievance Type <span class="text-[#E5097F]">*</span></label>
+          <label for="grievance_type_id" class="block text-sm font-semibold text-teal-900">Grievance Type <span class="text-red-500">*</span></label>
           <select id="grievance_type_id" name="grievance_type_id" required
-                  class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl appearance-none bg-white text-slate-800 font-medium
-                         focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                         hover:border-[#4A154B]/40 transition-all">
+                  class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm
+                         focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                         hover:border-teal-200 transition-all">
             <option value="" disabled selected>Select Grievance Type</option>
             <?php foreach ($grievanceTypes as $type): ?>
               <option value="<?= (int) $type['id'] ?>"><?= e((string) $type['type_name']) ?></option>
@@ -1039,43 +1086,45 @@ $totalGrievances = count($grievances);
         </div>
 
         <div class="space-y-2">
-          <label for="subject" class="block text-sm font-semibold text-slate-700">Subject <span class="text-[#E5097F]">*</span></label>
+          <label for="subject" class="block text-sm font-semibold text-teal-900">Subject <span class="text-red-500">*</span></label>
           <input type="text" id="subject" name="subject" required maxlength="120" placeholder="Enter a brief subject"
-                 class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                        focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                        hover:border-[#4A154B]/40 transition-all" />
-          <p class="text-xs text-slate-500">(Maximum 120 character) · <span id="subjectCounter" class="font-semibold text-slate-600">0</span>/120</p>
+                 class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm placeholder-teal-900/40
+                        focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                        hover:border-teal-200 transition-all" />
+          <p class="text-xs text-teal-900/60">(Maximum 120 character) · <span id="subjectCounter" class="font-semibold text-teal-900/80">0</span>/120</p>
         </div>
 
         <div class="space-y-2">
-          <label for="description" class="block text-sm font-semibold text-slate-700">Description</label>
+          <label for="description" class="block text-sm font-semibold text-teal-900">Description</label>
           <textarea id="description" name="description" rows="5" maxlength="420" placeholder="Describe your grievance in detail…"
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400 resize-none
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all"></textarea>
-          <p class="text-xs text-slate-500">(Maximum 420 character) · <span id="descriptionCounter" class="font-semibold text-slate-600">0</span>/420</p>
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm placeholder-teal-900/40 resize-none
+                           focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-200 transition-all"></textarea>
+          <p class="text-xs text-teal-900/60">(Maximum 420 character) · <span id="descriptionCounter" class="font-semibold text-teal-900/80">0</span>/420</p>
         </div>
 
         <div class="space-y-2">
-          <label for="attachment" class="block text-sm font-semibold text-slate-700">Attachment</label>
+          <label for="attachment" class="block text-sm font-semibold text-teal-900">Attachment</label>
 
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 flex-wrap">
             <label for="attachment"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-slate-200
-                          bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-sm
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-teal-100
+                          bg-teal-50 hover:bg-teal-100 text-teal-700 font-semibold text-sm
                           cursor-pointer transition-colors">
               <i data-lucide="upload" class="w-4 h-4"></i>
-              <span>Choose files</span>
+              <span>Choose file</span>
             </label>
-            <span id="attachmentFileName" class="text-sm text-slate-500 truncate">No file chosen</span>
+            <span id="attachmentFileName" class="text-sm text-teal-900/60 truncate">No file chosen</span>
             <input type="file" id="attachment" name="attachment" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="hidden" />
           </div>
-          <p class="text-xs text-slate-500">(Max 5 Mb)</p>
+          <p class="text-xs text-teal-900/60">Allowed: PDF, JPG, JPEG, PNG, DOC, DOCX (max 5 MB)</p>
         </div>
 
         <div class="pt-2 flex justify-center">
           <button type="submit"
-                  class="px-10 py-3 rounded-xl bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A] hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A] text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                  class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold text-white
+                         bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                         transition-all duration-200 cursor-pointer">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span>Submit</span>
           </button>
@@ -1084,18 +1133,16 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- EDIT MODAL -->
-  <!-- ============================================================ -->
   <div id="editGrievanceModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeEditGrievanceModal()"></div>
 
     <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden max-h-[92vh] flex flex-col">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="text-lg md:text-xl font-bold text-slate-800">Edit Grievance</h3>
-        <button type="button" onclick="closeEditGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 class="text-lg md:text-xl font-bold text-teal-900">Edit Grievance</h3>
+        <button type="button" onclick="closeEditGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1106,11 +1153,11 @@ $totalGrievances = count($grievances);
         <input type="hidden" name="grievance_id" id="editGrievanceId" value="" />
 
         <div class="space-y-2">
-          <label for="edit_grievance_type_id" class="block text-sm font-semibold text-slate-700">Grievance Type <span class="text-[#E5097F]">*</span></label>
+          <label for="edit_grievance_type_id" class="block text-sm font-semibold text-teal-900">Grievance Type <span class="text-red-500">*</span></label>
           <select id="edit_grievance_type_id" name="grievance_type_id" required
-                  class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl appearance-none bg-white text-slate-800 font-medium
-                         focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                         hover:border-[#4A154B]/40 transition-all">
+                  class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm
+                         focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                         hover:border-teal-200 transition-all">
             <option value="" disabled>Select Grievance Type</option>
             <?php foreach ($grievanceTypes as $type): ?>
               <option value="<?= (int) $type['id'] ?>"><?= e((string) $type['type_name']) ?></option>
@@ -1119,30 +1166,32 @@ $totalGrievances = count($grievances);
         </div>
 
         <div class="space-y-2">
-          <label for="edit_subject" class="block text-sm font-semibold text-slate-700">Subject <span class="text-[#E5097F]">*</span></label>
+          <label for="edit_subject" class="block text-sm font-semibold text-teal-900">Subject <span class="text-red-500">*</span></label>
           <input type="text" id="edit_subject" name="subject" required maxlength="120" placeholder="Enter a brief subject"
-                 class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                        focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                        hover:border-[#4A154B]/40 transition-all" />
-          <p class="text-xs text-slate-500">(Maximum 120 character) · <span id="editSubjectCounter" class="font-semibold text-slate-600">0</span>/120</p>
+                 class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm placeholder-teal-900/40
+                        focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                        hover:border-teal-200 transition-all" />
+          <p class="text-xs text-teal-900/60">(Maximum 120 character) · <span id="editSubjectCounter" class="font-semibold text-teal-900/80">0</span>/120</p>
         </div>
 
         <div class="space-y-2">
-          <label for="edit_description" class="block text-sm font-semibold text-slate-700">Description</label>
+          <label for="edit_description" class="block text-sm font-semibold text-teal-900">Description</label>
           <textarea id="edit_description" name="description" rows="5" maxlength="420" placeholder="Describe your grievance in detail…"
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400 resize-none
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all"></textarea>
-          <p class="text-xs text-slate-500">(Maximum 420 character) · <span id="editDescriptionCounter" class="font-semibold text-slate-600">0</span>/420</p>
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm placeholder-teal-900/40 resize-none
+                           focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-200 transition-all"></textarea>
+          <p class="text-xs text-teal-900/60">(Maximum 420 character) · <span id="editDescriptionCounter" class="font-semibold text-teal-900/80">0</span>/420</p>
         </div>
 
-        <div class="pt-2 flex justify-center gap-3">
+        <div class="pt-2 flex flex-col-reverse sm:flex-row justify-center gap-3">
           <button type="button" onclick="closeEditGrievanceModal()"
-                  class="px-6 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                  class="px-6 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
             Cancel
           </button>
           <button type="submit"
-                  class="px-8 py-3 rounded-xl bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A] hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A] text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                  class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold text-white
+                         bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                         transition-all duration-200 cursor-pointer">
             <i data-lucide="save" class="w-4 h-4"></i>
             <span>Save Changes</span>
           </button>
@@ -1151,25 +1200,23 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- DISPOSE MODAL -->
-  <!-- ============================================================ -->
   <div id="disposeConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDisposeModal()"></div>
 
     <div id="disposeConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-rose-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="x" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Dispose Grievance?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Dispose Grievance?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <p class="text-sm text-teal-900/70 leading-relaxed">
           You are about to mark
-          <span id="disposeGrievanceNumber" class="font-bold text-[#8B1E7E] break-words">this grievance</span>
+          <span id="disposeGrievanceNumber" class="font-bold text-teal-700 break-words">this grievance</span>
           as <strong class="text-red-600">Disposed</strong>.
         </p>
 
@@ -1185,11 +1232,12 @@ $totalGrievances = count($grievances);
         <input type="hidden" name="action" value="dispose_grievance" />
 
         <button type="button" onclick="closeDisposeModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
         <button type="submit"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="x" class="w-4 h-4"></i>
           <span>Dispose</span>
         </button>
@@ -1197,80 +1245,78 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- VIEW MODAL -->
-  <!-- ============================================================ -->
   <div id="viewGrievanceModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeViewGrievanceModal()"></div>
 
     <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden max-h-[90vh] flex flex-col">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="text-lg font-bold text-slate-800">Grievance Details</h3>
-        <button type="button" onclick="closeViewGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 class="text-lg font-bold text-teal-900">Grievance Details</h3>
+        <button type="button" onclick="closeViewGrievanceModal()" class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="p-6 overflow-y-auto flex-1 space-y-5">
-        <div class="flex items-start space-x-4 pb-4 border-b border-slate-100">
-          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md flex-shrink-0">
+        <div class="flex items-start gap-4 pb-4 border-b border-teal-100">
+          <div class="w-14 h-14 rounded-xl bg-teal-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
             <i data-lucide="file-text" class="w-7 h-7"></i>
           </div>
           <div class="min-w-0 flex-1">
-            <p id="vgNumber" class="text-sm font-bold text-[#4A154B] break-words">—</p>
-            <p id="vgSubject" class="text-base font-bold text-slate-800 break-words mt-0.5">—</p>
+            <p id="vgNumber" class="text-sm font-bold text-teal-700 break-words">—</p>
+            <p id="vgSubject" class="text-base font-bold text-teal-900 break-words mt-0.5">—</p>
             <div class="mt-2 flex flex-wrap items-center gap-2">
               <span id="vgStatus"></span>
-              <span class="text-xs text-slate-500">·</span>
-              <span class="text-xs text-slate-500" id="vgDate">—</span>
+              <span class="text-xs text-teal-900/50">·</span>
+              <span class="text-xs text-teal-900/60" id="vgDate">—</span>
             </div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Grievance Type</p>
-            <p id="vgType" class="text-sm font-semibold text-slate-800 break-words">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Grievance Type</p>
+            <p id="vgType" class="text-sm font-semibold text-teal-900 break-words">—</p>
           </div>
-          <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Submitted On</p>
-            <p id="vgDate2" class="text-sm font-semibold text-slate-800">—</p>
+          <div class="bg-teal-50/60 rounded-xl p-3 border border-teal-100">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1">Submitted On</p>
+            <p id="vgDate2" class="text-sm font-semibold text-teal-900">—</p>
           </div>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Description</p>
-          <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-            <p id="vgDescription" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Description</p>
+          <div class="bg-teal-50/60 rounded-xl p-4 border border-teal-100">
+            <p id="vgDescription" class="text-sm text-teal-900/80 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
 
         <div id="vgReopenWrapper" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Your Reopen Reason</p>
-          <div class="bg-rose-50 rounded-xl p-4 border border-rose-200">
-            <p id="vgReopenReason" class="text-sm text-rose-800 leading-relaxed whitespace-pre-line break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Your Reopen Reason</p>
+          <div class="bg-pink-50 rounded-xl p-4 border border-pink-200">
+            <p id="vgReopenReason" class="text-sm text-pink-800 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
 
         <div id="vgAttachmentWrapper" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Original Attachment</p>
-          <div class="bg-purple-50 rounded-xl p-4 border border-purple-100 space-y-3">
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Original Attachment</p>
+          <div class="bg-teal-50/60 rounded-xl p-4 border border-teal-100 space-y-3">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-900">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-900">
                 <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                 <span id="vgAttachmentName" class="break-all">attachment</span>
               </span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button type="button" id="vgPreviewBtn" onclick="openPreviewOverlay('original')"
-                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-[#4A154B] hover:bg-[#5A1B5C] text-white shadow-md shadow-purple-500/20 transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition-colors duration-200">
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 <span id="vgPreviewBtnLabel">View</span>
               </button>
               <a id="vgDownloadLink" href="#" target="_blank" rel="noopener"
-                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-[#4A154B] border-2 border-[#4A154B]/20 hover:border-[#4A154B]/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-teal-50 text-teal-700 border-2 border-teal-200 hover:border-teal-600 transition-colors duration-200">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>Download</span>
               </a>
@@ -1279,14 +1325,14 @@ $totalGrievances = count($grievances);
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reply / Response</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Reply / Response</p>
           <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
             <p id="vgReply" class="text-sm text-emerald-800 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
 
         <div id="vgReplyAttachWrapper" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Reply Attachment</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Reply Attachment</p>
           <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-200 space-y-3">
             <div class="flex flex-wrap items-center gap-2">
               <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-900">
@@ -1296,12 +1342,12 @@ $totalGrievances = count($grievances);
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button type="button" id="vgReplyPreviewBtn" onclick="openPreviewOverlay('reply')"
-                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-[#006837] hover:bg-[#00532c] text-white shadow-md shadow-emerald-500/20 transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                      class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-colors duration-200">
                 <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                 <span id="vgReplyPreviewBtnLabel">View</span>
               </button>
               <a id="vgReplyDownloadLink" href="#" target="_blank" rel="noopener"
-                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-slate-100 text-[#006837] border-2 border-[#006837]/20 hover:border-[#006837]/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
+                 class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white hover:bg-emerald-50 text-emerald-700 border-2 border-emerald-200 hover:border-emerald-600 transition-colors duration-200">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>Download</span>
               </a>
@@ -1310,32 +1356,30 @@ $totalGrievances = count($grievances);
         </div>
 
         <div id="vgFeedbackWrapper" class="hidden">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Your Feedback</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/50 mb-1.5">Your Feedback</p>
           <div class="bg-amber-50 rounded-xl p-4 border border-amber-100">
             <p id="vgFeedback" class="text-sm text-amber-800 leading-relaxed whitespace-pre-line break-words">—</p>
           </div>
         </div>
       </div>
 
-      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+      <div class="px-6 py-4 bg-teal-50/60 border-t border-teal-100 flex justify-end">
         <button type="button" onclick="closeViewGrievanceModal()"
-                class="px-5 py-2.5 rounded-xl font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="px-5 py-2.5 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- IN-PAGE PREVIEW OVERLAY -->
-  <!-- ============================================================ -->
   <div id="previewOverlay" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closePreviewOverlay()"></div>
 
     <div class="relative w-full max-w-5xl max-h-[92vh] bg-slate-900 rounded-2xl shadow-2xl animate-modal-in overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700">
         <div class="flex items-center gap-2 min-w-0">
-          <i data-lucide="image" class="w-4 h-4 text-purple-300 flex-shrink-0"></i>
+          <i data-lucide="image" class="w-4 h-4 text-teal-300 flex-shrink-0"></i>
           <p id="previewFileName" class="text-sm font-semibold text-slate-100 truncate">Attachment</p>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
@@ -1358,14 +1402,12 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- FEEDBACK MODAL -->
-  <!-- ============================================================ -->
   <div id="feedbackModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeFeedbackModal()"></div>
 
     <div id="feedbackPanel" class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="flex items-center justify-between px-6 pt-6 pb-3">
         <div class="flex items-start gap-3">
@@ -1373,13 +1415,13 @@ $totalGrievances = count($grievances);
             <i data-lucide="message-square" class="w-5 h-5 text-emerald-600"></i>
           </div>
           <div>
-            <h3 class="text-lg font-bold text-slate-800">Give Feedback</h3>
-            <p class="text-xs text-slate-500 mt-0.5">
-              Ref: <span class="font-semibold text-[#8B1E7E]" id="feedbackGrievanceNumber">—</span>
+            <h3 class="text-lg font-bold text-teal-900">Give Feedback</h3>
+            <p class="text-xs text-teal-900/60 mt-0.5">
+              Ref: <span class="font-semibold text-teal-700" id="feedbackGrievanceNumber">—</span>
             </p>
           </div>
         </div>
-        <button type="button" onclick="closeFeedbackModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+        <button type="button" onclick="closeFeedbackModal()" class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1390,26 +1432,28 @@ $totalGrievances = count($grievances);
         <input type="hidden" name="grievance_id" id="feedbackGrievanceId" value="" />
 
         <div class="space-y-2">
-          <label for="feedbackText" class="block text-sm font-semibold text-slate-700">
-            Feedback <span class="text-[#E5097F]">*</span>
+          <label for="feedbackText" class="block text-sm font-semibold text-teal-900">
+            Feedback <span class="text-red-500">*</span>
           </label>
           <textarea id="feedbackText" name="feedback" rows="5" maxlength="1000" required
                     placeholder="Share your feedback about how the grievance was handled…"
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 resize-none
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all bg-white"></textarea>
-          <p class="text-xs text-slate-500">
-            (Maximum 1000 character) — <span id="feedbackCharCount" class="font-semibold text-[#8B1E7E]">0</span>/1000
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg text-sm bg-teal-50/40 text-teal-900 placeholder-teal-900/40 resize-none
+                           focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-200 transition-all"></textarea>
+          <p class="text-xs text-teal-900/60">
+            (Maximum 1000 character) — <span id="feedbackCharCount" class="font-semibold text-teal-700">0</span>/1000
           </p>
         </div>
 
-        <div class="flex justify-end gap-3">
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-3">
           <button type="button" onclick="closeFeedbackModal()"
-                  class="px-5 py-2.5 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                  class="px-5 py-2.5 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
             Cancel
           </button>
           <button type="submit"
-                  class="px-7 py-2.5 rounded-xl bg-[#4A154B] hover:bg-[#5A1B5C] text-white font-bold text-sm shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+                  class="inline-flex items-center justify-center gap-2 px-7 py-2.5 rounded-lg font-semibold text-white
+                         bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                         transition-all duration-200 cursor-pointer">
             <i data-lucide="send" class="w-4 h-4"></i>
             <span>Submit Feedback</span>
           </button>
@@ -1418,19 +1462,17 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- REOPEN MODAL (z-index 75 — above dispose/feedback/logout) -->
-  <!-- ============================================================ -->
+  <!-- REOPEN MODAL -->
   <div id="reopenConfirmModal" class="hidden fixed inset-0 z-[75] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeReopenModal()"></div>
 
     <div id="reopenConfirmPanel" class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="flex items-start justify-between px-6 pt-6 pb-3">
-        <h3 class="text-xl md:text-2xl font-bold text-slate-800">Reopen Grievance</h3>
+        <h3 class="text-xl md:text-2xl font-bold text-teal-900">Reopen Grievance</h3>
         <button type="button" onclick="closeReopenModal()"
-                class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg p-1.5 transition-colors" aria-label="Close">
+                class="text-teal-900/50 hover:text-teal-900 hover:bg-teal-50 rounded-lg p-1.5 transition-colors" aria-label="Close">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1441,7 +1483,7 @@ $totalGrievances = count($grievances);
         <input type="hidden" name="grievance_id" id="reopenGrievanceId" value="" />
 
         <div>
-          <label for="reopen_reason" class="block text-sm font-semibold text-slate-700 mb-2">
+          <label for="reopen_reason" class="block text-sm font-semibold text-teal-900 mb-2">
             Reopen (If you are not satisfied with the reply, you can reopen the grievance/complaint)
           </label>
           <textarea id="reopen_reason"
@@ -1449,18 +1491,18 @@ $totalGrievances = count($grievances);
                     rows="2"
                     maxlength="120"
                     required
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 resize-none
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all bg-white"></textarea>
-          <p class="text-xs text-slate-500 mt-1.5">(Maximum 120 character) — <span id="reopenCharCount" class="font-semibold text-slate-600">0</span>/120</p>
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg text-sm bg-teal-50/40 text-teal-900 placeholder-teal-900/40 resize-none
+                           focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-200 transition-all"></textarea>
+          <p class="text-xs text-teal-900/60 mt-1.5">(Maximum 120 character) — <span id="reopenCharCount" class="font-semibold text-teal-900/80">0</span>/120</p>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-2">
           <button type="submit"
-                  class="inline-flex items-center justify-center px-7 py-2.5 rounded-xl
-                         bg-[#4A154B] hover:bg-[#5A1B5C] text-white text-sm font-bold
-                         shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                         transition-all duration-300 hover:-translate-y-0.5 active:scale-95
+                  class="inline-flex items-center justify-center px-7 py-2.5 rounded-lg
+                         bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold
+                         shadow-sm hover:shadow-md
+                         transition-all duration-200
                          disabled:opacity-50 disabled:cursor-not-allowed">
             <span>Submit</span>
           </button>
@@ -1469,39 +1511,38 @@ $totalGrievances = count($grievances);
     </div>
   </div>
 
-  <!-- ============================================================ -->
   <!-- LOGOUT MODAL -->
-  <!-- ============================================================ -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div id="logoutConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
-          You are about to log out of <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+        <p class="text-sm text-teal-900/70 leading-relaxed">
+          You are about to log out of <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
           Any unsaved changes will be lost.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
         <button type="button" id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
         </button>
@@ -1511,22 +1552,22 @@ $totalGrievances = count($grievances);
 
   <script>
     // Expose small helpers globally so onclick="" works reliably
-    window.openCreateGrievanceModal = function () { /* placeholder — redefined below */ };
-    window.closeCreateGrievanceModal = function () { /* placeholder */ };
-    window.openEditGrievanceModal = function () { /* placeholder */ };
-    window.closeEditGrievanceModal = function () { /* placeholder */ };
-    window.openDisposeModal = function () { /* placeholder */ };
-    window.closeDisposeModal = function () { /* placeholder */ };
-    window.openFeedbackModal = function () { /* placeholder */ };
-    window.closeFeedbackModal = function () { /* placeholder */ };
-    window.openReopenModal = function () { /* placeholder */ };
-    window.closeReopenModal = function () { /* placeholder */ };
-    window.openViewGrievanceModal = function () { /* placeholder */ };
-    window.closeViewGrievanceModal = function () { /* placeholder */ };
-    window.openPreviewOverlay = function () { /* placeholder */ };
-    window.closePreviewOverlay = function () { /* placeholder */ };
-    window.openLogoutModal = function () { /* placeholder */ };
-    window.closeLogoutModal = function () { /* placeholder */ };
+    window.openCreateGrievanceModal = function () {};
+    window.closeCreateGrievanceModal = function () {};
+    window.openEditGrievanceModal = function () {};
+    window.closeEditGrievanceModal = function () {};
+    window.openDisposeModal = function () {};
+    window.closeDisposeModal = function () {};
+    window.openFeedbackModal = function () {};
+    window.closeFeedbackModal = function () {};
+    window.openReopenModal = function () {};
+    window.closeReopenModal = function () {};
+    window.openViewGrievanceModal = function () {};
+    window.closeViewGrievanceModal = function () {};
+    window.openPreviewOverlay = function () {};
+    window.closePreviewOverlay = function () {};
+    window.openLogoutModal = function () {};
+    window.closeLogoutModal = function () {};
 
     document.addEventListener('DOMContentLoaded', function () {
       if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1835,10 +1876,10 @@ $totalGrievances = count($grievances);
         const s = (status || '').trim();
         const map = {
           'Pending':     'bg-amber-100 text-amber-800 border-amber-200',
-          'In Progress': 'bg-blue-100 text-blue-800 border-blue-200',
+          'In Progress': 'bg-sky-100 text-sky-800 border-sky-200',
           'Disposed':    'bg-emerald-100 text-emerald-800 border-emerald-200',
-          'Closed':      'bg-slate-200 text-slate-700 border-slate-300',
-          'Reopened':    'bg-rose-100 text-rose-800 border-rose-200'
+          'Closed':      'bg-slate-100 text-slate-700 border-slate-200',
+          'Reopened':    'bg-pink-100 text-pink-800 border-pink-200'
         };
         const cls = map[s] || 'bg-slate-100 text-slate-700 border-slate-200';
         return '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ' + cls + '">' + s + '</span>';
@@ -1866,7 +1907,6 @@ $totalGrievances = count($grievances);
         document.getElementById('vgDescription').textContent = (data.description && data.description.trim() !== '') ? data.description : 'No description provided.';
         document.getElementById('vgReply').textContent       = (data.reply && data.reply.trim() !== '') ? data.reply : 'No response yet from the grievance committee.';
 
-        // Reopen reason
         const roWrap = document.getElementById('vgReopenWrapper');
         const roText = document.getElementById('vgReopenReason');
         if (data.reopen_reason && String(data.reopen_reason).trim() !== '') {
@@ -1876,7 +1916,6 @@ $totalGrievances = count($grievances);
           roWrap.classList.add('hidden');
         }
 
-        // Original attachment
         const origWrap = document.getElementById('vgAttachmentWrapper');
         const origName = document.getElementById('vgAttachmentName');
         const origPreview = document.getElementById('vgPreviewBtn');
@@ -1901,7 +1940,6 @@ $totalGrievances = count($grievances);
           origWrap.classList.add('hidden');
         }
 
-        // Reply attachment
         const repWrap = document.getElementById('vgReplyAttachWrapper');
         const repName = document.getElementById('vgReplyAttachmentName');
         const repPreview = document.getElementById('vgReplyPreviewBtn');
@@ -1926,7 +1964,6 @@ $totalGrievances = count($grievances);
           repWrap.classList.add('hidden');
         }
 
-        // Feedback
         const fbWrap = document.getElementById('vgFeedbackWrapper');
         const fbText = document.getElementById('vgFeedback');
         if (data.feedback && data.feedback.trim() !== '') {
@@ -2016,12 +2053,9 @@ $totalGrievances = count($grievances);
         });
       }
 
-      /* =========================================================
-         DELEGATED CLICK HANDLERS for data-* triggers
-         ========================================================= */
+      /* DELEGATED CLICK HANDLERS for data-* triggers */
       document.addEventListener('click', function (e) {
 
-        // VIEW
         const viewBtn = e.target.closest('[data-view-trigger="1"]');
         if (viewBtn) {
           e.preventDefault();
@@ -2032,7 +2066,6 @@ $totalGrievances = count($grievances);
           return;
         }
 
-        // EDIT
         const editBtn = e.target.closest('[data-edit-trigger="1"]');
         if (editBtn) {
           e.preventDefault();
@@ -2044,7 +2077,6 @@ $totalGrievances = count($grievances);
           return;
         }
 
-        // DISPOSE
         const disposeBtn = e.target.closest('[data-dispose-trigger="1"]');
         if (disposeBtn) {
           e.preventDefault();
@@ -2054,7 +2086,6 @@ $totalGrievances = count($grievances);
           return;
         }
 
-        // FEEDBACK
         const feedbackBtn = e.target.closest('[data-feedback-trigger="1"]');
         if (feedbackBtn) {
           e.preventDefault();
@@ -2064,7 +2095,6 @@ $totalGrievances = count($grievances);
           return;
         }
 
-        // REOPEN
         const reopenBtn = e.target.closest('[data-reopen-trigger="1"]');
         if (reopenBtn) {
           e.preventDefault();
@@ -2075,7 +2105,7 @@ $totalGrievances = count($grievances);
         }
       });
 
-      /* ---------- Search + Entries pagination ---------- */
+      /* Search + Entries pagination */
       (function () {
         const searchInput   = document.getElementById('searchInput');
         const entriesSelect = document.getElementById('entriesPerPage');
@@ -2134,7 +2164,7 @@ $totalGrievances = count($grievances);
         applyFilters();
       })();
 
-      /* ---------- Escape key ---------- */
+      /* Escape key */
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
         if (previewOverlay && !previewOverlay.classList.contains('hidden')) { window.closePreviewOverlay(); return; }

@@ -18,9 +18,6 @@
 
 declare(strict_types=1);
 
-// ---------------------------------------------------------------------------
-// 1. SESSION START
-// ---------------------------------------------------------------------------
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -30,7 +27,7 @@ ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
 // ---------------------------------------------------------------------------
-// 2. AUTH GUARD
+// AUTH GUARD
 // ---------------------------------------------------------------------------
 $sessionRole = isset($_SESSION['role']) ? strtoupper((string) $_SESSION['role']) : '';
 
@@ -42,7 +39,7 @@ if (empty($_SESSION['user_id']) || $sessionRole !== 'ADMIN') {
 $userId = (int) $_SESSION['user_id'];
 
 // ---------------------------------------------------------------------------
-// 3. DATABASE CONNECTION
+// DATABASE CONNECTION
 // ---------------------------------------------------------------------------
 $dbFile = __DIR__ . '/../db_connect.php';
 
@@ -71,7 +68,7 @@ if (!file_exists($dbFile)) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. HELPER
+// HELPER
 // ---------------------------------------------------------------------------
 function e(?string $v): string
 {
@@ -79,7 +76,7 @@ function e(?string $v): string
 }
 
 // ---------------------------------------------------------------------------
-// 5. FETCH ADMIN PROFILE
+// FETCH ADMIN PROFILE
 // ---------------------------------------------------------------------------
 $adminData = [
     'username'        => $_SESSION['username'] ?? 'Admin',
@@ -90,14 +87,10 @@ $adminData = [
 
 if ($conn instanceof mysqli) {
     try {
-        $sql = "SELECT  u.username,
-                        ap.name,
-                        ap.email,
-                        ap.profile_picture
+        $sql = "SELECT  u.username, ap.name, ap.email, ap.profile_picture
                 FROM users u
                 LEFT JOIN admin_profiles ap ON ap.user_id = u.id
-                WHERE u.id = ?
-                LIMIT 1";
+                WHERE u.id = ? LIMIT 1";
 
         $stmt = $conn->prepare($sql);
         if ($stmt) {
@@ -133,7 +126,7 @@ if (!empty($adminData['profile_picture'])) {
 }
 
 // ---------------------------------------------------------------------------
-// 6. HANDLE FORM SUBMISSIONS
+// HANDLE FORM SUBMISSIONS
 // ---------------------------------------------------------------------------
 $flashSuccess = '';
 $flashError   = '';
@@ -243,7 +236,7 @@ if (!empty($_SESSION['flash_error'])) {
 }
 
 // ---------------------------------------------------------------------------
-// 7. FETCH COURSES & GROUPED CLASSES
+// FETCH COURSES & GROUPED CLASSES
 // ---------------------------------------------------------------------------
 $courses = [];
 $classesByCourse = [];
@@ -261,10 +254,7 @@ if ($conn instanceof mysqli) {
     }
 
     try {
-        $sql = "SELECT  cl.id,
-                        cl.class_name,
-                        cl.course_id,
-                        co.course_name,
+        $sql = "SELECT  cl.id, cl.class_name, cl.course_id, co.course_name,
                         COUNT(st.id) AS student_count
                 FROM classes cl
                 JOIN courses co ON cl.course_id = co.id
@@ -298,15 +288,23 @@ if ($conn instanceof mysqli) {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink:   '#E5097F',
-            brandGreen:  '#006837',
-            brandGold:   '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
             fadeInUp: {
@@ -335,6 +333,15 @@ if ($conn instanceof mysqli) {
             flashOut: {
               '0%':   { opacity: '1', transform: 'translateY(0)', maxHeight: '200px' },
               '100%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0px' }
+            },
+            shimmer: {
+              '0%':   { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            },
+            pulseRing: {
+              '0%':   { boxShadow: '0 0 0 0 rgba(0,110,116,0.45)' },
+              '70%':  { boxShadow: '0 0 0 12px rgba(0,110,116,0)' },
+              '100%': { boxShadow: '0 0 0 0 rgba(0,110,116,0)' }
             }
           },
           animation: {
@@ -343,160 +350,412 @@ if ($conn instanceof mysqli) {
             'modal-in':   'modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             'confirm-shake': 'confirmShake 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
             'flash-in':   'flashIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'flash-out':  'flashOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards'
+            'flash-out':  'flashOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards',
+            'shimmer':    'shimmer 3s linear infinite',
+            'pulse-ring': 'pulseRing 2s ease-out infinite'
           }
         }
       }
     };
   </script>
 
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    /* ============================================================
+       FONT FACES
+       ============================================================ */
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    /* ============================================================
+       AMBIENT BACKGROUND MESH (fixed only on desktop)
+       ============================================================ */
+    body {
+      background-color: #EAF4F4;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(0,110,116,0.08) 0px, transparent 50%),
+        radial-gradient(at 88% 4%, rgba(63,155,159,0.10) 0px, transparent 50%),
+        radial-gradient(at 78% 92%, rgba(0,110,116,0.07) 0px, transparent 50%),
+        radial-gradient(at 4% 88%, rgba(63,155,159,0.08) 0px, transparent 50%);
+    }
+    @media (min-width: 1024px) and (hover: hover) {
+      body { background-attachment: fixed; }
+    }
+
+    /* ============================================================
+       CUSTOM SCROLLBAR (desktop only)
+       ============================================================ */
+    @media (hover: hover) and (pointer: fine) {
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #128287, #006E74);
+        border-radius: 8px;
+        border: 2px solid #EAF4F4;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: #005A5F; }
+    }
+
+    ::selection { background: #9FCDCF; color: #003134; }
+
+    /* ============================================================
+       DECORATIVE PATTERNS
+       ============================================================ */
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+      position: relative;
+      overflow: hidden;
+    }
+    .roofline::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 4s linear infinite;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-track { background: transparent; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    #sidebarNav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+    /* ============================================================
+       REVEAL ON SCROLL
+       ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1);
+    }
+    .reveal.is-visible { opacity: 1; transform: none; }
+
+    @media (max-width: 640px) {
+      .reveal {
+        transform: translateY(10px);
+        transition-duration: .4s;
+      }
+    }
+
+    /* ============================================================
+       SIMPLE CARD HOVER — soft lift + shadow + border color
+       ============================================================ */
+    .card-soft {
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .card-soft:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px -10px rgba(0, 69, 74, 0.18);
+      }
+    }
+
+    /* Icon — simple background/color swap */
+    .card-soft .card-icon {
+      transition: background-color .25s ease, color .25s ease;
+    }
+
+    /* ============================================================
+       SIDEBAR ACTIVE GLOW
+       ============================================================ */
+    .sidebar-active-glow {
+      box-shadow: 0 0 0 1px rgba(255,255,255,.3),
+                  0 6px 20px -6px rgba(0,0,0,.35),
+                  inset 0 0 20px rgba(255,255,255,.06);
+    }
+
+    /* ============================================================
+       SIDEBAR LINK — HOVER SLIDE ACCENT
+       ============================================================ */
+    .sidebar-link { position: relative; overflow: hidden; }
+    .sidebar-link::after {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #fff;
+      transform: translateX(-4px);
+      opacity: 0;
+      transition: all .25s ease;
+      border-radius: 0 4px 4px 0;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .sidebar-link:hover::after { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ============================================================
+       HEADER FROSTED-ON-SCROLL
+       ============================================================ */
+    .header-scrolled {
+      background: rgba(255,255,255,.92) !important;
+      box-shadow: 0 4px 24px -8px rgba(0,69,74,.15);
+    }
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+      @media (hover: hover) and (min-width: 1024px) {
+        .header-scrolled {
+          background: rgba(255,255,255,.85) !important;
+          backdrop-filter: saturate(180%) blur(14px);
+          -webkit-backdrop-filter: saturate(180%) blur(14px);
+        }
+      }
+    }
+
+    /* ============================================================
+       HEADING UNDERLINE
+       ============================================================ */
+    .heading-underline { position: relative; display: inline-block; }
+    .heading-underline::after {
+      content: '';
+      position: absolute; left: 0; bottom: -6px;
+      height: 3px; width: 100%;
+      background: linear-gradient(90deg, #006E74, #3F9B9F 60%, transparent);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underlineIn .8s .3s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes underlineIn { to { transform: scaleX(1); } }
+
+    /* ============================================================
+       COURSE SECTION DIVIDER
+       ============================================================ */
+    .course-divider {
+      position: relative;
+      height: 1px;
+      background: linear-gradient(90deg, #CFE6E7 0%, #CFE6E7 60%, transparent 100%);
+    }
+
+    /* ============================================================
+       ADD CLASS BUTTON — subtle sheen sweep
+       ============================================================ */
+    .btn-sheen { position: relative; overflow: hidden; }
+    .btn-sheen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%);
+      background-size: 200% 100%;
+      transform: translateX(-100%);
+      transition: transform .8s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-sheen:hover::before { transform: translateX(100%); }
+    }
+
+    /* ============================================================
+       BACK TO TOP
+       ============================================================ */
+    #backToTop {
+      transition: opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1), background-color .25s ease;
+      opacity: 0;
+      transform: translateY(10px) scale(.9);
+      pointer-events: none;
+    }
+    #backToTop.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       FOCUS RING
+       ============================================================ */
+    :focus-visible {
+      outline: 2px solid #3F9B9F;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ============================================================
+       LOW-END DEVICE STRIP-OUT
+       ============================================================ */
+    @media (max-width: 480px) {
+      .roofline::after { animation: none; }
+      .heading-underline::after { animation: none; transform: scaleX(1); }
+      .animate-pulse-ring { animation: none; }
+      .btn-sheen::before { display: none; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+      .reveal { opacity: 1 !important; transform: none !important; }
+      .card-soft:hover { transform: none !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen text-teal-900 antialiased flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- SIDEBAR -->
-    <aside class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837] flex flex-col items-center py-4 shadow-2xl fixed inset-y-0 left-0 z-40">
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside id="adminSidebar"
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
+                  transition-all duration-300 ease-in-out overflow-hidden">
 
-      <button class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
-
-      <nav class="flex flex-col items-center space-y-6 flex-1">
-
+      <!-- Brand row: "grievance" text + toggle (logo removed) -->
+      <div class="flex items-center gap-2 px-3 mb-6 flex-shrink-0">
         <a href="dashboard.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110"
-           title="Dashboard">
-          <i data-lucide="home" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Dashboard
+           class="sidebar-brand inline-flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+          <span class="sidebar-label text-white font-bold text-lg whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">
+            grievance
           </span>
+          <span class="sidebar-label w-1.5 h-1.5 rounded-full bg-white mb-1 flex-shrink-0 opacity-0 w-0 overflow-hidden transition-all duration-200"></span>
+        </a>
+        <button id="sidebarToggle"
+                class="text-white/80 hover:text-white p-2.5 rounded-xl hover:bg-white/10
+                       transition-colors flex items-center justify-center flex-shrink-0"
+                aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
+        </button>
+      </div>
+
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
+
+        <a href="dashboard.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <a href="profile.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110"
-           title="Profile">
-          <i data-lucide="user" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Profile
-          </span>
+        <a href="profile.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
         </a>
 
-        <a href="settings.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110"
-           title="Settings">
-          <i data-lucide="settings" class="w-6 h-6 group-hover:rotate-90 transition-transform duration-500"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Settings
-          </span>
+        <a href="settings.php" class="sidebar-link sidebar-active-glow group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
+          <i data-lucide="settings" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Settings</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Settings</span>
+        </a>
+
+        <a href="change_password.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
 
       </nav>
 
-      <!-- Logout Trigger -->
-      <a href="#" data-logout-trigger="1"
-         id="sidebarLogoutBtn"
-         class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center justify-center text-white transition-all hover:scale-110"
-         title="Logout">
-        <i data-lucide="log-out" class="w-6 h-6 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-          Logout
-        </span>
+      <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
+         class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
+        <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
-
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <div class="flex-1 ml-20 flex flex-col min-h-screen">
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <div id="adminMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30 transition-all duration-300">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
 
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo"
-                   class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance"
-                 class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
           <div class="relative" id="admin-dropdown-container">
-            <button id="admin-dropdown-btn"
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+            <button id="admin-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
 
               <?php if ($hasProfilePicture): ?>
                 <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
-                     class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
+                     class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                  <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
 
-              <span class="hidden sm:block text-sm font-semibold text-slate-700"><?= e($displayName) ?></span>
-              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
             <div id="admin-dropdown-menu"
-                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden">
+                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
 
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($hasProfilePicture): ?>
                     <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>"
-                         class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
+                         class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white">
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white">
                       <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                   <?php endif; ?>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
+                    <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                    <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
               </div>
 
-              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
 
-              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
 
-              <a href="settings.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="settings" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="settings.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="settings" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Settings</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
 
-              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="key" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
 
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1"
-                   id="dropdownLogoutBtn"
-                   class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn"
+                   class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
                   <span class="font-medium">Logout</span>
                 </a>
               </div>
@@ -506,64 +765,66 @@ if ($conn instanceof mysqli) {
         </div>
       </header>
 
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <div class="max-w-6xl mx-auto mb-8 animate-fade-in-up">
+        <!-- PAGE HEADING + ADD BUTTON -->
+        <div class="max-w-6xl mx-auto mb-6 animate-fade-in-up">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 tracking-tight">
-                Class/Semester
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600 animate-pulse-ring"></span>
+                <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Settings · Class</p>
+              </div>
+              <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-3">
+                <span class="heading-underline">Class / Semester</span>
               </h1>
-              <nav class="flex items-center space-x-2 text-sm text-slate-500">
-                <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-                  <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i>
+              <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+                <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                   Dashboard
                 </a>
-                <span class="text-slate-300">/</span>
-                <a href="settings.php" class="hover:text-[#8B1E7E] transition-colors">
-                  Settings
-                </a>
-                <span class="text-slate-300">/</span>
-                <span class="text-[#E5097F] font-semibold">Semester</span>
+                <span class="text-teal-900/30">/</span>
+                <a href="settings.php" class="hover:text-teal-600 transition-colors">Settings</a>
+                <span class="text-teal-900/30">/</span>
+                <span class="text-teal-600 font-semibold">Class</span>
               </nav>
             </div>
 
-            <button type="button"
-                    onclick="openClassModal('create')"
-                    class="group relative inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl
-                           bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]
-                           hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A]
-                           text-white font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                           transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
-              <i data-lucide="plus" class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"></i>
+            <button type="button" onclick="openClassModal('create')"
+                    class="btn-sheen inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-semibold text-white
+                           bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                           transition-all duration-200 cursor-pointer shrink-0">
+              <i data-lucide="plus" class="w-5 h-5"></i>
               <span>Add Class</span>
             </button>
 
           </div>
         </div>
 
+        <!-- FLASH MESSAGES -->
         <?php if ($flashSuccess !== ''): ?>
           <div id="flashSuccessBox"
-               class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
-            <i data-lucide="check-circle" class="w-5 h-5 text-[#006837] flex-shrink-0 mt-0.5"></i>
+               class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-emerald-800 font-medium"><?= e($flashSuccess) ?></p>
           </div>
         <?php endif; ?>
 
         <?php if ($flashError !== ''): ?>
           <div id="flashErrorBox"
-               class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
+               class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2 animate-flash-in overflow-hidden">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-red-700 font-medium"><?= e($flashError) ?></p>
           </div>
         <?php endif; ?>
 
+        <!-- INFO BANNER -->
         <div class="max-w-6xl mx-auto mb-6 animate-fade-in-up" style="animation-delay: 60ms;">
-          <div class="bg-slate-100 border border-slate-200 rounded-xl px-5 py-3.5">
-            <p class="text-sm text-slate-600 flex items-center">
-              <i data-lucide="mouse-pointer-click" class="w-4 h-4 mr-2 text-[#8B1E7E]"></i>
-              Click on a class card to manage its students — Drag &amp; drop to prioritize!
+          <div class="flex items-start gap-3 bg-teal-50 border-2 border-teal-100 rounded-xl px-5 py-3.5">
+            <i data-lucide="info" class="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5"></i>
+            <p class="text-sm text-teal-900/80">
+              Click on a class card to manage its students.
             </p>
           </div>
         </div>
@@ -572,17 +833,17 @@ if ($conn instanceof mysqli) {
 
           <?php if (empty($classesByCourse)): ?>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/70 p-12 text-center">
-              <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-50 mb-4">
-                <i data-lucide="graduation-cap" class="w-8 h-8 text-[#8B1E7E]"></i>
+            <div class="bg-white rounded-2xl border-2 border-teal-100 p-12 text-center">
+              <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-teal-50 mb-4">
+                <i data-lucide="graduation-cap" class="w-8 h-8 text-teal-600"></i>
               </div>
-              <h3 class="text-lg font-bold text-slate-800 mb-2">No classes yet</h3>
-              <p class="text-sm text-slate-500 mb-6">
+              <h3 class="text-lg font-bold text-teal-900 mb-2">No classes yet</h3>
+              <p class="text-sm text-teal-900/60 mb-6">
                 Get started by creating your first class or semester.
               </p>
-              <button type="button"
-                      onclick="openClassModal('create')"
-                      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A] hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A] text-white font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+              <button type="button" onclick="openClassModal('create')"
+                      class="btn-sheen inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-white
+                             bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md transition-all duration-200">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>Add First Class</span>
               </button>
@@ -593,78 +854,70 @@ if ($conn instanceof mysqli) {
             <?php foreach ($classesByCourse as $courseName => $classes): ?>
 
               <div class="mb-5 mt-8 first:mt-0">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center">
-                  <span class="w-2 h-2 bg-[#E5097F] rounded-full mr-3"></span>
+                <h2 class="text-lg font-bold text-teal-900 flex items-center gap-3">
+                  <span class="w-2 h-2 bg-teal-600 rounded-full"></span>
                   <?= e($courseName) ?>
                 </h2>
-                <div class="mt-3 h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent"></div>
+                <div class="course-divider mt-3"></div>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
 
-                <?php foreach ($classes as $i => $class): ?>
+                <?php foreach ($classes as $idx => $class): ?>
                   <?php
-                    $isPurpleTint = ($i % 2 === 0);
-                    $cardBgClass  = $isPurpleTint ? 'bg-purple-100' : 'bg-pink-100';
                     $studentCount = (int) ($class['student_count'] ?? 0);
                     $classId      = (int) $class['id'];
                     $classUrl     = 'students.php?class_id=' . $classId;
                   ?>
                   <a href="<?= e($classUrl) ?>"
                      title="Manage students of <?= e($class['class_name']) ?>"
-                     class="group relative <?= $cardBgClass ?> rounded-2xl px-4 py-4 shadow-sm
-                            border-2 border-transparent
-                            hover:shadow-xl hover:-translate-y-1
-                            hover:border-[#8B1E7E]
-                            cursor-pointer
-                            transition-all duration-300 no-underline text-inherit
-                            overflow-hidden
-                            flex flex-col justify-center min-h-[88px]">
+                     class="reveal card-soft group flex flex-col p-5 rounded-2xl border-2 border-teal-100 bg-white
+                            hover:border-teal-600 no-underline text-inherit"
+                     style="transition-delay: <?= min($idx * 60, 300) ?>ms">
 
-                    <div class="relative z-10 flex items-center justify-between gap-3">
-
-                      <div class="flex items-center space-x-1.5 bg-white rounded-full px-2.5 py-1.5 shadow-sm flex-shrink-0
-                                  group-hover:bg-gradient-to-r group-hover:from-[#6A2C8A] group-hover:to-[#C43A7A]
-                                  transition-all duration-300">
-                        <i data-lucide="users" class="w-3.5 h-3.5 text-[#4A154B] group-hover:text-white transition-colors"></i>
-                        <span class="text-xs font-bold text-[#4A154B] group-hover:text-white transition-colors"><?= $studentCount ?></span>
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                      <div class="card-icon inline-flex items-center justify-center w-11 h-11 rounded-xl bg-teal-50 text-teal-600
+                                  group-hover:bg-teal-600 group-hover:text-white shrink-0">
+                        <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                       </div>
 
-                      <div class="flex-1 min-w-0 text-center">
-                        <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
-                          <?= e($class['course_name']) ?>
-                        </p>
-                        <p class="text-sm font-bold text-slate-800 truncate group-hover:text-[#4A154B] transition-colors">
-                          <?= e($class['class_name']) ?>
-                        </p>
-                      </div>
+                      <span class="inline-flex items-center gap-1.5 bg-teal-50 text-teal-600 px-2.5 py-1 rounded-full text-xs font-bold">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                        <?= $studentCount ?>
+                      </span>
+                    </div>
 
-                      <div class="flex flex-col gap-1 flex-shrink-0">
+                    <p class="text-[10px] font-semibold text-teal-900/50 uppercase tracking-wider mb-1 truncate">
+                      <?= e($class['course_name']) ?>
+                    </p>
+                    <p class="text-base font-bold text-teal-900 truncate mb-4">
+                      <?= e($class['class_name']) ?>
+                    </p>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-teal-100 mt-auto">
+                      <span class="inline-flex items-center gap-1.5 text-teal-600 font-semibold text-xs">
+                        Manage students
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300"></i>
+                      </span>
+
+                      <div class="flex gap-1.5">
                         <button type="button"
                                 title="Edit class"
                                 onclick='event.preventDefault(); event.stopPropagation(); openClassModal("edit", <?= $classId ?>, <?= (int) $class["course_id"] ?>, <?= json_encode((string) $class["class_name"]) ?>)'
-                                class="w-7 h-7 rounded-full bg-white flex items-center justify-center
-                                       shadow-sm hover:bg-gradient-to-r hover:from-[#6A2C8A] hover:to-[#C43A7A] text-[#4A154B] hover:text-white
-                                       transition-all duration-200 hover:scale-110">
+                                class="w-8 h-8 rounded-lg bg-teal-50 hover:bg-teal-600 text-teal-600 hover:text-white
+                                       flex items-center justify-center transition-colors duration-200">
                           <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                         </button>
 
                         <button type="button"
                                 title="Delete class"
                                 onclick='event.preventDefault(); event.stopPropagation(); confirmDeleteClass(<?= $classId ?>, <?= json_encode((string) $class["class_name"]) ?>)'
-                                class="w-7 h-7 rounded-full bg-white flex items-center justify-center
-                                       shadow-sm hover:bg-red-500 text-red-500 hover:text-white
-                                       transition-all duration-200 hover:scale-110">
+                                class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-500 text-red-500 hover:text-white
+                                       flex items-center justify-center transition-colors duration-200">
                           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                         </button>
                       </div>
-
                     </div>
-
-                    <div class="absolute bottom-0 left-0 right-0 h-1 z-0
-                                bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]
-                                transform scale-x-0 group-hover:scale-x-100
-                                transition-transform duration-500 origin-left"></div>
 
                   </a>
                 <?php endforeach; ?>
@@ -679,19 +932,17 @@ if ($conn instanceof mysqli) {
 
       </main>
 
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-6">
           <div class="max-w-7xl mx-auto text-center">
-            <p class="text-xs text-slate-700">
+            <p class="text-xs text-teal-200/70">
               Copyright &copy; <?= date('Y') ?>
-              <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>.
+              <span class="font-bold text-white">Rajagiri College of Social Sciences</span>.
               All rights reserved.
             </p>
-            <p class="text-xs text-slate-700 mt-1">
-              Powered by
-              <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">
-                Orell
-              </span>
+            <p class="text-xs text-teal-200/70 mt-1">
+              Powered by <span class="font-bold text-white">RLabZ</span>
             </p>
           </div>
         </div>
@@ -700,16 +951,26 @@ if ($conn instanceof mysqli) {
     </div>
   </div>
 
-  <!-- CREATE / EDIT CLASS MODAL -->
+  <!-- BACK TO TOP -->
+  <button id="backToTop" aria-label="Back to top"
+          class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-teal-600 hover:bg-teal-700
+                 text-white shadow-lg hover:shadow-xl flex items-center justify-center
+                 hover:scale-110 transition-all duration-300">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
+  <!-- ============================================================ -->
+  <!-- CREATE / EDIT CLASS MODAL                                    -->
+  <!-- ============================================================ -->
   <div id="classModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeClassModal()"></div>
 
     <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 id="classModalTitle" class="text-lg font-bold text-slate-800">Create Class</h3>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 id="classModalTitle" class="text-lg font-bold text-teal-900">Create Class</h3>
         <button type="button" onclick="closeClassModal()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -719,13 +980,11 @@ if ($conn instanceof mysqli) {
         <input type="hidden" name="class_id" id="formClassId" value="" />
 
         <div class="space-y-2">
-          <label for="course_id" class="block text-sm font-semibold text-slate-700">
-            Course
-          </label>
+          <label for="course_id" class="block text-sm font-semibold text-teal-900">Course</label>
           <select name="course_id" id="course_id" required
-                  class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl appearance-none bg-white text-slate-800 font-medium
-                         focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                         hover:border-[#4A154B]/40 transition-all">
+                  class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg appearance-none bg-teal-50/40 text-teal-900 font-medium text-sm
+                         focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                         hover:border-teal-200 transition-all">
             <option value="">-- Select Course --</option>
             <?php foreach ($courses as $course): ?>
               <option value="<?= (int) $course['id'] ?>">
@@ -736,24 +995,22 @@ if ($conn instanceof mysqli) {
         </div>
 
         <div class="space-y-2">
-          <label for="class_name" class="block text-sm font-semibold text-slate-700">
-            Class Name <span class="text-[#E5097F]">*</span>
+          <label for="class_name" class="block text-sm font-semibold text-teal-900">
+            Class Name <span class="text-red-500">*</span>
           </label>
           <input type="text" name="class_name" id="class_name" required
                  placeholder="e.g. SEMESTER I"
-                 class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium
-                        placeholder-slate-400
-                        focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                        hover:border-[#4A154B]/40 transition-all" />
+                 class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 font-medium text-sm
+                        placeholder-teal-900/40
+                        focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                        hover:border-teal-200 transition-all" />
         </div>
 
         <div class="flex justify-center pt-2">
           <button type="submit"
-                  class="px-8 py-3 rounded-xl
-                         bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]
-                         hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A]
-                         text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                         transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                  class="px-8 py-3 rounded-lg font-semibold text-white
+                         bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                         transition-all duration-200 cursor-pointer">
             Submit
           </button>
         </div>
@@ -762,27 +1019,27 @@ if ($conn instanceof mysqli) {
     </div>
   </div>
 
-  <!-- DELETE CONFIRMATION MODAL -->
+  <!-- ============================================================ -->
+  <!-- DELETE CONFIRMATION MODAL                                    -->
+  <!-- ============================================================ -->
   <div id="deleteConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
 
     <div id="deleteConfirmPanel"
          class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
 
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4
-                    bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="trash-2" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Delete Class?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Delete Class?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <p class="text-sm text-teal-900/70 leading-relaxed">
           You are about to permanently delete
-          <span id="deleteClassNameDisplay"
-                class="font-bold text-[#8B1E7E] break-words">this class</span>.
+          <span id="deleteClassNameDisplay" class="font-bold text-teal-700 break-words">this class</span>.
         </p>
 
         <p class="text-xs text-red-500 font-medium mt-3 flex items-center gap-1.5">
@@ -792,22 +1049,15 @@ if ($conn instanceof mysqli) {
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
-        <button type="button"
-                onclick="closeDeleteModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700
-                       bg-slate-100 hover:bg-slate-200
-                       border border-slate-200
-                       transition-all duration-200 active:scale-95">
+        <button type="button" onclick="closeDeleteModal()"
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200
+                       hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
 
-        <button type="button"
-                id="confirmDeleteBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white
-                       bg-gradient-to-r from-red-500 via-red-600 to-rose-600
-                       hover:from-red-600 hover:via-red-700 hover:to-rose-700
-                       shadow-lg shadow-red-500/30 hover:shadow-red-500/50
-                       transition-all duration-300 hover:-translate-y-0.5 active:scale-95
+        <button type="button" id="confirmDeleteBtn"
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md transition-all duration-200
                        flex items-center justify-center gap-2">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
           <span>Delete</span>
@@ -824,32 +1074,34 @@ if ($conn instanceof mysqli) {
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div id="logoutConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
-          You are about to log out of <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+        <p class="text-sm text-teal-900/70 leading-relaxed">
+          You are about to log out of <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
           Any unsaved changes will be lost.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200
+                       hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
         <button type="button" id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700
+                       shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
         </button>
@@ -864,53 +1116,66 @@ if ($conn instanceof mysqli) {
   </form>
 
   <script>
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // ---- Auto-dismiss flash messages after 3 seconds ----
+    // Auto-dismiss flash messages after 3 seconds
     (function () {
-      const flashBoxes = [
-        document.getElementById('flashSuccessBox'),
-        document.getElementById('flashErrorBox'),
-      ];
-
-      flashBoxes.forEach(function (box) {
+      ['flashSuccessBox', 'flashErrorBox'].forEach(function (id) {
+        const box = document.getElementById(id);
         if (!box) return;
-
         setTimeout(function () {
           box.classList.remove('animate-flash-in');
           box.classList.add('animate-flash-out');
-
-          setTimeout(function () {
-            if (box && box.parentNode) {
-              box.parentNode.removeChild(box);
-            }
-          }, 500);
+          setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 500);
         }, 3000);
       });
     })();
 
-    // ---- Admin profile dropdown ----
+    // Sidebar expand/collapse
+    (function () {
+      const sidebar   = document.getElementById('adminSidebar');
+      const main      = document.getElementById('adminMain');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      if (!sidebar || !main || !toggleBtn) return;
+
+      const labels   = sidebar.querySelectorAll('.sidebar-label');
+      const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
+      let expanded = false;
+
+      toggleBtn.addEventListener('click', function () {
+        expanded = !expanded;
+        if (expanded) {
+          sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+          main.classList.remove('ml-20');   main.classList.add('ml-64');
+          labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
+          tooltips.forEach(function (el) { el.classList.add('hidden'); });
+        } else {
+          sidebar.classList.add('w-20');    sidebar.classList.remove('w-64');
+          main.classList.add('ml-20');      main.classList.remove('ml-64');
+          labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
+          tooltips.forEach(function (el) { el.classList.remove('hidden'); });
+        }
+        setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
+      });
+    })();
+
+    // Admin profile dropdown
     (function () {
       const btn       = document.getElementById('admin-dropdown-btn');
       const menu      = document.getElementById('admin-dropdown-menu');
       const chevron   = document.getElementById('admin-chevron');
       const container = document.getElementById('admin-dropdown-container');
-
       if (!btn || !menu || !container) return;
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = !menu.classList.contains('hidden');
         if (isOpen) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
           btn.setAttribute('aria-expanded', 'false');
         } else {
-          menu.classList.remove('hidden');
-          menu.classList.add('animate-dropdown');
+          menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
           if (chevron) chevron.classList.add('rotate-180');
           btn.setAttribute('aria-expanded', 'true');
         }
@@ -918,8 +1183,7 @@ if ($conn instanceof mysqli) {
 
       document.addEventListener('click', function (e) {
         if (!container.contains(e.target)) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
           btn.setAttribute('aria-expanded', 'false');
         }
@@ -927,15 +1191,14 @@ if ($conn instanceof mysqli) {
 
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
           btn.setAttribute('aria-expanded', 'false');
         }
       });
     })();
 
-    // ---- Class Modal ----
+    // Class Modal
     const classModal      = document.getElementById('classModal');
     const classModalTitle = document.getElementById('classModalTitle');
     const classForm       = document.getElementById('classForm');
@@ -961,9 +1224,7 @@ if ($conn instanceof mysqli) {
       }
 
       setTimeout(() => {
-        const focusTarget = courseSelect && courseSelect.value
-          ? classNameInput
-          : courseSelect;
+        const focusTarget = courseSelect && courseSelect.value ? classNameInput : courseSelect;
         if (focusTarget) focusTarget.focus();
       }, 50);
 
@@ -977,28 +1238,17 @@ if ($conn instanceof mysqli) {
       formClassId.value = '';
     }
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && classModal && !classModal.classList.contains('hidden')) {
-        closeClassModal();
-      }
-    });
+    // Delete Confirmation
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const deleteConfirmPanel = document.getElementById('deleteConfirmPanel');
+    const deleteClassNameEl  = document.getElementById('deleteClassNameDisplay');
+    const confirmDeleteBtn   = document.getElementById('confirmDeleteBtn');
 
-    // ---- Delete Confirmation Modal ----
-    const deleteConfirmModal   = document.getElementById('deleteConfirmModal');
-    const deleteConfirmPanel   = document.getElementById('deleteConfirmPanel');
-    const deleteClassNameEl    = document.getElementById('deleteClassNameDisplay');
-    const confirmDeleteBtn     = document.getElementById('confirmDeleteBtn');
-
-    let pendingDeleteId    = null;
-    let pendingDeleteName  = '';
+    let pendingDeleteId = null;
 
     function confirmDeleteClass(classId, className) {
-      pendingDeleteId   = classId;
-      pendingDeleteName = className;
-
-      if (deleteClassNameEl) {
-        deleteClassNameEl.textContent = '"' + className + '"';
-      }
+      pendingDeleteId = classId;
+      if (deleteClassNameEl) deleteClassNameEl.textContent = '"' + className + '"';
 
       deleteConfirmModal.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
@@ -1009,30 +1259,21 @@ if ($conn instanceof mysqli) {
         deleteConfirmPanel.classList.add('animate-confirm-shake');
       }
 
-      setTimeout(function () {
-        if (confirmDeleteBtn) confirmDeleteBtn.focus();
-      }, 80);
-
+      setTimeout(function () { if (confirmDeleteBtn) confirmDeleteBtn.focus(); }, 80);
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     function closeDeleteModal() {
       deleteConfirmModal.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
-      pendingDeleteId   = null;
-      pendingDeleteName = '';
+      pendingDeleteId = null;
     }
 
     if (confirmDeleteBtn) {
       confirmDeleteBtn.addEventListener('click', function () {
-        if (pendingDeleteId === null || pendingDeleteId === undefined) {
-          closeDeleteModal();
-          return;
-        }
-
+        if (pendingDeleteId === null) { closeDeleteModal(); return; }
         const delIdInput = document.getElementById('deleteClassId');
         const delForm    = document.getElementById('deleteForm');
-
         if (delIdInput && delForm) {
           delIdInput.value = String(pendingDeleteId);
           delForm.submit();
@@ -1042,13 +1283,7 @@ if ($conn instanceof mysqli) {
       });
     }
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && deleteConfirmModal && !deleteConfirmModal.classList.contains('hidden')) {
-        closeDeleteModal();
-      }
-    });
-
-    // ---- Logout Confirmation Modal ----
+    // Logout modal
     (function () {
       const logoutConfirmModal = document.getElementById('logoutConfirmModal');
       const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
@@ -1068,7 +1303,6 @@ if ($conn instanceof mysqli) {
         setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
         if (typeof lucide !== 'undefined') lucide.createIcons();
       };
-
       window.closeLogoutModal = function () {
         logoutConfirmModal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
@@ -1077,8 +1311,7 @@ if ($conn instanceof mysqli) {
       [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
         if (!btn) return;
         btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           window.openLogoutModal();
         });
       });
@@ -1094,6 +1327,68 @@ if ($conn instanceof mysqli) {
         if (e.key === 'Escape' && !logoutConfirmModal.classList.contains('hidden')) {
           window.closeLogoutModal();
         }
+      });
+    })();
+
+    // Escape key handler for class modal
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && classModal && !classModal.classList.contains('hidden')) {
+        closeClassModal();
+      }
+      if (e.key === 'Escape' && deleteConfirmModal && !deleteConfirmModal.classList.contains('hidden')) {
+        closeDeleteModal();
+      }
+    });
+
+    // Scroll Reveal (IntersectionObserver)
+    (function () {
+      const items = document.querySelectorAll('.reveal');
+      if (!items.length) return;
+
+      if (!('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('is-visible'); });
+        return;
+      }
+
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+      items.forEach(function (el) { io.observe(el); });
+    })();
+
+    // Header frosted-on-scroll
+    (function () {
+      const header = document.querySelector('header');
+      if (!header) return;
+
+      const onScroll = function () {
+        if (window.scrollY > 10) header.classList.add('header-scrolled');
+        else header.classList.remove('header-scrolled');
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    // Back-to-top
+    (function () {
+      const btn = document.getElementById('backToTop');
+      if (!btn) return;
+
+      const onScroll = function () {
+        if (window.scrollY > 400) btn.classList.add('show');
+        else btn.classList.remove('show');
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      btn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     })();
   </script>

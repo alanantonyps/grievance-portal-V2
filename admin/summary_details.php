@@ -17,9 +17,7 @@ ini_set('display_errors', '0');
 ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
-// ---------------------------------------------------------------------------
 // AUTH GUARD
-// ---------------------------------------------------------------------------
 $sessionRole = isset($_SESSION['role']) ? strtoupper((string) $_SESSION['role']) : '';
 $allowedRoles = ['ADMIN', 'MANAGEMENT', 'TEACHER'];
 
@@ -30,9 +28,7 @@ if (empty($_SESSION['user_id']) || !in_array($sessionRole, $allowedRoles, true))
 
 $userId = (int) $_SESSION['user_id'];
 
-// ---------------------------------------------------------------------------
 // DATABASE
-// ---------------------------------------------------------------------------
 $dbFile = __DIR__ . '/../db_connect.php';
 $dbError = null;
 $conn    = null;
@@ -58,9 +54,7 @@ if (!file_exists($dbFile)) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // HELPERS
-// ---------------------------------------------------------------------------
 function e(?string $v): string
 {
     return htmlspecialchars((string) $v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -91,9 +85,6 @@ function roleLabel(string $role): string
     return $map[$role] ?? $role;
 }
 
-/**
- * Resolve the public URL for an attachment stored as a relative path.
- */
 function resolveAttachmentUrl(?string $path): ?string
 {
     if (empty($path)) return null;
@@ -278,9 +269,7 @@ function resolveComplainantUser(mysqli $conn, string $role, string $name, string
     return $newUserId;
 }
 
-// ---------------------------------------------------------------------------
 // ADMIN PROFILE
-// ---------------------------------------------------------------------------
 $adminData = [
     'username'        => $_SESSION['username'] ?? 'Admin',
     'name'            => '',
@@ -327,9 +316,7 @@ if (!empty($adminData['profile_picture'])) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // GRIEVANCE TYPES
-// ---------------------------------------------------------------------------
 $grievanceTypeOptions = [];
 if ($conn instanceof mysqli) {
     try {
@@ -340,9 +327,7 @@ if ($conn instanceof mysqli) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // TEMPLATE CSV DOWNLOAD
-// ---------------------------------------------------------------------------
 if (isset($_GET['download_template']) && (string) $_GET['download_template'] === '1') {
     $filename = 'summary_template.csv';
     header('Content-Type: text/csv; charset=utf-8');
@@ -371,9 +356,7 @@ if (isset($_GET['download_template']) && (string) $_GET['download_template'] ===
     exit;
 }
 
-// ---------------------------------------------------------------------------
 // FLASH
-// ---------------------------------------------------------------------------
 $flashSuccess = '';
 $flashError   = '';
 
@@ -386,9 +369,7 @@ if (!empty($_SESSION['flash_error'])) {
     unset($_SESSION['flash_error']);
 }
 
-// ---------------------------------------------------------------------------
 // HANDLE POST
-// ---------------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $conn instanceof mysqli) {
 
     $action = $_POST['action'] ?? '';
@@ -630,9 +611,7 @@ if (!empty($_SESSION['import_skipped_rows']) && is_array($_SESSION['import_skipp
     unset($_SESSION['import_skipped_rows']);
 }
 
-// ---------------------------------------------------------------------------
 // QUERY PARAMS
-// ---------------------------------------------------------------------------
 $search  = trim((string) ($_GET['q']       ?? ''));
 $entries = (int) ($_GET['entries']          ?? 10);
 $page    = (int) ($_GET['page']             ?? 1);
@@ -641,9 +620,7 @@ if (!in_array($entries, [10, 25, 50, 100], true)) $entries = 10;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $entries;
 
-// ---------------------------------------------------------------------------
 // FETCH GRIEVANCES
-// ---------------------------------------------------------------------------
 $rows       = [];
 $totalRows  = 0;
 $totalPages = 1;
@@ -741,9 +718,7 @@ if ($conn instanceof mysqli) {
     }
 }
 
-// ---------------------------------------------------------------------------
 // FETCH GRIEVANCE ACTIONS FOR ALL VISIBLE ROWS
-// ---------------------------------------------------------------------------
 $actionsByGrievance = [];
 
 if ($conn instanceof mysqli && !empty($rows)) {
@@ -809,40 +784,233 @@ if ($conn instanceof mysqli && !empty($rows)) {
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink:   '#E5097F',
-            brandGreen:  '#006837',
-            brandGold:   '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
-            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            dropdownFade: { '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
-            modalFadeIn: { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
-            confirmShake: { '0%, 100%': { transform: 'translateX(0)' }, '20%': { transform: 'translateX(-6px)' }, '40%': { transform: 'translateX(6px)' }, '60%': { transform: 'translateX(-4px)' }, '80%': { transform: 'translateX(4px)' } },
-            flashIn: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-            flashOut: { '0%': { opacity: '1', transform: 'translateY(0)', maxHeight: '200px' }, '100%': { opacity: '0', transform: 'translateY(-10px)', maxHeight: '0px' } }
+            fadeInUp:     { '0%':{opacity:'0',transform:'translateY(12px)'}, '100%':{opacity:'1',transform:'translateY(0)'} },
+            dropdownFade: { '0%':{opacity:'0',transform:'translateY(-8px) scale(0.98)'}, '100%':{opacity:'1',transform:'translateY(0) scale(1)'} },
+            modalFadeIn:  { '0%':{opacity:'0',transform:'scale(0.96)'}, '100%':{opacity:'1',transform:'scale(1)'} },
+            confirmShake: { '0%, 100%':{transform:'translateX(0)'},'20%':{transform:'translateX(-6px)'},'40%':{transform:'translateX(6px)'},'60%':{transform:'translateX(-4px)'},'80%':{transform:'translateX(4px)'} },
+            flashIn:      { '0%':{opacity:'0',transform:'translateY(-10px)'}, '100%':{opacity:'1',transform:'translateY(0)'} },
+            flashOut:     { '0%':{opacity:'1',transform:'translateY(0)',maxHeight:'200px'}, '100%':{opacity:'0',transform:'translateY(-10px)',maxHeight:'0px'} },
+            shimmer:      { '0%':{backgroundPosition:'-200% 0'},'100%':{backgroundPosition:'200% 0'} },
+            pulseRing:    { '0%':{boxShadow:'0 0 0 0 rgba(0,110,116,0.45)'},'70%':{boxShadow:'0 0 0 12px rgba(0,110,116,0)'},'100%':{boxShadow:'0 0 0 0 rgba(0,110,116,0)'} }
           },
           animation: {
-            'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'dropdown':   'dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'modal-in':   'modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'fade-in-up':    'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'dropdown':      'dropdownFade 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'modal-in':      'modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards',
             'confirm-shake': 'confirmShake 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-            'flash-in':   'flashIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            'flash-out':  'flashOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards'
+            'flash-in':      'flashIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'flash-out':     'flashOut 0.45s cubic-bezier(0.4, 0, 1, 1) forwards',
+            'shimmer':       'shimmer 3s linear infinite',
+            'pulse-ring':    'pulseRing 2s ease-out infinite'
           }
         }
       }
     };
   </script>
 
-  <link rel="stylesheet" href="../assets/css/index.css" />
-
   <style>
+    /* ============================================================
+       FONT FACES
+       ============================================================ */
+    @font-face { font-family:'Coolvetica'; src:url('../assets/fonts/coolvetica-rg.woff2') format('woff2'), url('../assets/fonts/coolvetica-rg.woff') format('woff'); font-weight:400; font-display:swap; }
+    @font-face { font-family:'Coolvetica'; src:url('../assets/fonts/coolvetica-bold.woff2') format('woff2'), url('../assets/fonts/coolvetica-bold.woff') format('woff'); font-weight:700; font-display:swap; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Coolvetica','Poppins',sans-serif; }
+
+    /* ============================================================
+       AMBIENT BACKGROUND MESH (fixed only on desktop)
+       ============================================================ */
+    body {
+      background-color: #EAF4F4;
+      background-image:
+        radial-gradient(at 12% 8%, rgba(0,110,116,0.08) 0px, transparent 50%),
+        radial-gradient(at 88% 4%, rgba(63,155,159,0.10) 0px, transparent 50%),
+        radial-gradient(at 78% 92%, rgba(0,110,116,0.07) 0px, transparent 50%),
+        radial-gradient(at 4% 88%, rgba(63,155,159,0.08) 0px, transparent 50%);
+    }
+    @media (min-width: 1024px) and (hover: hover) {
+      body { background-attachment: fixed; }
+    }
+
+    /* ============================================================
+       CUSTOM SCROLLBAR (desktop only)
+       ============================================================ */
+    @media (hover: hover) and (pointer: fine) {
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #128287, #006E74);
+        border-radius: 8px;
+        border: 2px solid #EAF4F4;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: #005A5F; }
+    }
+
+    ::selection { background: #9FCDCF; color: #003134; }
+
+    /* ============================================================
+       DECORATIVE PATTERNS
+       ============================================================ */
+    .roofline { height:14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size:20px 14px; background-repeat:repeat-x;
+      position: relative;
+      overflow: hidden;
+    }
+    .roofline::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 4s linear infinite;
+    }
+    .logo-divider { width:1px; background-color:#CFE6E7; }
+    #sidebarNav::-webkit-scrollbar { width:6px; }
+    #sidebarNav::-webkit-scrollbar-track { background:transparent; }
+    #sidebarNav::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:3px; }
+    #sidebarNav::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.35); }
+
+    /* ============================================================
+       SIDEBAR ACTIVE GLOW + LINK HOVER SLIDE
+       ============================================================ */
+    .sidebar-active-glow {
+      box-shadow: 0 0 0 1px rgba(255,255,255,.3),
+                  0 6px 20px -6px rgba(0,0,0,.35),
+                  inset 0 0 20px rgba(255,255,255,.06);
+    }
+    .sidebar-link { position: relative; overflow: hidden; }
+    .sidebar-link::after {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: #fff;
+      transform: translateX(-4px);
+      opacity: 0;
+      transition: all .25s ease;
+      border-radius: 0 4px 4px 0;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .sidebar-link:hover::after { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ============================================================
+       HEADER FROSTED-ON-SCROLL
+       ============================================================ */
+    .header-scrolled {
+      background: rgba(255,255,255,.92) !important;
+      box-shadow: 0 4px 24px -8px rgba(0,69,74,.15);
+    }
+    @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+      @media (hover: hover) and (min-width: 1024px) {
+        .header-scrolled {
+          background: rgba(255,255,255,.85) !important;
+          backdrop-filter: saturate(180%) blur(14px);
+          -webkit-backdrop-filter: saturate(180%) blur(14px);
+        }
+      }
+    }
+
+    /* ============================================================
+       HEADING UNDERLINE
+       ============================================================ */
+    .heading-underline { position: relative; display: inline-block; }
+    .heading-underline::after {
+      content: '';
+      position: absolute; left: 0; bottom: -6px;
+      height: 3px; width: 100%;
+      background: linear-gradient(90deg, #006E74, #3F9B9F 60%, transparent);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      animation: underlineIn .8s .3s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes underlineIn { to { transform: scaleX(1); } }
+
+    /* ============================================================
+       BUTTON SHEEN
+       ============================================================ */
+    .btn-sheen { position: relative; overflow: hidden; }
+    .btn-sheen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%);
+      background-size: 200% 100%;
+      transform: translateX(-100%);
+      transition: transform .8s cubic-bezier(.16,1,.3,1);
+      pointer-events: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .btn-sheen:hover::before { transform: translateX(100%); }
+    }
+
+    /* ============================================================
+       BACK TO TOP
+       ============================================================ */
+    #backToTop {
+      transition: opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1), background-color .25s ease;
+      opacity: 0;
+      transform: translateY(10px) scale(.9);
+      pointer-events: none;
+    }
+    #backToTop.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* ============================================================
+       FOCUS RING
+       ============================================================ */
+    :focus-visible {
+      outline: 2px solid #3F9B9F;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ============================================================
+       LOW-END DEVICE STRIP-OUT
+       ============================================================ */
+    @media (max-width: 480px) {
+      .roofline::after { animation: none; }
+      .heading-underline::after { animation: none; transform: scaleX(1); }
+      .animate-pulse-ring { animation: none; }
+      .btn-sheen::before { display: none; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        transition-duration: .001ms !important;
+      }
+      .heading-underline::after { transform: scaleX(1); }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ============================================================
+       PRINT STYLES (unchanged behavior, preserved exactly)
+       ============================================================ */
     #print-area { display: none; }
 
     @media print {
@@ -878,98 +1046,153 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen text-teal-900 antialiased flex flex-col">
 
   <div class="screen-only flex min-h-screen flex-1">
 
-    <!-- SIDEBAR -->
-    <aside class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837] flex flex-col items-center py-4 shadow-2xl fixed inset-y-0 left-0 z-40">
-      <button class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
+    <!-- ============================================================
+         SIDEBAR
+         ============================================================ -->
+    <aside id="adminSidebar"
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
+                  transition-all duration-300 ease-in-out overflow-hidden">
 
-      <nav class="flex flex-col items-center space-y-6 flex-1">
-        <a href="dashboard.php" class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110" title="Dashboard">
-          <i data-lucide="home" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
+      <!-- Brand row: "grievance" text + toggle (logo removed) -->
+      <div class="flex items-center gap-2 px-3 mb-6 flex-shrink-0">
+        <a href="dashboard.php"
+           class="sidebar-brand inline-flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+          <span class="sidebar-label text-white font-bold text-lg whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">
+            grievance
+          </span>
+          <span class="sidebar-label w-1.5 h-1.5 rounded-full bg-white mb-1 flex-shrink-0 opacity-0 w-0 overflow-hidden transition-all duration-200"></span>
         </a>
-        <a href="profile.php" class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110" title="Profile">
-          <i data-lucide="user" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Profile</span>
+        <button id="sidebarToggle"
+                class="text-white/80 hover:text-white p-2.5 rounded-xl hover:bg-white/10
+                       transition-colors flex items-center justify-center flex-shrink-0"
+                aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-6 h-6 flex-shrink-0"></i>
+        </button>
+      </div>
+
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
+
+        <a href="dashboard.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
+        </a>
+
+        <a href="profile.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
+        </a>
+
+        <a href="grievance_report.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="bar-chart-3" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Grievance Reports</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Grievance Reports</span>
+        </a>
+
+        <a href="members.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="users" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Members</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Members</span>
+        </a>
+
+        <a href="grievances.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="clipboard-list" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Grievance</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Grievance</span>
+        </a>
+
+        <a href="settings.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="settings" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Settings</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Settings</span>
+        </a>
+
+        <a href="change_password.php" class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
       </nav>
 
       <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
-         class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center justify-center text-white transition-all hover:scale-110" title="Logout">
-        <i data-lucide="log-out" class="w-6 h-6 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
+         class="sidebar-link group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
+        <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
     </aside>
 
-    <!-- MAIN -->
-    <div class="flex-1 ml-20 flex flex-col min-h-screen">
+    <!-- ============================================================
+         MAIN
+         ============================================================ -->
+    <div id="adminMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
-          <div class="flex items-center space-x-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30 transition-all duration-300">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo" class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance" class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
           <div class="relative" id="admin-dropdown-container">
             <button id="admin-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
               <?php if ($hasProfilePicture): ?>
-                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
+                <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                  <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
-              <span class="hidden sm:block text-sm font-semibold text-slate-700"><?= e($displayName) ?></span>
-              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate"><?= e($displayName) ?></span>
+              <i data-lucide="chevron-down" id="admin-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
-            <div id="admin-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 py-2 z-50 overflow-hidden">
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+            <div id="admin-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($hasProfilePicture): ?>
-                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
+                    <img src="<?= e($profilePictureUrl) ?>" alt="<?= e($displayName) ?>" class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white">
-                      <i data-lucide="user" class="w-6 h-6 text-white"></i>
-                    </div>
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white"><i data-lucide="user" class="w-6 h-6 text-white"></i></div>
                   <?php endif; ?>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate"><?= e($displayName) ?></p>
-                    <p class="text-xs text-slate-500 truncate"><?= e($displayEmail) ?></p>
+                    <p class="text-sm font-bold text-teal-900 truncate"><?= e($displayName) ?></p>
+                    <p class="text-xs text-teal-900/60 truncate"><?= e($displayEmail) ?></p>
                   </div>
                 </div>
               </div>
 
-              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="key" class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i>
                 <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" data-logout-trigger="1" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
                   <span class="font-medium">Logout</span>
                 </a>
               </div>
@@ -978,41 +1201,47 @@ if ($conn instanceof mysqli && !empty($rows)) {
         </div>
       </header>
 
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <!-- Breadcrumb + Action Buttons -->
-        <div class="max-w-6xl mx-auto mb-6 animate-fade-in-up">
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <!-- Page heading + Action Buttons -->
+        <div class="max-w-6xl mx-auto mb-8 animate-fade-in-up">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-2 tracking-tight">Summary Details</h1>
-              <nav class="flex items-center space-x-2 text-sm text-slate-500">
-                <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-                  <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i> Dashboard
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600 animate-pulse-ring"></span>
+                <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Admin Console</p>
+              </div>
+              <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-teal-900 mb-3">
+                <span class="heading-underline">Summary Details</span>
+              </h1>
+              <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+                <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+                  <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard
                 </a>
-                <span class="text-slate-300">/</span>
-                <span class="text-[#E5097F] font-semibold">Summary Details</span>
+                <span class="text-teal-900/30">/</span>
+                <span class="text-teal-600 font-semibold">Summary Details</span>
               </nav>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
               <button type="button" onclick="window.print();" title="Print Summary"
-                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-[#4A154B] hover:bg-[#5A1B5C]
-                             text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                             transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-teal-600 hover:bg-teal-700
+                             text-white shadow-sm hover:shadow-md
+                             transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
                 <i data-lucide="printer" class="w-5 h-5"></i>
               </button>
 
               <button type="button" onclick="openBulkUploadModal()" title="Bulk Upload Summary Details"
-                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-[#4A154B] hover:bg-[#5A1B5C]
-                             text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                             transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-teal-600 hover:bg-teal-700
+                             text-white shadow-sm hover:shadow-md
+                             transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
                 <i data-lucide="upload" class="w-5 h-5"></i>
               </button>
 
               <button type="button" onclick="openCreateModal()" title="Create Summary Details"
-                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-[#4A154B] hover:bg-[#5A1B5C]
-                             text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50
-                             transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                      class="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-teal-600 hover:bg-teal-700
+                             text-white shadow-sm hover:shadow-md
+                             transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
                 <i data-lucide="plus" class="w-5 h-5"></i>
               </button>
             </div>
@@ -1022,7 +1251,7 @@ if ($conn instanceof mysqli && !empty($rows)) {
         <!-- Flash -->
         <?php if ($flashSuccess !== ''): ?>
           <div id="flashSuccessBox" class="max-w-6xl mx-auto mb-6 rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-3 flex items-start space-x-2 animate-flash-in overflow-hidden">
-            <i data-lucide="check-circle" class="w-5 h-5 text-[#006837] flex-shrink-0 mt-0.5"></i>
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
             <p class="text-sm text-emerald-800 font-medium"><?= e($flashSuccess) ?></p>
           </div>
         <?php endif; ?>
@@ -1053,40 +1282,41 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
         <!-- TABLE CONTROLS -->
         <div class="max-w-6xl mx-auto mb-5 animate-fade-in-up" style="animation-delay: 60ms;">
-          <form method="GET" action="summary_details.php" id="filterForm" class="bg-white rounded-xl shadow-sm border border-slate-200/70 px-5 py-4">
+          <form method="GET" action="summary_details.php" id="filterForm"
+                class="bg-teal-50/60 rounded-2xl border-2 border-teal-100 px-5 py-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div class="flex items-center space-x-3">
-                <span class="text-sm text-slate-600">Show</span>
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-teal-900">Show</span>
                 <select name="entries" id="entriesPerPage"
-                        class="px-3 py-1.5 border-2 border-slate-200 rounded-lg text-sm font-medium text-slate-700
-                               focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                               hover:border-[#4A154B]/40 transition-colors bg-white">
+                        class="px-3 py-1.5 border-2 border-teal-100 rounded-lg text-sm font-medium text-teal-900
+                               focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                               hover:border-teal-400 transition-colors bg-white">
                   <option value="10"  <?= $entries === 10  ? 'selected' : '' ?>>10</option>
                   <option value="25"  <?= $entries === 25  ? 'selected' : '' ?>>25</option>
                   <option value="50"  <?= $entries === 50  ? 'selected' : '' ?>>50</option>
                   <option value="100" <?= $entries === 100 ? 'selected' : '' ?>>100</option>
                 </select>
-                <span class="text-sm text-slate-600">entries</span>
+                <span class="text-sm text-teal-900">entries</span>
               </div>
 
               <div class="relative w-full sm:w-80">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-900/40"></i>
                 <input type="text" name="q" id="searchInput" value="<?= e($search) ?>" placeholder="Search.." autocomplete="off"
-                       class="w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg text-sm
-                              focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                              hover:border-[#4A154B]/40 transition-all bg-white" />
+                       class="w-full pl-10 pr-4 py-2 border-2 border-teal-100 rounded-lg text-sm
+                              focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                              hover:border-teal-400 transition-all bg-white" />
               </div>
             </div>
           </form>
         </div>
 
-        <!-- DATA TABLE (on screen) -->
+        <!-- DATA TABLE -->
         <div class="max-w-6xl mx-auto animate-fade-in-up" style="animation-delay: 100ms;">
-          <div class="bg-white rounded-2xl shadow-lg border border-slate-200/70 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-sm border-2 border-teal-100 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full" id="summaryTable">
                 <thead>
-                  <tr class="bg-[#4A154B] text-white">
+                  <tr class="bg-teal-600 text-white">
                     <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Sl.No.</th>
                     <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Name</th>
                     <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Class/Department</th>
@@ -1097,11 +1327,11 @@ if ($conn instanceof mysqli && !empty($rows)) {
                     <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100" id="summaryTableBody">
+                <tbody class="divide-y divide-teal-50" id="summaryTableBody">
 
                   <?php if (empty($rows)): ?>
                     <tr>
-                      <td colspan="8" class="px-6 py-12 text-center text-slate-500 bg-slate-50">
+                      <td colspan="8" class="px-6 py-12 text-center text-teal-900/60 bg-teal-50/40">
                         <span class="text-sm font-medium">No data available in table</span>
                       </td>
                     </tr>
@@ -1135,13 +1365,13 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
                         $actionsList = $actionsByGrievance[$gId] ?? [];
                       ?>
-                      <tr class="hover:bg-slate-50/80 transition-colors group">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900"><?= $globalIndex ?></td>
-                        <td class="px-6 py-4 text-sm font-semibold text-slate-800"><?= e($gName) ?></td>
-                        <td class="px-6 py-4 text-sm text-slate-700 max-w-[200px]"><?= e($gClass) ?></td>
-                        <td class="px-6 py-4 text-sm text-slate-700 max-w-[260px]"><?= e($gSubject) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600"><?= e($formattedDate) ?></td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700"><?= e(roleLabel($gRole)) ?></td>
+                      <tr class="hover:bg-teal-50/40 transition-colors group">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-teal-900"><?= $globalIndex ?></td>
+                        <td class="px-6 py-4 text-sm font-semibold text-teal-900"><?= e($gName) ?></td>
+                        <td class="px-6 py-4 text-sm text-teal-900/80 max-w-[200px]"><?= e($gClass) ?></td>
+                        <td class="px-6 py-4 text-sm text-teal-900/80 max-w-[260px]"><?= e($gSubject) ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-teal-900/70"><?= e($formattedDate) ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-teal-900/80"><?= e(roleLabel($gRole)) ?></td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                           <div class="inline-flex items-center gap-1.5">
 
@@ -1163,16 +1393,16 @@ if ($conn instanceof mysqli && !empty($rows)) {
                                         "reply_attachment_url"  => $gReplyAtt,
                                         "actions"               => $actionsList,
                                     ], JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'
-                                    class="inline-flex w-9 h-9 rounded-full bg-purple-50 hover:bg-[#4A154B]
-                                           items-center justify-center text-[#4A154B] hover:text-white
+                                    class="inline-flex w-9 h-9 rounded-full bg-teal-50 hover:bg-teal-600
+                                           items-center justify-center text-teal-600 hover:text-white
                                            transition-all duration-200 hover:scale-110">
                               <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
 
                             <button type="button" title="Delete grievance"
                                     onclick='confirmDelete(<?= $gId ?>, <?= json_encode($gNumber !== '' ? $gNumber : $gSubject, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'
-                                    class="inline-flex w-9 h-9 rounded-full bg-purple-50 hover:bg-red-500
-                                           items-center justify-center text-[#4A154B] hover:text-white
+                                    class="inline-flex w-9 h-9 rounded-full bg-teal-50 hover:bg-red-500
+                                           items-center justify-center text-teal-600 hover:text-white
                                            transition-all duration-200 hover:scale-110">
                               <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
@@ -1193,14 +1423,14 @@ if ($conn instanceof mysqli && !empty($rows)) {
             </div>
 
             <!-- Pagination -->
-            <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p class="text-sm text-slate-600">
+            <div class="px-6 py-4 bg-teal-50/40 border-t border-teal-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p class="text-sm text-teal-900/70">
                 Showing
-                <span class="font-semibold text-slate-900"><?= $totalRows > 0 ? ($offset + 1) : 0 ?></span>
+                <span class="font-semibold text-teal-900"><?= $totalRows > 0 ? ($offset + 1) : 0 ?></span>
                 to
-                <span class="font-semibold text-slate-900"><?= $totalRows > 0 ? min($offset + count($rows), $totalRows) : 0 ?></span>
+                <span class="font-semibold text-teal-900"><?= $totalRows > 0 ? min($offset + count($rows), $totalRows) : 0 ?></span>
                 of
-                <span class="font-semibold text-slate-900"><?= $totalRows ?></span>
+                <span class="font-semibold text-teal-900"><?= $totalRows ?></span>
                 entries
               </p>
 
@@ -1212,16 +1442,20 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
                 <?php if ($page > 1): ?>
                   <a href="<?= e($qsBase . '&page=' . ($page - 1)) ?>"
-                     class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">Previous</a>
+                     class="px-4 py-2 rounded-lg text-sm font-semibold text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 hover:border-teal-600 transition-colors">Previous</a>
                 <?php else: ?>
-                  <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 border border-slate-200 cursor-not-allowed" disabled>Previous</button>
+                  <button type="button" class="px-4 py-2 rounded-lg text-sm font-semibold text-teal-900/30 bg-teal-50/60 border-2 border-teal-100 cursor-not-allowed" disabled>Previous</button>
                 <?php endif; ?>
+
+                <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-teal-600 text-white text-sm font-bold shadow-sm">
+                  <?= $page ?>
+                </span>
 
                 <?php if ($page < $totalPages): ?>
                   <a href="<?= e($qsBase . '&page=' . ($page + 1)) ?>"
-                     class="px-4 py-2 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 transition-colors">Next</a>
+                     class="px-4 py-2 rounded-lg text-sm font-semibold text-teal-900 bg-white hover:bg-teal-50 border-2 border-teal-200 hover:border-teal-600 transition-colors">Next</a>
                 <?php else: ?>
-                  <button type="button" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 bg-slate-50 border border-slate-200 cursor-not-allowed" disabled>Next</button>
+                  <button type="button" class="px-4 py-2 rounded-lg text-sm font-semibold text-teal-900/30 bg-teal-50/60 border-2 border-teal-100 cursor-not-allowed" disabled>Next</button>
                 <?php endif; ?>
               </div>
             </div>
@@ -1230,16 +1464,16 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
       </main>
 
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-6">
           <div class="max-w-7xl mx-auto text-center">
-            <p class="text-xs text-slate-700">
+            <p class="text-xs text-teal-200/70">
               Copyright &copy; <?= date('Y') ?>
-              <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>. All rights reserved.
+              <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
             </p>
-            <p class="text-xs text-slate-700 mt-1">
-              Powered by
-              <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">Orell</span>
+            <p class="text-xs text-teal-200/70 mt-1">
+              Powered by <span class="font-bold text-white">RLabZ</span>
             </p>
           </div>
         </div>
@@ -1247,9 +1481,9 @@ if ($conn instanceof mysqli && !empty($rows)) {
     </div>
   </div>
 
-  <!-- ============================================================
-       PRINT-ONLY AREA
-       ============================================================ -->
+  <!-- ============================================================ -->
+  <!-- PRINT-ONLY AREA (unchanged)                                  -->
+  <!-- ============================================================ -->
   <div id="print-area">
     <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
       <tr>
@@ -1257,7 +1491,7 @@ if ($conn instanceof mysqli && !empty($rows)) {
           <table style="border-collapse:collapse;">
             <tr>
               <td style="vertical-align:middle;padding-right:10px;">
-                <img src="../public/rcss-logo.png" alt="RCSS" style="height:44px;width:auto;" />
+                <img src="../public/rcss-logo.webp" alt="RCSS" style="height:44px;width:auto;" />
               </td>
               <td style="vertical-align:middle;">
                 <div style="font-size:13px;font-weight:bold;color:#006837;text-transform:uppercase;letter-spacing:0.5px;">
@@ -1343,37 +1577,37 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </div>
 
   <!-- ============================================================ -->
-  <!-- VIEW DETAILS MODAL -->
+  <!-- VIEW DETAILS MODAL                                           -->
   <!-- ============================================================ -->
   <div id="viewModal" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeViewModal()"></div>
 
     <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-            <i data-lucide="eye" class="w-5 h-5 text-[#8B1E7E]"></i>
+          <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
+            <i data-lucide="eye" class="w-5 h-5 text-teal-600"></i>
           </div>
-          <h3 class="text-lg font-bold text-slate-800">Grievance Details</h3>
+          <h3 class="text-lg font-bold text-teal-900">Grievance Details</h3>
         </div>
         <button type="button" onclick="closeViewModal()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
 
-        <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-slate-100">
+        <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-teal-100">
           <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center text-white shadow-md">
+            <div class="w-14 h-14 rounded-full bg-teal-600 flex items-center justify-center text-white shadow-sm">
               <i data-lucide="user" class="w-7 h-7"></i>
             </div>
             <div class="min-w-0">
-              <p id="viewName" class="text-base font-bold text-slate-800 break-words">—</p>
-              <p class="text-xs text-slate-500">
+              <p id="viewName" class="text-base font-bold text-teal-900 break-words">—</p>
+              <p class="text-xs text-teal-900/60">
                 <span id="viewRole">—</span> · <span id="viewClassDept">—</span>
               </p>
             </div>
@@ -1383,74 +1617,71 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Grievance Number</p>
-            <p id="viewNumber" class="text-sm font-semibold text-[#4A154B] break-all">—</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Grievance Number</p>
+            <p id="viewNumber" class="text-sm font-semibold text-teal-700 break-all">—</p>
           </div>
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Grievance Type</p>
-            <p id="viewType" class="text-sm text-slate-700">—</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Grievance Type</p>
+            <p id="viewType" class="text-sm text-teal-900/80">—</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Posted Date</p>
-            <p id="viewPostedDate" class="text-sm text-slate-700">—</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Posted Date</p>
+            <p id="viewPostedDate" class="text-sm text-teal-900/80">—</p>
           </div>
           <div>
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reply Date</p>
-            <p id="viewReplyDate" class="text-sm text-slate-700">—</p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Reply Date</p>
+            <p id="viewReplyDate" class="text-sm text-teal-900/80">—</p>
           </div>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Subject</p>
-          <p id="viewSubject" class="text-sm text-slate-800 font-medium break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Subject</p>
+          <p id="viewSubject" class="text-sm text-teal-900 font-medium break-words">—</p>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Description</p>
-          <p id="viewDescription" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Description</p>
+          <p id="viewDescription" class="text-sm text-teal-900/80 leading-relaxed whitespace-pre-wrap break-words">—</p>
         </div>
 
-        <!-- Complaint Attachment -->
         <div id="viewAttachmentWrapper">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Complaint Attachment</p>
-          <div id="viewAttachmentContent" class="text-sm text-slate-700">—</div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40 mb-2">Complaint Attachment</p>
+          <div id="viewAttachmentContent" class="text-sm text-teal-900/80">—</div>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reply / Action Taken</p>
-          <p id="viewReplyDetails" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Reply / Action Taken</p>
+          <p id="viewReplyDetails" class="text-sm text-teal-900/80 leading-relaxed whitespace-pre-wrap break-words">—</p>
         </div>
 
-        <!-- Reply Attachment -->
         <div id="viewReplyAttachmentWrapper">
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Reply Attachment</p>
-          <div id="viewReplyAttachmentContent" class="text-sm text-slate-700">—</div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40 mb-2">Reply Attachment</p>
+          <div id="viewReplyAttachmentContent" class="text-sm text-teal-900/80">—</div>
         </div>
 
         <div>
-          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Feedback Details</p>
-          <p id="viewFeedbackDetails" class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap break-words">—</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Feedback Details</p>
+          <p id="viewFeedbackDetails" class="text-sm text-teal-900/80 leading-relaxed whitespace-pre-wrap break-words">—</p>
         </div>
 
-        <!-- Grievance Actions timeline -->
         <div id="viewActionsWrapper">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Grievance Actions</p>
-            <span id="viewActionsCount" class="text-[10px] font-bold text-[#8B1E7E] bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full">0</span>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40">Grievance Actions</p>
+            <span id="viewActionsCount" class="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-100 px-2 py-0.5 rounded-full">0</span>
           </div>
           <div id="viewActionsList" class="space-y-3">—</div>
         </div>
 
       </div>
 
-      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+      <div class="px-6 py-4 bg-teal-50/40 border-t border-teal-100 flex justify-end">
         <button type="button" onclick="closeViewModal()"
-                class="px-5 py-2.5 rounded-xl font-semibold text-slate-700
-                       bg-white hover:bg-slate-100 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+                class="px-5 py-2.5 rounded-lg font-semibold text-teal-900
+                       bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                       transition-all duration-200">
           Close
         </button>
       </div>
@@ -1458,24 +1689,24 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </div>
 
   <!-- ============================================================ -->
-  <!-- DELETE CONFIRMATION MODAL -->
+  <!-- DELETE CONFIRMATION MODAL                                    -->
   <!-- ============================================================ -->
   <div id="deleteConfirmModal" class="hidden fixed inset-0 z-[67] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeDeleteModal()"></div>
 
     <div id="deleteConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="trash-2" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Delete Grievance?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Delete Grievance?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <p class="text-sm text-teal-900/70 leading-relaxed">
           You are about to permanently delete
-          <span id="deleteNameDisplay" class="font-bold text-[#8B1E7E] break-words">this grievance</span>.
+          <span id="deleteNameDisplay" class="font-bold text-teal-700 break-words">this grievance</span>.
         </p>
 
         <p class="text-xs text-red-500 font-medium mt-3 flex items-center gap-1.5">
@@ -1485,12 +1716,12 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeDeleteModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
 
         <button type="button" id="confirmDeleteBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="trash-2" class="w-4 h-4"></i> <span>Delete</span>
         </button>
       </div>
@@ -1498,18 +1729,18 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </div>
 
   <!-- ============================================================ -->
-  <!-- CREATE MODAL -->
+  <!-- CREATE MODAL                                                 -->
   <!-- ============================================================ -->
   <div id="createSummaryModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeCreateModal()"></div>
 
     <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h3 class="text-lg font-bold text-slate-800">Create Summary Details</h3>
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
+        <h3 class="text-lg font-bold text-teal-900">Create Summary Details</h3>
         <button type="button" onclick="closeCreateModal()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1519,11 +1750,11 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="space-y-2">
-            <label for="create_role" class="block text-sm font-semibold text-slate-700">Role <span class="text-[#E5097F]">*</span></label>
+            <label for="create_role" class="block text-sm font-semibold text-teal-900">Role <span class="text-red-500">*</span></label>
             <select name="role" id="create_role" required
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl appearance-none bg-white text-slate-800 font-medium
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all">
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg appearance-none bg-white text-teal-900 font-medium
+                           focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-400 transition-all">
               <option value="">Select</option>
               <option value="STUDENT">STUDENT</option>
               <option value="PARENT">PARENT</option>
@@ -1534,45 +1765,45 @@ if ($conn instanceof mysqli && !empty($rows)) {
           </div>
 
           <div class="space-y-2">
-            <label for="create_name" class="block text-sm font-semibold text-slate-700">Name <span class="text-[#E5097F]">*</span></label>
+            <label for="create_name" class="block text-sm font-semibold text-teal-900">Name <span class="text-red-500">*</span></label>
             <input type="text" name="name" id="create_name" required placeholder="StudentName"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
 
           <div class="space-y-2">
-            <label for="create_academic_year" class="block text-sm font-semibold text-slate-700">Academic Year <span class="text-[#E5097F]">*</span></label>
+            <label for="create_academic_year" class="block text-sm font-semibold text-teal-900">Academic Year <span class="text-red-500">*</span></label>
             <input type="text" name="academic_year" id="create_academic_year" required placeholder="AcademicYear"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="space-y-2">
-            <label for="create_complaint" class="block text-sm font-semibold text-slate-700">Complaint <span class="text-[#E5097F]">*</span></label>
+            <label for="create_complaint" class="block text-sm font-semibold text-teal-900">Complaint <span class="text-red-500">*</span></label>
             <textarea name="complaint" id="create_complaint" required rows="3" placeholder="Complaint"
-                      class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400 resize-none
-                             focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                             hover:border-[#4A154B]/40 transition-all"></textarea>
+                      class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40 resize-none
+                             focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                             hover:border-teal-400 transition-all"></textarea>
           </div>
 
           <div class="space-y-2">
-            <label for="create_class_name" class="block text-sm font-semibold text-slate-700">Class Name</label>
+            <label for="create_class_name" class="block text-sm font-semibold text-teal-900">Class Name</label>
             <input type="text" name="class_name" id="create_class_name" placeholder="ClassName"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
 
           <div class="space-y-2">
-            <label for="create_grievance_type" class="block text-sm font-semibold text-slate-700">Grievance Type <span class="text-[#E5097F]">*</span></label>
+            <label for="create_grievance_type" class="block text-sm font-semibold text-teal-900">Grievance Type <span class="text-red-500">*</span></label>
             <select name="grievance_type_id" id="create_grievance_type" required
-                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl appearance-none bg-white text-slate-800 font-medium
-                           focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                           hover:border-[#4A154B]/40 transition-all">
+                    class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg appearance-none bg-white text-teal-900 font-medium
+                           focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                           hover:border-teal-400 transition-all">
               <option value="">GrievanceType</option>
               <?php foreach ($grievanceTypeOptions as $opt): ?>
                 <option value="<?= (int) $opt['id'] ?>"><?= e($opt['type_name']) ?></option>
@@ -1583,53 +1814,53 @@ if ($conn instanceof mysqli && !empty($rows)) {
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="space-y-2">
-            <label for="create_action_taken" class="block text-sm font-semibold text-slate-700">Action Taken <span class="text-[#E5097F]">*</span></label>
+            <label for="create_action_taken" class="block text-sm font-semibold text-teal-900">Action Taken <span class="text-red-500">*</span></label>
             <input type="text" name="action_taken" id="create_action_taken" required placeholder="ActionTaken"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
 
           <div class="space-y-2">
-            <label for="create_cell_no" class="block text-sm font-semibold text-slate-700">Cell No <span class="text-[#E5097F]">*</span></label>
+            <label for="create_cell_no" class="block text-sm font-semibold text-teal-900">Cell No <span class="text-red-500">*</span></label>
             <input type="tel" name="cell_no" id="create_cell_no" required
                    inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10"
                    title="Please enter exactly 10 digits" placeholder="CellNo"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
 
           <div class="space-y-2">
-            <label for="create_posted_date" class="block text-sm font-semibold text-slate-700">Posted Date</label>
+            <label for="create_posted_date" class="block text-sm font-semibold text-teal-900">Posted Date</label>
             <input type="date" name="posted_date" id="create_posted_date" value="<?= date('Y-m-d') ?>"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="space-y-2">
-            <label for="create_reply_date" class="block text-sm font-semibold text-slate-700">Reply Date</label>
+            <label for="create_reply_date" class="block text-sm font-semibold text-teal-900">Reply Date</label>
             <input type="date" name="reply_date" id="create_reply_date" value="<?= date('Y-m-d') ?>"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
 
           <div class="space-y-2 md:col-span-2">
-            <label for="create_replied_by" class="block text-sm font-semibold text-slate-700">Replied By <span class="text-[#E5097F]">*</span></label>
+            <label for="create_replied_by" class="block text-sm font-semibold text-teal-900">Replied By <span class="text-red-500">*</span></label>
             <input type="text" name="replied_by" id="create_replied_by" required placeholder="Replied"
-                   class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 font-medium placeholder-slate-400
-                          focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                          hover:border-[#4A154B]/40 transition-all" />
+                   class="w-full px-4 py-3 border-2 border-teal-100 rounded-lg bg-white text-teal-900 font-medium placeholder-teal-900/40
+                          focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
+                          hover:border-teal-400 transition-all" />
           </div>
         </div>
 
         <div class="flex justify-center pt-3">
           <button type="submit"
-                  class="px-12 py-3 rounded-xl bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A] hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A] text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95">
+                  class="btn-sheen px-12 py-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 active:scale-95">
             Submit
           </button>
         </div>
@@ -1638,23 +1869,23 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </div>
 
   <!-- ============================================================ -->
-  <!-- BULK UPLOAD MODAL -->
+  <!-- BULK UPLOAD MODAL                                            -->
   <!-- ============================================================ -->
   <div id="bulkUploadModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeBulkUploadModal()"></div>
 
     <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-teal-100">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
-            <i data-lucide="upload" class="w-5 h-5 text-[#8B1E7E]"></i>
+          <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
+            <i data-lucide="upload" class="w-5 h-5 text-teal-600"></i>
           </div>
-          <h3 class="text-lg font-bold text-slate-800">Bulk Upload Summary Details</h3>
+          <h3 class="text-lg font-bold text-teal-900">Bulk Upload Summary Details</h3>
         </div>
         <button type="button" onclick="closeBulkUploadModal()"
-                class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                class="w-8 h-8 rounded-lg hover:bg-teal-50 flex items-center justify-center text-teal-900/60 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1662,49 +1893,49 @@ if ($conn instanceof mysqli && !empty($rows)) {
       <form id="bulkUploadForm" method="POST" action="summary_details.php" enctype="multipart/form-data" class="p-6 space-y-5">
         <input type="hidden" name="action" value="bulk_upload" />
 
-        <div class="rounded-xl border border-purple-100 bg-purple-50/60 px-4 py-3">
-          <p class="text-xs text-slate-700 leading-relaxed">
-            <span class="font-bold text-[#8B1E7E]">Column order required:</span>
-            <code class="text-[11px] bg-white px-1.5 py-0.5 rounded border border-purple-100">role, name, academic_year, class_name, complaint, grievance_type, action_taken, cell_no, posted_date, reply_date, replied_by</code>
+        <div class="rounded-xl border-2 border-teal-100 bg-teal-50/60 px-4 py-3">
+          <p class="text-xs text-teal-900/80 leading-relaxed">
+            <span class="font-bold text-teal-700">Column order required:</span>
+            <code class="text-[11px] bg-white px-1.5 py-0.5 rounded border border-teal-100">role, name, academic_year, class_name, complaint, grievance_type, action_taken, cell_no, posted_date, reply_date, replied_by</code>
           </p>
         </div>
 
         <div class="space-y-2">
-          <label for="csv_file" class="block text-sm font-semibold text-slate-700">Select CSV File <span class="text-[#E5097F]">*</span></label>
+          <label for="csv_file" class="block text-sm font-semibold text-teal-900">Select CSV File <span class="text-red-500">*</span></label>
           <input type="file" name="csv_file" id="csv_file" required accept=".csv, .txt"
-                 class="w-full text-sm text-slate-700
+                 class="w-full text-sm text-teal-900
                         file:mr-3 file:py-2.5 file:px-4
-                        file:rounded-xl file:border-0
+                        file:rounded-lg file:border-0
                         file:text-sm file:font-semibold
-                        file:bg-[#4A154B] file:text-white
-                        hover:file:bg-[#5A1B5C]
-                        border-2 border-slate-200 rounded-xl
-                        focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
+                        file:bg-teal-600 file:text-white
+                        hover:file:bg-teal-700
+                        border-2 border-teal-100 rounded-lg
+                        focus:outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-600/10
                         transition-all cursor-pointer" />
-          <p class="text-xs text-slate-500">Accepted format: .csv</p>
+          <p class="text-xs text-teal-900/60">Accepted format: .csv</p>
         </div>
 
-        <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
+        <div class="flex items-center justify-between rounded-xl bg-teal-50/60 border-2 border-teal-100 px-4 py-3">
           <div class="flex items-start gap-3">
-            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-[#8B1E7E] mt-0.5 flex-shrink-0"></i>
+            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-teal-600 mt-0.5 flex-shrink-0"></i>
             <div>
-              <p class="text-sm font-semibold text-slate-700">Need the correct format?</p>
-              <p class="text-xs text-slate-500">Download the sample CSV template.</p>
+              <p class="text-sm font-semibold text-teal-900">Need the correct format?</p>
+              <p class="text-xs text-teal-900/60">Download the sample CSV template.</p>
             </div>
           </div>
           <a href="summary_details.php?download_template=1"
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-purple-50 border-2 border-purple-100 hover:border-[#8B1E7E] text-[#8B1E7E] font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap">
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white hover:bg-teal-100 border-2 border-teal-200 hover:border-teal-600 text-teal-700 font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap">
             <i data-lucide="download" class="w-4 h-4"></i> <span>Sample Template</span>
           </a>
         </div>
 
         <div class="flex justify-center pt-2 gap-3">
           <button type="button" onclick="closeBulkUploadModal()"
-                  class="px-6 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                  class="px-6 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
             Cancel
           </button>
           <button type="submit"
-                  class="px-8 py-3 rounded-xl bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A] hover:from-[#5A1C7A] hover:via-[#7B0E6E] hover:to-[#B42A6A] text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+                  class="btn-sheen px-8 py-3 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
             <i data-lucide="upload" class="w-4 h-4"></i> <span>Import</span>
           </button>
         </div>
@@ -1713,38 +1944,38 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </div>
 
   <!-- ============================================================ -->
-  <!-- LOGOUT MODAL -->
+  <!-- LOGOUT MODAL                                                 -->
   <!-- ============================================================ -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
     <div id="logoutConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
-          You are about to log out of <span class="font-bold text-[#8B1E7E] break-words"><?= e($displayName) ?></span>.
+        <p class="text-sm text-teal-900/70 leading-relaxed">
+          You are about to log out of <span class="font-bold text-teal-700 break-words"><?= e($displayName) ?></span>.
           Any unsaved changes will be lost.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
           <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
         <button type="button" onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all duration-200 active:scale-95">
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
         <button type="button" id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-rose-600 hover:from-red-600 hover:via-red-700 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2">
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i> <span>Log Out</span>
         </button>
       </div>
@@ -1758,428 +1989,445 @@ if ($conn instanceof mysqli && !empty($rows)) {
   </form>
 
   <script>
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Auto-dismiss flash
-    (function () {
-      ['flashSuccessBox', 'flashErrorBox'].forEach(function (id) {
-        const box = document.getElementById(id);
-        if (!box) return;
+      const sidebar = document.getElementById('adminSidebar');
+      const main    = document.getElementById('adminMain');
+
+      // Sidebar toggle
+      (function () {
+        const toggleBtn = document.getElementById('sidebarToggle');
+        if (!toggleBtn || !sidebar || !main) return;
+        const labels   = sidebar.querySelectorAll('.sidebar-label');
+        const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
+        let expanded = false;
+        toggleBtn.addEventListener('click', function () {
+          expanded = !expanded;
+          if (expanded) {
+            sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+            main.classList.remove('ml-20');   main.classList.add('ml-64');
+            labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.add('hidden'); });
+          } else {
+            sidebar.classList.add('w-20');    sidebar.classList.remove('w-64');
+            main.classList.add('ml-20');      main.classList.remove('ml-64');
+            labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
+            tooltips.forEach(function (el) { el.classList.remove('hidden'); });
+          }
+          setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
+        });
+      })();
+
+      // Profile dropdown
+      (function () {
+        const btn = document.getElementById('admin-dropdown-btn');
+        const menu = document.getElementById('admin-dropdown-menu');
+        const chevron = document.getElementById('admin-chevron');
+        const container = document.getElementById('admin-dropdown-container');
+        if (!btn || !menu || !container) return;
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const open = !menu.classList.contains('hidden');
+          if (open) { menu.classList.add('hidden'); menu.classList.remove('animate-dropdown'); if (chevron) chevron.classList.remove('rotate-180'); }
+          else { menu.classList.remove('hidden'); menu.classList.add('animate-dropdown'); if (chevron) chevron.classList.add('rotate-180'); }
+        });
+        document.addEventListener('click', function (e) { if (!container.contains(e.target)) { menu.classList.add('hidden'); menu.classList.remove('animate-dropdown'); if (chevron) chevron.classList.remove('rotate-180'); } });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { menu.classList.add('hidden'); menu.classList.remove('animate-dropdown'); if (chevron) chevron.classList.remove('rotate-180'); } });
+      })();
+
+      // Auto-dismiss flash
+      (function () {
+        ['flashSuccessBox', 'flashErrorBox'].forEach(function (id) {
+          const box = document.getElementById(id);
+          if (!box) return;
+          setTimeout(function () {
+            box.classList.remove('animate-flash-in');
+            box.classList.add('animate-flash-out');
+            setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 500);
+          }, 3000);
+        });
+      })();
+
+      // Helpers
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = (str === undefined || str === null) ? '' : String(str);
+        return div.innerHTML;
+      }
+      function setTextOrDash(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const v = (value === undefined || value === null) ? '' : String(value).trim();
+        el.textContent = v !== '' ? v : '—';
+      }
+
+      // Attachment renderer
+      function renderAttachment(containerId, url) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!url) {
+          container.innerHTML = '<span class="text-teal-900/40 italic text-sm">No attachment</span>';
+          return;
+        }
+
+        const safeUrl  = String(url);
+        const fileName = (safeUrl.split('/').pop() || 'attachment').split('?')[0];
+        const isImage  = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(safeUrl);
+
+        const viewIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
+            '<circle cx="12" cy="12" r="3"></circle>' +
+          '</svg>';
+
+        const downloadIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
+            '<polyline points="7 10 12 15 17 10"></polyline>' +
+            '<line x1="12" y1="15" x2="12" y2="3"></line>' +
+          '</svg>';
+
+        const fileIcon =
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-teal-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
+            '<polyline points="14 2 14 8 20 8"></polyline>' +
+          '</svg>';
+
+        let imagePreview = '';
+        if (isImage) {
+          imagePreview =
+            '<div class="mb-3">' +
+              '<img src="' + escapeHtml(safeUrl) + '" alt="' + escapeHtml(fileName) + '" ' +
+                   'class="max-h-48 rounded-lg border border-teal-100 shadow-sm" />' +
+            '</div>';
+        }
+
+        container.innerHTML =
+          '<div class="rounded-xl border-2 border-teal-100 bg-teal-50/60 p-3">' +
+            imagePreview +
+            '<div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">' +
+              (isImage ? '' : '<div class="flex-shrink-0">' + fileIcon + '</div>') +
+              '<div class="min-w-0 flex-1">' +
+                '<p class="text-xs font-semibold text-teal-900 truncate" title="' + escapeHtml(fileName) + '">' +
+                  escapeHtml(fileName) +
+                '</p>' +
+                '<p class="text-[10px] text-teal-900/50 uppercase tracking-wider font-bold mt-0.5">' +
+                  (isImage ? 'Image' : 'Document') +
+                '</p>' +
+              '</div>' +
+              '<div class="flex items-center gap-2 flex-shrink-0">' +
+                '<a href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener" ' +
+                   'title="View attachment" ' +
+                   'class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-teal-100 ' +
+                          'border-2 border-teal-200 hover:border-teal-600 text-teal-900 hover:text-teal-700 ' +
+                          'font-semibold text-xs transition-all duration-200 hover:scale-105 active:scale-95">' +
+                  viewIcon + '<span>View</span>' +
+                '</a>' +
+                '<a href="' + escapeHtml(safeUrl) + '" download="' + escapeHtml(fileName) + '" ' +
+                   'title="Download attachment" ' +
+                   'class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 ' +
+                          'text-white font-semibold text-xs shadow-sm hover:shadow-md ' +
+                          'transition-all duration-200 hover:scale-105 active:scale-95">' +
+                  downloadIcon + '<span>Download</span>' +
+                '</a>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      }
+
+      function renderActions(actions) {
+        const listEl  = document.getElementById('viewActionsList');
+        const countEl = document.getElementById('viewActionsCount');
+        if (!listEl) return;
+
+        const arr = Array.isArray(actions) ? actions : [];
+
+        if (countEl) countEl.textContent = String(arr.length);
+
+        if (arr.length === 0) {
+          listEl.innerHTML =
+            '<div class="text-sm text-teal-900/40 italic bg-teal-50/60 border border-dashed border-teal-200 rounded-lg px-3 py-3 text-center">' +
+              'No action records found for this grievance.' +
+            '</div>';
+          return;
+        }
+
+        let html = '';
+        arr.forEach(function (a, idx) {
+          const dateStr   = a.action_date && String(a.action_date).trim() !== '' ? String(a.action_date) : '—';
+          const summary   = a.summary && String(a.summary).trim() !== '' ? String(a.summary) : '';
+          const actionTxt = a.action_taken && String(a.action_taken).trim() !== '' ? String(a.action_taken) : '';
+          const attendee  = a.attendee_name && String(a.attendee_name).trim() !== '' ? String(a.attendee_name) : '—';
+          const attType   = a.attendee_type && String(a.attendee_type).trim() !== '' ? String(a.attendee_type) : '';
+
+          html +=
+            '<div class="rounded-xl border-2 border-teal-100 bg-teal-50/60 overflow-hidden">' +
+              '<div class="flex items-center justify-between px-4 py-2 bg-white border-b border-teal-100">' +
+                '<div class="flex items-center gap-2">' +
+                  '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-[10px] font-bold">' +
+                    (idx + 1) +
+                  '</span>' +
+                  '<span class="text-xs font-bold text-teal-900">' + escapeHtml(dateStr) + '</span>' +
+                '</div>' +
+                '<div class="text-right min-w-0">' +
+                  '<p class="text-[10px] uppercase font-bold tracking-wider text-teal-900/40">Attendee</p>' +
+                  '<p class="text-xs font-semibold text-teal-900 truncate">' +
+                    escapeHtml(attendee) +
+                    (attType ? ' <span class="text-[10px] text-teal-900/50 font-normal">(' + escapeHtml(attType) + ')</span>' : '') +
+                  '</p>' +
+                '</div>' +
+              '</div>' +
+              '<div class="px-4 py-3 space-y-2">' +
+                '<div>' +
+                  '<p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40 mb-1">Summary</p>' +
+                  '<p class="text-sm text-teal-900/80 whitespace-pre-wrap break-words">' +
+                    (summary !== '' ? escapeHtml(summary) : '<span class="text-teal-900/40 italic">—</span>') +
+                  '</p>' +
+                '</div>' +
+                '<div>' +
+                  '<p class="text-[10px] font-bold uppercase tracking-wider text-teal-900/40 mb-1">Action Taken</p>' +
+                  '<p class="text-sm text-teal-900/80 whitespace-pre-wrap break-words">' +
+                    (actionTxt !== '' ? escapeHtml(actionTxt) : '<span class="text-teal-900/40 italic">—</span>') +
+                  '</p>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        });
+
+        listEl.innerHTML = html;
+      }
+
+      window.openViewModal = function (data) {
+        if (!data) data = {};
+
+        setTextOrDash('viewName',         data.name);
+        setTextOrDash('viewRole',         data.role);
+        setTextOrDash('viewClassDept',    data.class_department);
+        setTextOrDash('viewNumber',       data.grievance_number);
+        setTextOrDash('viewType',         data.grievance_type);
+        setTextOrDash('viewPostedDate',   data.posted_date);
+        setTextOrDash('viewReplyDate',    data.reply_date);
+        setTextOrDash('viewSubject',      data.subject);
+        setTextOrDash('viewDescription',  data.description);
+        setTextOrDash('viewReplyDetails', data.reply_details);
+        setTextOrDash('viewFeedbackDetails', data.feedback_details);
+
+        renderAttachment('viewAttachmentContent',      data.attachment_url);
+        renderAttachment('viewReplyAttachmentContent', data.reply_attachment_url);
+        renderActions(data.actions);
+
+        const statusEl = document.getElementById('viewStatus');
+        if (statusEl) {
+          const status = String(data.status || 'Pending');
+          statusEl.textContent = status;
+          statusEl.className = 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border';
+
+          const key = status.toLowerCase();
+          if (key === 'pending')          statusEl.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-200');
+          else if (key === 'in progress') statusEl.classList.add('bg-sky-100', 'text-sky-800', 'border-sky-200');
+          else if (key === 'disposed')    statusEl.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-200');
+          else if (key === 'closed')      statusEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+          else if (key === 'reopened')    statusEl.classList.add('bg-pink-100', 'text-pink-800', 'border-pink-200');
+          else                            statusEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+        }
+
+        const viewModal = document.getElementById('viewModal');
+        viewModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+      window.closeViewModal = function () {
+        document.getElementById('viewModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      };
+
+      // Delete
+      const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+      const deleteConfirmPanel = document.getElementById('deleteConfirmPanel');
+      const deleteNameDisplay  = document.getElementById('deleteNameDisplay');
+      const confirmDeleteBtn   = document.getElementById('confirmDeleteBtn');
+      let pendingDeleteId = null;
+
+      window.confirmDelete = function (grievanceId, label) {
+        pendingDeleteId = grievanceId;
+        if (deleteNameDisplay) deleteNameDisplay.textContent = '"' + label + '"';
+        deleteConfirmModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (deleteConfirmPanel) {
+          deleteConfirmPanel.classList.remove('animate-confirm-shake');
+          void deleteConfirmPanel.offsetWidth;
+          deleteConfirmPanel.classList.add('animate-confirm-shake');
+        }
+        setTimeout(function () { if (confirmDeleteBtn) confirmDeleteBtn.focus(); }, 80);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+      window.closeDeleteModal = function () {
+        deleteConfirmModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        pendingDeleteId = null;
+      };
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function () {
+          if (pendingDeleteId === null) return window.closeDeleteModal();
+          const input = document.getElementById('deleteGrievanceId');
+          const form  = document.getElementById('deleteForm');
+          if (input && form) {
+            input.value = String(pendingDeleteId);
+            form.submit();
+          }
+        });
+      }
+
+      // Create modal
+      const createModal = document.getElementById('createSummaryModal');
+      const createForm  = document.getElementById('createSummaryForm');
+      window.openCreateModal = function () {
+        createModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
         setTimeout(function () {
-          box.classList.remove('animate-flash-in');
-          box.classList.add('animate-flash-out');
-          setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 500);
-        }, 3000);
-      });
-    })();
+          const r = document.getElementById('create_role');
+          if (r) r.focus();
+        }, 80);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+      window.closeCreateModal = function () {
+        createModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        if (createForm) createForm.reset();
+      };
 
-    // Admin dropdown
-    (function () {
-      const btn = document.getElementById('admin-dropdown-btn');
-      const menu = document.getElementById('admin-dropdown-menu');
-      const chevron = document.getElementById('admin-chevron');
-      const container = document.getElementById('admin-dropdown-container');
-      if (!btn || !menu || !container) return;
+      // Bulk modal
+      const bulkModal = document.getElementById('bulkUploadModal');
+      const bulkForm  = document.getElementById('bulkUploadForm');
+      window.openBulkUploadModal = function () {
+        bulkModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        setTimeout(function () {
+          const f = document.getElementById('csv_file');
+          if (f) f.focus();
+        }, 80);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+      window.closeBulkUploadModal = function () {
+        bulkModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        if (bulkForm) bulkForm.reset();
+      };
 
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const isOpen = !menu.classList.contains('hidden');
-        if (isOpen) {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded','false');
-        } else {
-          menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
-          if (chevron) chevron.classList.add('rotate-180');
-          btn.setAttribute('aria-expanded','true');
+      // Logout
+      const logoutConfirmModal = document.getElementById('logoutConfirmModal');
+      const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
+      const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
+      const LOGOUT_URL         = '../logout.php?role=admin';
+
+      window.openLogoutModal = function () {
+        logoutConfirmModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if (logoutConfirmPanel) {
+          logoutConfirmPanel.classList.remove('animate-confirm-shake');
+          void logoutConfirmPanel.offsetWidth;
+          logoutConfirmPanel.classList.add('animate-confirm-shake');
         }
-      });
-
-      document.addEventListener('click', function (e) {
-        if (!container.contains(e.target)) {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded','false');
-        }
-      });
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
-          if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded','false');
-        }
-      });
-    })();
-
-    // --------------------------------------------------------------------
-    // Helpers
-    // --------------------------------------------------------------------
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = (str === undefined || str === null) ? '' : String(str);
-      return div.innerHTML;
-    }
-
-    function setTextOrDash(id, value) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const v = (value === undefined || value === null) ? '' : String(value).trim();
-      el.textContent = v !== '' ? v : '—';
-    }
-
-    // --------------------------------------------------------------------
-    // Attachment renderer — View + Download buttons
-    // --------------------------------------------------------------------
-    function renderAttachment(containerId, url) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      if (!url) {
-        container.innerHTML = '<span class="text-slate-400 italic text-sm">No attachment</span>';
-        return;
-      }
-
-      const safeUrl  = String(url);
-      const fileName = (safeUrl.split('/').pop() || 'attachment').split('?')[0];
-      const isImage  = /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(safeUrl);
-
-      // Lucide icons as inline SVG (so we don't depend on lucide replacing them later)
-      const viewIcon =
-        '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
-          '<circle cx="12" cy="12" r="3"></circle>' +
-        '</svg>';
-
-      const downloadIcon =
-        '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>' +
-          '<polyline points="7 10 12 15 17 10"></polyline>' +
-          '<line x1="12" y1="15" x2="12" y2="3"></line>' +
-        '</svg>';
-
-      const fileIcon =
-        '<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#8B1E7E] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
-          '<polyline points="14 2 14 8 20 8"></polyline>' +
-        '</svg>';
-
-      let imagePreview = '';
-      if (isImage) {
-        imagePreview =
-          '<div class="mb-3">' +
-            '<img src="' + escapeHtml(safeUrl) + '" alt="' + escapeHtml(fileName) + '" ' +
-                 'class="max-h-48 rounded-lg border border-slate-200 shadow-sm" />' +
-          '</div>';
-      }
-
-      container.innerHTML =
-        '<div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3">' +
-          imagePreview +
-          '<div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">' +
-            (isImage ? '' : '<div class="flex-shrink-0">' + fileIcon + '</div>') +
-            '<div class="min-w-0 flex-1">' +
-              '<p class="text-xs font-semibold text-slate-700 truncate" title="' + escapeHtml(fileName) + '">' +
-                escapeHtml(fileName) +
-              '</p>' +
-              '<p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold mt-0.5">' +
-                (isImage ? 'Image' : 'Document') +
-              '</p>' +
-            '</div>' +
-            '<div class="flex items-center gap-2 flex-shrink-0">' +
-              '<a href="' + escapeHtml(safeUrl) + '" target="_blank" rel="noopener" ' +
-                 'title="View attachment" ' +
-                 'class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-purple-50 ' +
-                        'border border-slate-200 hover:border-[#8B1E7E] text-slate-700 hover:text-[#8B1E7E] ' +
-                        'font-semibold text-xs transition-all duration-200 hover:scale-105 active:scale-95">' +
-                viewIcon + '<span>View</span>' +
-              '</a>' +
-              '<a href="' + escapeHtml(safeUrl) + '" download="' + escapeHtml(fileName) + '" ' +
-                 'title="Download attachment" ' +
-                 'class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#4A154B] hover:bg-[#5A1B5C] ' +
-                        'text-white font-semibold text-xs shadow-sm hover:shadow-md ' +
-                        'transition-all duration-200 hover:scale-105 active:scale-95">' +
-                downloadIcon + '<span>Download</span>' +
-              '</a>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    function renderActions(actions) {
-      const listEl  = document.getElementById('viewActionsList');
-      const countEl = document.getElementById('viewActionsCount');
-      if (!listEl) return;
-
-      const arr = Array.isArray(actions) ? actions : [];
-
-      if (countEl) countEl.textContent = String(arr.length);
-
-      if (arr.length === 0) {
-        listEl.innerHTML =
-          '<div class="text-sm text-slate-400 italic bg-slate-50 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">' +
-            'No action records found for this grievance.' +
-          '</div>';
-        return;
-      }
-
-      let html = '';
-      arr.forEach(function (a, idx) {
-        const dateStr   = a.action_date && String(a.action_date).trim() !== '' ? String(a.action_date) : '—';
-        const summary   = a.summary && String(a.summary).trim() !== '' ? String(a.summary) : '';
-        const actionTxt = a.action_taken && String(a.action_taken).trim() !== '' ? String(a.action_taken) : '';
-        const attendee  = a.attendee_name && String(a.attendee_name).trim() !== '' ? String(a.attendee_name) : '—';
-        const attType   = a.attendee_type && String(a.attendee_type).trim() !== '' ? String(a.attendee_type) : '';
-
-        html +=
-          '<div class="rounded-xl border border-slate-200 bg-slate-50/60 overflow-hidden">' +
-            '<div class="flex items-center justify-between px-4 py-2 bg-white border-b border-slate-100">' +
-              '<div class="flex items-center gap-2">' +
-                '<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] text-white text-[10px] font-bold">' +
-                  (idx + 1) +
-                '</span>' +
-                '<span class="text-xs font-bold text-slate-700">' + escapeHtml(dateStr) + '</span>' +
-              '</div>' +
-              '<div class="text-right min-w-0">' +
-                '<p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Attendee</p>' +
-                '<p class="text-xs font-semibold text-slate-700 truncate">' +
-                  escapeHtml(attendee) +
-                  (attType ? ' <span class="text-[10px] text-slate-400 font-normal">(' + escapeHtml(attType) + ')</span>' : '') +
-                '</p>' +
-              '</div>' +
-            '</div>' +
-            '<div class="px-4 py-3 space-y-2">' +
-              '<div>' +
-                '<p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Summary</p>' +
-                '<p class="text-sm text-slate-700 whitespace-pre-wrap break-words">' +
-                  (summary !== '' ? escapeHtml(summary) : '<span class="text-slate-400 italic">—</span>') +
-                '</p>' +
-              '</div>' +
-              '<div>' +
-                '<p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Action Taken</p>' +
-                '<p class="text-sm text-slate-700 whitespace-pre-wrap break-words">' +
-                  (actionTxt !== '' ? escapeHtml(actionTxt) : '<span class="text-slate-400 italic">—</span>') +
-                '</p>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-      });
-
-      listEl.innerHTML = html;
-    }
-
-    function openViewModal(data) {
-      if (!data) data = {};
-
-      setTextOrDash('viewName',         data.name);
-      setTextOrDash('viewRole',         data.role);
-      setTextOrDash('viewClassDept',    data.class_department);
-      setTextOrDash('viewNumber',       data.grievance_number);
-      setTextOrDash('viewType',         data.grievance_type);
-      setTextOrDash('viewPostedDate',   data.posted_date);
-      setTextOrDash('viewReplyDate',    data.reply_date);
-      setTextOrDash('viewSubject',      data.subject);
-      setTextOrDash('viewDescription',  data.description);
-      setTextOrDash('viewReplyDetails', data.reply_details);
-      setTextOrDash('viewFeedbackDetails', data.feedback_details);
-
-      // Attachments (View + Download)
-      renderAttachment('viewAttachmentContent',      data.attachment_url);
-      renderAttachment('viewReplyAttachmentContent', data.reply_attachment_url);
-
-      // Actions
-      renderActions(data.actions);
-
-      const statusEl = document.getElementById('viewStatus');
-      if (statusEl) {
-        const status = String(data.status || 'Pending');
-        statusEl.textContent = status;
-        statusEl.className = 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border';
-
-        const key = status.toLowerCase();
-        if (key === 'pending')          statusEl.classList.add('bg-amber-100', 'text-amber-800', 'border-amber-200');
-        else if (key === 'in progress') statusEl.classList.add('bg-sky-100', 'text-sky-800', 'border-sky-200');
-        else if (key === 'disposed')    statusEl.classList.add('bg-emerald-100', 'text-emerald-800', 'border-emerald-200');
-        else if (key === 'closed')      statusEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
-        else if (key === 'reopened')    statusEl.classList.add('bg-pink-100', 'text-pink-800', 'border-pink-200');
-        else                            statusEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
-      }
-
-      viewModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeViewModal() {
-      viewModal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }
-
-    // --------------------------------------------------------------------
-    // Delete confirmation
-    // --------------------------------------------------------------------
-    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
-    const deleteConfirmPanel = document.getElementById('deleteConfirmPanel');
-    const deleteNameDisplay  = document.getElementById('deleteNameDisplay');
-    const confirmDeleteBtn   = document.getElementById('confirmDeleteBtn');
-    let pendingDeleteId = null;
-
-    function confirmDelete(grievanceId, label) {
-      pendingDeleteId = grievanceId;
-      if (deleteNameDisplay) deleteNameDisplay.textContent = '"' + label + '"';
-      deleteConfirmModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (deleteConfirmPanel) {
-        deleteConfirmPanel.classList.remove('animate-confirm-shake');
-        void deleteConfirmPanel.offsetWidth;
-        deleteConfirmPanel.classList.add('animate-confirm-shake');
-      }
-      setTimeout(function () { if (confirmDeleteBtn) confirmDeleteBtn.focus(); }, 80);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeDeleteModal() {
-      deleteConfirmModal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-      pendingDeleteId = null;
-    }
-    if (confirmDeleteBtn) {
-      confirmDeleteBtn.addEventListener('click', function () {
-        if (pendingDeleteId === null) return closeDeleteModal();
-        const input = document.getElementById('deleteGrievanceId');
-        const form  = document.getElementById('deleteForm');
-        if (input && form) {
-          input.value = String(pendingDeleteId);
-          form.submit();
-        }
-      });
-    }
-
-    // --------------------------------------------------------------------
-    // Create modal
-    // --------------------------------------------------------------------
-    const createModal = document.getElementById('createSummaryModal');
-    const createForm  = document.getElementById('createSummaryForm');
-    function openCreateModal() {
-      createModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      setTimeout(function () {
-        const r = document.getElementById('create_role');
-        if (r) r.focus();
-      }, 80);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeCreateModal() {
-      createModal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-      if (createForm) createForm.reset();
-    }
-
-    // --------------------------------------------------------------------
-    // Bulk upload modal
-    // --------------------------------------------------------------------
-    const bulkModal = document.getElementById('bulkUploadModal');
-    const bulkForm  = document.getElementById('bulkUploadForm');
-    function openBulkUploadModal() {
-      bulkModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      setTimeout(function () {
-        const f = document.getElementById('csv_file');
-        if (f) f.focus();
-      }, 80);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeBulkUploadModal() {
-      bulkModal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-      if (bulkForm) bulkForm.reset();
-    }
-
-    // --------------------------------------------------------------------
-    // Logout
-    // --------------------------------------------------------------------
-    const logoutConfirmModal = document.getElementById('logoutConfirmModal');
-    const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
-    const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
-    const LOGOUT_URL = '../logout.php?role=admin';
-
-    function openLogoutModal() {
-      logoutConfirmModal.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-      if (logoutConfirmPanel) {
-        logoutConfirmPanel.classList.remove('animate-confirm-shake');
-        void logoutConfirmPanel.offsetWidth;
-        logoutConfirmPanel.classList.add('animate-confirm-shake');
-      }
-      setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
-      if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    function closeLogoutModal() {
-      logoutConfirmModal.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }
-    (function () {
-      const triggers = [
-        document.getElementById('sidebarLogoutBtn'),
-        document.getElementById('dropdownLogoutBtn'),
-      ];
-      triggers.forEach(function (btn) {
+        setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      };
+      window.closeLogoutModal = function () {
+        logoutConfirmModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      };
+      [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
         if (!btn) return;
         btn.addEventListener('click', function (e) {
           e.preventDefault(); e.stopPropagation();
-          openLogoutModal();
+          window.openLogoutModal();
         });
       });
-    })();
-    if (confirmLogoutBtn) {
-      confirmLogoutBtn.addEventListener('click', function () {
-        confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
-        window.location.href = LOGOUT_URL;
-      });
-    }
-
-    // Entries + search
-    (function () {
-      const entriesSelect = document.getElementById('entriesPerPage');
-      const filterForm    = document.getElementById('filterForm');
-      if (!entriesSelect || !filterForm) return;
-      entriesSelect.addEventListener('change', function () { filterForm.submit(); });
-    })();
-
-    (function () {
-      const searchInput = document.getElementById('searchInput');
-      const tableBody   = document.getElementById('summaryTableBody');
-      if (!searchInput || !tableBody) return;
-
-      let debounceTimer = null;
-      searchInput.addEventListener('input', function () {
-        const term = this.value.toLowerCase().trim();
-        tableBody.querySelectorAll('tr').forEach(function (row) {
-          row.style.display = (term === '' || row.textContent.toLowerCase().indexOf(term) !== -1) ? '' : 'none';
+      if (confirmLogoutBtn) {
+        confirmLogoutBtn.addEventListener('click', function () {
+          confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
+          window.location.href = LOGOUT_URL;
         });
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(function () {
-          const form = document.getElementById('filterForm');
-          if (form) form.submit();
-        }, 700);
-      });
-    })();
+      }
 
-    // Mobile: enforce 10 digits
-    (function () {
-      const cellInput = document.getElementById('create_cell_no');
-      if (!cellInput) return;
-      cellInput.addEventListener('input', function () {
-        this.value = this.value.replace(/\D/g, '').slice(0, 10);
-      });
-    })();
+      // Entries + search
+      (function () {
+        const entriesSelect = document.getElementById('entriesPerPage');
+        const filterForm    = document.getElementById('filterForm');
+        if (!entriesSelect || !filterForm) return;
+        entriesSelect.addEventListener('change', function () { filterForm.submit(); });
+      })();
 
-    // Escape closes modals
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      if (viewModal && !viewModal.classList.contains('hidden')) closeViewModal();
-      if (deleteConfirmModal && !deleteConfirmModal.classList.contains('hidden')) closeDeleteModal();
-      if (createModal && !createModal.classList.contains('hidden')) closeCreateModal();
-      if (bulkModal && !bulkModal.classList.contains('hidden')) closeBulkUploadModal();
-      if (logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden')) closeLogoutModal();
+      (function () {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody   = document.getElementById('summaryTableBody');
+        if (!searchInput || !tableBody) return;
+
+        let debounceTimer = null;
+        searchInput.addEventListener('input', function () {
+          const term = this.value.toLowerCase().trim();
+          tableBody.querySelectorAll('tr').forEach(function (row) {
+            row.style.display = (term === '' || row.textContent.toLowerCase().indexOf(term) !== -1) ? '' : 'none';
+          });
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            const form = document.getElementById('filterForm');
+            if (form) form.submit();
+          }, 700);
+        });
+      })();
+
+      // Mobile: enforce 10 digits
+      (function () {
+        const cellInput = document.getElementById('create_cell_no');
+        if (!cellInput) return;
+        cellInput.addEventListener('input', function () {
+          this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+      })();
+
+      // Escape closes modals
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        const v = document.getElementById('viewModal');
+        const d = document.getElementById('deleteConfirmModal');
+        const c = document.getElementById('createSummaryModal');
+        const b = document.getElementById('bulkUploadModal');
+        const l = document.getElementById('logoutConfirmModal');
+        if (v && !v.classList.contains('hidden')) window.closeViewModal();
+        if (d && !d.classList.contains('hidden')) window.closeDeleteModal();
+        if (c && !c.classList.contains('hidden')) window.closeCreateModal();
+        if (b && !b.classList.contains('hidden')) window.closeBulkUploadModal();
+        if (l && !l.classList.contains('hidden')) window.closeLogoutModal();
+      });
+
+      // Header frosted-on-scroll
+      (function () {
+        const header = document.querySelector('header');
+        if (!header) return;
+        const onScroll = function () {
+          if (window.scrollY > 10) header.classList.add('header-scrolled');
+          else header.classList.remove('header-scrolled');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      })();
+
+      // Back-to-top
+      (function () {
+        const btn = document.getElementById('backToTop');
+        if (!btn) return;
+        const onScroll = function () {
+          if (window.scrollY > 400) btn.classList.add('show');
+          else btn.classList.remove('show');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        btn.addEventListener('click', function () {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      })();
     });
   </script>
 

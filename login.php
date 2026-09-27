@@ -51,11 +51,9 @@ $roleDashboardMap = [
     'MANAGEMENT'   => 'management/dashboard.php',
 ];
 
-// If already logged in, redirect away from login page to the correct dashboard
 if (!empty($_SESSION['user_id']) && !empty($_SESSION['role'])) {
     $currentRole = strtoupper((string) $_SESSION['role']);
     $targetPath  = $roleDashboardMap[$currentRole] ?? 'student/dashboard.php';
-
     header('Location: ' . $targetPath);
     exit;
 }
@@ -75,7 +73,6 @@ if (!file_exists($dbFile)) {
 
     if (!isset($conn) || !($conn instanceof mysqli)) {
         $conn = @new mysqli('localhost', 'root', '', 'grievance_db');
-
         if ($conn->connect_error) {
             $dbError = 'Unable to connect to the database.';
             $conn    = null;
@@ -102,9 +99,6 @@ $roleConfig = [
         'placeholder'   => 'Enter your Admin Username',
         'label'         => 'Admin Username',
         'notice'        => 'System Administrator Access Only',
-        'image'         => 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80',
-        'imageTitle'    => 'System Control Center',
-        'imageDesc'     => 'System Configuration, User Management & Analytics',
         'supportMail'   => 'admin.support@rajagiri.edu',
         'supportTag'    => 'Tech Support',
         'register_page' => null,
@@ -117,10 +111,7 @@ $roleConfig = [
         'placeholder'   => 'Enter your Student Username',
         'label'         => 'Student Username',
         'notice'        => 'Enrolled Students Only',
-        'image'         => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80',
-        'imageTitle'    => 'Student Portal',
-        'imageDesc'     => 'Your gateway to fair and transparent grievance resolution',
-        'supportMail'   => 'student.grievance@rajigarircss.edu',
+        'supportMail'   => 'student.grievance@rajagiricss.edu',
         'supportTag'    => 'Helpdesk Email',
         'register_page' => 'student_register.php',
     ],
@@ -132,10 +123,7 @@ $roleConfig = [
         'placeholder'   => 'Enter your Username',
         'label'         => 'Parent Username',
         'notice'        => 'For Registered Parents & Guardians',
-        'image'         => 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-        'imageTitle'    => 'Parent Portal',
-        'imageDesc'     => "Stay connected with your ward's academic journey",
-        'supportMail'   => 'parent.help@rajigarircss.edu',
+        'supportMail'   => 'parent.help@rajagiricss.edu',
         'supportTag'    => 'Support Email',
         'register_page' => 'parent_register.php',
     ],
@@ -147,9 +135,6 @@ $roleConfig = [
         'placeholder'   => 'Enter your Staff Username',
         'label'         => 'Staff Username',
         'notice'        => 'Verified Staff Members Only',
-        'image'         => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80',
-        'imageTitle'    => 'Staff Portal',
-        'imageDesc'     => 'Dedicated portal for teaching and support staff',
         'supportMail'   => 'staff.help@rajagiri.edu',
         'supportTag'    => 'Support Email',
         'register_page' => 'staff_register.php',
@@ -162,9 +147,6 @@ $roleConfig = [
         'placeholder'   => 'Enter your Management Username',
         'label'         => 'Management Username',
         'notice'        => 'Authorized Committee Members Only',
-        'image'         => 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
-        'imageTitle'    => 'Management & Grievance Cell',
-        'imageDesc'     => 'Redressal Committee Oversight & Escalation Management',
         'supportMail'   => 'grievance.committee@rajagiri.edu',
         'supportTag'    => 'Committee Helpdesk',
         'register_page' => null,
@@ -192,7 +174,6 @@ $loginInput = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // ---- CSRF check ----
     $submittedToken = $_POST['csrf_token'] ?? '';
     $sessionToken   = $_SESSION['csrf_token'] ?? '';
 
@@ -200,7 +181,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Security token expired. Please refresh the page and try again.';
     }
 
-    // ---- Input collection ----
     $username = trim((string) ($_POST['username'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
 
@@ -216,7 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $loginInput = $username;
 
-    // ---- Basic validation ----
     if ($username === '') {
         $errors[] = 'Please enter your username.';
     }
@@ -224,27 +203,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Please enter your password.';
     }
 
-    // ---- Authenticate ----
     if (empty($errors)) {
-
         if ($conn === null) {
             $errors[] = $dbError ?: 'Database is unavailable. Please try again later.';
         } else {
             try {
-                /*
-                 * CASE-SENSITIVE username match.
-                 * MySQL's default utf8mb4_general_ci collation is case-insensitive,
-                 * so `username = ?` would match 'Ajay', 'ajay', 'AJAY' alike.
-                 * Using BINARY forces a byte-for-byte comparison so the user must
-                 * enter the username exactly as it was registered.
-                 */
                 $sql = "SELECT id, username, password, role, status
                         FROM users
                         WHERE BINARY username = ?
                         LIMIT 1";
 
                 $stmt = $conn->prepare($sql);
-
                 if (!$stmt) {
                     throw new Exception('Query preparation failed: ' . $conn->error);
                 }
@@ -254,7 +223,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $stmt->get_result();
 
                 if ($result === false || $result->num_rows === 0) {
-                    // Generic message — don't reveal whether the username exists
                     $errors[] = 'Invalid username or password.';
                 } else {
                     $user = $result->fetch_assoc();
@@ -262,22 +230,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $dbUserRole   = strtoupper((string) ($user['role']   ?? ''));
                     $dbUserStatus = ucfirst(strtolower((string) ($user['status'] ?? '')));
 
-                    // ---- Role match check ----
                     if (!in_array($dbUserRole, $allowedDbRoles, true)) {
                         $errors[] = 'Invalid username or password for this portal.';
-                    }
-                    // ---- Status check ----
-                    elseif ($dbUserStatus !== 'Approved') {
+                    } elseif ($dbUserStatus !== 'Approved') {
                         $errors[] = 'Your account status is ' . $dbUserStatus . '. Access is restricted until approved.';
-                    }
-                    // ---- Password verification ----
-                    elseif (!password_verify($password, $user['password'])) {
+                    } elseif (!password_verify($password, $user['password'])) {
                         $errors[] = 'Invalid username or password.';
-                    }
-                    // ---- SUCCESS ----
-                    else {
+                    } else {
                         session_regenerate_id(true);
-
                         $_SESSION['user_id']    = (int) $user['id'];
                         $_SESSION['username']   = $user['username'];
                         $_SESSION['role']       = $dbUserRole;
@@ -288,14 +248,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $conn->close();
 
                         $targetPath = $roleDashboardMap[$dbUserRole] ?? 'student/dashboard.php';
-
                         header('Location: ' . $targetPath);
                         exit;
                     }
                 }
-
                 $stmt->close();
-
             } catch (Exception $ex) {
                 error_log('[Login Error] ' . $ex->getMessage());
                 $errors[] = 'A system error occurred while signing you in. Please try again.';
@@ -325,359 +282,369 @@ function e(?string $v): string
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="<?= e($role['title']) ?> — Rajagiri College of Social Sciences Grievance Redressal Portal.">
   <title><?= e($role['title']) ?> — Rajagiri College of Social Sciences</title>
   <link rel="icon" type="image/svg+xml" href="public/favicon.svg" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink: '#E5097F',
-            brandGreen: '#006837',
-            brandGold: '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           }
         }
       }
-    };
+    }
   </script>
 
-  <link rel="stylesheet" href="assets/css/index.css" />
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+
+    .hero-dots {
+      background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px);
+      background-size: 22px 22px;
+    }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+  </style>
 </head>
+<body class="min-h-screen bg-white text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700">
 
-<body class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-x-hidden font-sans text-slate-800 antialiased">
-
-  <!-- ====================== BACKGROUND DECOR ====================== -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute top-0 left-0 w-[600px] h-[600px] bg-gradient-to-br from-[#8B1E7E]/10 to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-    <div class="absolute bottom-0 right-0 w-[700px] h-[700px] bg-gradient-to-tl from-[#006837]/10 to-transparent rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
-    <div class="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-gradient-to-r from-[#E5097F]/5 to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-  </div>
-
-  <!-- ====================== HEADER ====================== -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#006837] shadow-lg shadow-[#4A154B]/20">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(255,255,255,0.08),transparent_50%)] pointer-events-none"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(255,255,255,0.05),transparent_50%)] pointer-events-none"></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-50 border-b-2 border-teal-600">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16 md:h-20">
-
-        <div class="flex items-center space-x-3 sm:space-x-4">
-          <a href="index.php" class="relative group">
-            <img src="public/rcss-logo.png" alt="RCSS Logo"
-                 class="h-10 md:h-12 w-auto drop-shadow-lg transition-transform group-hover:scale-105" />
-          </a>
-          <div class="hidden sm:flex items-center h-10">
-            <div class="w-px h-full bg-gradient-to-b from-transparent via-white/50 to-transparent"></div>
-          </div>
-          <div class="hidden sm:block relative group">
-            <div class="absolute -inset-1 bg-gradient-to-r from-white/40 via-white/60 to-white/40 rounded-xl blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-            <div class="relative bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg shadow-black/10 border border-white/80 transition-all duration-300 group-hover:bg-white group-hover:shadow-xl">
-              <img src="public/orel-grievance.png" alt="Oréll Grievance"
-                   class="h-7 md:h-9 w-auto object-contain" />
-            </div>
-          </div>
-        </div>
-
-        <a href="index.php"
-           class="group relative inline-flex items-center space-x-2 px-4 sm:px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 hover:border-white/60 text-white transition-all duration-300 shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5">
-          <i data-lucide="arrow-left" class="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"></i>
-          <span class="text-sm font-semibold tracking-wide">Back to Home</span>
-          <i data-lucide="home" class="w-4 h-4 opacity-0 hidden sm:block transition-opacity duration-300 group-hover:opacity-100"></i>
+        <a href="index.php" class="flex items-center gap-3 md:gap-4 shrink-0">
+          <img src="public/rcss-logo.webp" alt="Rajagiri College of Social Sciences" class="h-8 md:h-10 w-auto" />
+          <span class="hidden sm:block logo-divider h-8 md:h-10"></span>
+          <span class="hidden sm:flex items-baseline gap-1">
+            <span class="text-xl md:text-2xl font-bold text-teal-600 tracking-tight">grievance</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+          </span>
         </a>
 
+        <a href="index.php" class="group inline-flex items-center gap-2 text-teal-900 hover:text-teal-600 transition-colors text-sm font-medium">
+          <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+          <span class="hidden sm:inline">Back to Home</span>
+          <span class="sm:hidden">Home</span>
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- ====================== MAIN ====================== -->
-  <main class="relative z-10 w-full min-h-screen flex items-start lg:items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 md:pt-28 pb-12 md:pb-16">
-    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+  <!-- Main -->
+  <main class="relative">
+    <!-- Role strip / breadcrumb -->
+    <div class="bg-teal-600 relative overflow-hidden">
+      <div class="absolute inset-0 hero-dots opacity-30 pointer-events-none"></div>
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+          <div class="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/30 shrink-0">
+            <i data-lucide="<?= e($role['icon']) ?>" class="w-7 h-7 md:w-8 md:h-8 text-white"></i>
+          </div>
+          <div>
+            <p class="text-white/70 text-xs font-semibold uppercase tracking-wider mb-1">Grievance Portal</p>
+            <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight"><?= e($role['title']) ?></h1>
+            <p class="text-teal-50 text-sm md:text-base mt-1"><?= e($role['subtitle']) ?></p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- ============ LEFT: LOGIN FORM ============ -->
-      <div class="w-full max-w-md mx-auto lg:max-w-none lg:pr-8">
-        <div class="relative group">
-          <div class="absolute -inset-0.5 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
+    <!-- Login form section -->
+    <section class="py-10 md:py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
 
-          <div class="relative bg-white rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-8 transition-all duration-300">
+          <!-- LEFT: Form card -->
+          <div class="lg:col-span-3 xl:col-span-3">
+            <div class="bg-white rounded-2xl border-2 border-teal-100 shadow-sm p-6 sm:p-8 max-w-xl mx-auto lg:mx-0">
 
-            <!-- Header -->
-            <div class="text-center mb-6">
-              <div class="relative inline-flex mb-4">
-                <div class="absolute inset-0 bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-2xl blur-md opacity-50"></div>
-                <div class="relative inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#4A154B] via-[#8B1E7E] to-[#E5097F] text-white shadow-lg shadow-pink-500/30">
-                  <i data-lucide="<?= e($role['icon']) ?>" class="w-7 h-7 md:w-8 md:h-8"></i>
-                </div>
+              <div class="mb-6">
+                <h2 class="text-xl md:text-2xl font-bold text-teal-900 mb-1.5">Log in with your credentials</h2>
+                <p class="text-sm text-teal-900/60">Enter the username and password issued to you.</p>
               </div>
-              <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] bg-clip-text text-transparent mb-2">
-                Log in with your credentials
-              </h1>
-              <p class="text-slate-500 text-xs md:text-sm"><?= e($role['title']) ?> — <?= e($role['subtitle']) ?></p>
-            </div>
 
-            <!-- Inline Error Alerts -->
-            <?php if (!empty($errors)): ?>
-              <div class="mb-5 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3">
-                <div class="flex items-start space-x-2">
-                  <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
-                  <ul class="text-sm text-red-700 space-y-1">
-                    <?php foreach ($errors as $err): ?>
-                      <li><?= e($err) ?></li>
-                    <?php endforeach; ?>
-                  </ul>
-                </div>
-              </div>
-            <?php endif; ?>
-
-            <!-- Database Error Banner -->
-            <?php if ($dbError && empty($errors)): ?>
-              <div class="mb-5 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3">
-                <div class="flex items-start space-x-2">
-                  <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
-                  <p class="text-sm text-amber-700"><?= e($dbError) ?></p>
-                </div>
-              </div>
-            <?php endif; ?>
-
-            <!-- Form -->
-            <form action="login.php?role=<?= e($roleKey) ?>" method="POST" class="space-y-4" novalidate autocomplete="off">
-              <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>" />
-              <input type="hidden" name="role" value="<?= e($roleKey) ?>" />
-
-              <!-- Username -->
-              <div class="space-y-2">
-                <label for="username" class="block text-sm font-semibold text-slate-700">
-                  <?= e($role['label']) ?>
-                </label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <i data-lucide="user" class="w-5 h-5"></i>
+              <!-- Error alerts -->
+              <?php if (!empty($errors)): ?>
+                <div class="mb-5 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3">
+                  <div class="flex items-start gap-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+                    <ul class="text-sm text-red-700 space-y-1">
+                      <?php foreach ($errors as $err): ?>
+                        <li><?= e($err) ?></li>
+                      <?php endforeach; ?>
+                    </ul>
                   </div>
-                  <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    value="<?= e($loginInput) ?>"
-                    placeholder="<?= e($role['placeholder']) ?>"
-                    required
-                    autocomplete="off"
-                    autocapitalize="none"
-                    autocorrect="off"
-                    spellcheck="false"
-                    class="w-full pl-11 md:pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                           focus:outline-none focus:border-[#8B1E7E] focus:ring-4 focus:ring-[#8B1E7E]/10
-                           transition-all duration-300 bg-slate-50/50 focus:bg-white text-slate-900
-                           placeholder-slate-400 font-medium text-sm md:text-base"
-                  />
                 </div>
-              </div>
+              <?php endif; ?>
 
-              <!-- Password -->
-              <div class="space-y-2">
-                <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <i data-lucide="lock" class="w-5 h-5"></i>
+              <!-- DB error -->
+              <?php if ($dbError && empty($errors)): ?>
+                <div class="mb-5 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3">
+                  <div class="flex items-start gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+                    <p class="text-sm text-amber-700"><?= e($dbError) ?></p>
                   </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    required
-                    autocomplete="current-password"
-                    class="w-full pl-11 md:pl-12 pr-12 py-3 border-2 border-slate-200 rounded-xl
-                           focus:outline-none focus:border-[#8B1E7E] focus:ring-4 focus:ring-[#8B1E7E]/10
-                           transition-all duration-300 bg-slate-50/50 focus:bg-white text-slate-900
-                           placeholder-slate-400 font-medium text-sm md:text-base"
-                  />
-                  <button
-                    type="button"
-                    id="togglePassword"
-                    aria-label="Toggle password visibility"
-                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#8B1E7E] transition-colors">
-                    <i data-lucide="eye" class="w-5 h-5" id="eyeIcon"></i>
-                  </button>
                 </div>
-              </div>
+              <?php endif; ?>
 
-              <!-- Forgot Password -->
-              <div class="flex justify-end">
-                <a href="forgot-password.php?role=<?= e($roleKey) ?>"
-                   class="group/link inline-flex items-center space-x-1 text-xs md:text-sm font-medium text-[#8B1E7E] hover:text-[#4A154B] transition-colors">
-                  <span>Forgotten password?</span>
-                  <i data-lucide="arrow-right" class="w-3 h-3 transition-transform group-hover/link:translate-x-0.5"></i>
-                </a>
-              </div>
+              <form action="login.php?role=<?= e($roleKey) ?>" method="POST" class="space-y-5" novalidate autocomplete="off">
+                <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>" />
+                <input type="hidden" name="role" value="<?= e($roleKey) ?>" />
 
-              <!-- Submit -->
-              <button type="submit" class="relative w-full overflow-hidden rounded-xl mt-2 group/btn">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] transition-all duration-300"></div>
-                <div class="absolute inset-0 bg-gradient-to-r from-[#E5097F] via-[#8B1E7E] to-[#4A154B] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative flex items-center justify-center space-x-2 py-3.5 px-6 text-white font-semibold shadow-lg shadow-pink-500/30 group-hover/btn:shadow-pink-500/50 transition-all duration-300">
-                  <span>Log in</span>
-                  <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"></i>
+                <!-- Username -->
+                <div class="space-y-2">
+                  <label for="username" class="block text-sm font-semibold text-teal-900">
+                    <?= e($role['label']) ?>
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-teal-600/60">
+                      <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <input
+                      id="username"
+                      name="username"
+                      type="text"
+                      value="<?= e($loginInput) ?>"
+                      placeholder="<?= e($role['placeholder']) ?>"
+                      required
+                      autocomplete="off"
+                      autocapitalize="none"
+                      autocorrect="off"
+                      spellcheck="false"
+                      class="w-full pl-11 pr-4 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 placeholder-teal-900/40 text-sm font-medium
+                             focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                             hover:border-teal-200 transition-all duration-200"
+                    />
+                  </div>
                 </div>
-              </button>
-            </form>
 
-            <!-- ============================================================
-                 CREATE ACCOUNT SECTION (Dynamic — only for eligible roles)
-                 ============================================================ -->
-            <?php if ($canRegister && !empty($role['register_page'])): ?>
-              <div class="mt-6 pt-6 border-t border-slate-100">
-                <div class="text-center">
-                  <p class="text-sm text-slate-500 mb-3">
-                    Don't have an account yet?
-                  </p>
+                <!-- Password -->
+                <div class="space-y-2">
+                  <label for="password" class="block text-sm font-semibold text-teal-900">Password</label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-teal-600/60">
+                      <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      required
+                      autocomplete="current-password"
+                      class="w-full pl-11 pr-12 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 placeholder-teal-900/40 text-sm font-medium
+                             focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10
+                             hover:border-teal-200 transition-all duration-200"
+                    />
+                    <button
+                      type="button"
+                      id="togglePassword"
+                      aria-label="Toggle password visibility"
+                      class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-teal-600/60 hover:text-teal-600 transition-colors">
+                      <i data-lucide="eye" class="w-5 h-5" id="eyeIcon"></i>
+                    </button>
+                  </div>
+                </div>
 
-                  <a href="<?= e($role['register_page']) ?>?role=<?= e($roleKey) ?>"
-                     class="group/register relative inline-flex w-full items-center justify-center gap-2 px-5 py-3 rounded-xl
-                            bg-white hover:bg-gradient-to-r hover:from-[#8B5FBF] hover:via-[#B14FB8] hover:to-[#F45D9E]
-                            border-2 border-[#4A154B]/20 hover:border-transparent
-                            text-[#4A154B] hover:text-white
-                            font-semibold shadow-sm hover:shadow-lg hover:shadow-pink-500/30
-                            transition-all duration-300 hover:-translate-y-0.5 active:scale-[0.98]">
-
-                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full
-                                 bg-[#4A154B]/10 group-hover/register:bg-white/20
-                                 transition-colors duration-300">
-                      <i data-lucide="user-plus" class="w-4 h-4"></i>
-                    </span>
-
-                    <span>Create an account</span>
-
-                    <i data-lucide="arrow-right"
-                       class="w-4 h-4 transition-transform duration-300 group-hover/register:translate-x-1"></i>
+                <!-- Forgot password -->
+                <div class="flex justify-end">
+                  <a href="forgot-password.php?role=<?= e($roleKey) ?>"
+                     class="group/link inline-flex items-center gap-1 text-xs md:text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+                    <span>Forgotten password?</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 transition-transform group-hover/link:translate-x-0.5"></i>
                   </a>
+                </div>
 
-                  <p class="text-[11px] text-slate-400 mt-3 flex items-center justify-center gap-1">
+                <!-- Submit -->
+                <button type="submit"
+                        class="w-full inline-flex items-center justify-center gap-2 bg-teal-600 text-white px-6 py-3.5 rounded-lg text-sm font-semibold
+                               hover:bg-teal-700 transition-colors duration-200 cursor-pointer">
+                  <span>Log in</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </form>
+
+              <!-- Register CTA (only for eligible roles) -->
+              <?php if ($canRegister && !empty($role['register_page'])): ?>
+                <div class="mt-6 pt-6 border-t border-teal-100">
+                  <p class="text-sm text-teal-900/60 text-center mb-3">Don't have an account yet?</p>
+                  <a href="<?= e($role['register_page']) ?>?role=<?= e($roleKey) ?>"
+                     class="group/register inline-flex w-full items-center justify-center gap-2 px-5 py-3 rounded-lg
+                            bg-white border-2 border-teal-600 text-teal-600 font-semibold
+                            hover:bg-teal-600 hover:text-white
+                            transition-all duration-200">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    <span>Create an account</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover/register:translate-x-1"></i>
+                  </a>
+                  <p class="text-[11px] text-teal-900/50 mt-3 flex items-center justify-center gap-1.5">
                     <i data-lucide="shield-check" class="w-3 h-3"></i>
                     <span>Quick registration — approval within 24 hours</span>
                   </p>
                 </div>
+              <?php endif; ?>
+
+              <!-- Notice -->
+              <div class="mt-5 text-center">
+                <p class="inline-flex items-center justify-center gap-2 text-xs md:text-sm text-teal-900/60">
+                  <i data-lucide="key-round" class="w-4 h-4 text-teal-600"></i>
+                  <span><?= e($role['notice']) ?></span>
+                </p>
               </div>
-            <?php endif; ?>
 
-            <!-- Notice -->
-            <div class="mt-5 text-center">
-              <p class="inline-flex items-center justify-center space-x-2 text-xs md:text-sm text-slate-500">
-                <i data-lucide="key-round" class="w-4 h-4 text-[#006837]"></i>
-                <span><?= e($role['notice']) ?></span>
-              </p>
             </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ RIGHT: BRANDING PANEL ============ -->
-      <div class="hidden lg:flex flex-col justify-center items-center relative">
-        <div class="absolute inset-0 bg-gradient-to-br from-[#4A154B]/5 via-[#8B1E7E]/5 to-[#E5097F]/5 rounded-3xl"></div>
-        <div class="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-[#8B1E7E]/20 to-transparent rounded-full blur-2xl"></div>
-        <div class="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-tl from-[#006837]/20 to-transparent rounded-full blur-2xl"></div>
-
-        <div class="relative z-10 w-full max-w-lg p-6 xl:p-8">
-
-          <div class="text-center mb-6 xl:mb-8">
-            <div class="inline-flex items-center justify-center mb-4 bg-white/80 backdrop-blur-sm rounded-2xl p-3 xl:p-4 shadow-lg">
-              <img src="public/rcss-logo.png" alt="RCSS Logo" class="h-14 xl:h-16 w-auto" />
-            </div>
-            <h2 class="text-xl xl:text-2xl 2xl:text-3xl font-bold bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#006837] bg-clip-text text-transparent">
-              Rajagiri College of Social Sciences
-            </h2>
-            <p class="text-slate-600 mt-2 text-xs xl:text-sm italic">"Relentlessly Towards Excellence"</p>
           </div>
 
-          <div class="relative group/image">
-            <div class="absolute -inset-1 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-3xl blur opacity-30 group-hover/image:opacity-50 transition duration-500"></div>
-            <div class="relative bg-white rounded-3xl overflow-hidden shadow-2xl">
-              <div class="relative h-64 xl:h-72 2xl:h-80 w-full overflow-hidden bg-slate-200">
-                <img
-                  src="<?= e($role['image']) ?>"
-                  alt="<?= e($role['imageTitle']) ?>"
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover/image:scale-105"
-                  onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-[#4A154B]/60 via-[#4A154B]/20 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-4 xl:p-6 text-white">
-                  <div class="flex items-center space-x-2 mb-1 xl:mb-2">
-                    <i data-lucide="<?= e($role['icon']) ?>" class="w-4 h-4 xl:w-5 xl:h-5"></i>
-                    <span class="font-semibold text-sm xl:text-base"><?= e($role['imageTitle']) ?></span>
+          <!-- RIGHT: Info panel -->
+          <aside class="lg:col-span-2 xl:col-span-2">
+            <div class="bg-teal-50 rounded-2xl border-2 border-teal-100 p-6 sm:p-8">
+
+              <h3 class="text-lg font-bold text-teal-900 mb-5">Need help signing in?</h3>
+
+              <div class="space-y-5">
+                <div class="flex gap-4">
+                  <div class="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white text-teal-600">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
                   </div>
-                  <p class="text-xs xl:text-sm text-white/90"><?= e($role['imageDesc']) ?></p>
+                  <div class="min-w-0">
+                    <p class="text-xs text-teal-900/60 font-semibold uppercase tracking-wide mb-1"><?= e($role['supportTag']) ?></p>
+                    <p class="text-sm font-semibold text-teal-900 break-all leading-tight"><?= e($role['supportMail']) ?></p>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="grid grid-cols-1 xl:grid-cols-2 gap-3 xl:gap-4 mt-6 xl:mt-8">
-            <div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 xl:p-4 border border-slate-200 shadow-lg">
-              <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 xl:w-10 xl:h-10 rounded-lg bg-gradient-to-br from-[#006837] to-[#008a4a] flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="mail" class="w-4 h-4 xl:w-5 xl:h-5 text-white"></i>
+                <div class="flex gap-4">
+                  <div class="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white text-teal-600">
+                    <i data-lucide="phone" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs text-teal-900/60 font-semibold uppercase tracking-wide mb-1">Helpline</p>
+                    <p class="text-sm font-semibold text-teal-900">+91 484 XXX XXXX</p>
+                    <p class="text-xs text-teal-900/60 mt-0.5">Mon–Fri, 9 AM – 5 PM</p>
+                  </div>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-[10px] xl:text-xs text-slate-500 font-medium"><?= e($role['supportTag']) ?></p>
-                  <p class="text-[11px] xl:text-xs font-semibold text-slate-800 break-all leading-tight">
-                    <?= e($role['supportMail']) ?>
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            <div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 xl:p-4 border border-slate-200 shadow-lg">
-              <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 xl:w-10 xl:h-10 rounded-lg bg-gradient-to-br from-[#4A154B] to-[#8B1E7E] flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="phone" class="w-4 h-4 xl:w-5 xl:h-5 text-white"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p class="text-[10px] xl:text-xs text-slate-500 font-medium">Helpline</p>
-                  <p class="text-xs xl:text-sm font-semibold text-slate-800">+91 484 XXX XXXX</p>
-                  <p class="text-[10px] xl:text-xs text-slate-500 mt-0.5">Mon-Fri, 9 AM - 5 PM</p>
+                <div class="flex gap-4">
+                  <div class="shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-xl bg-white text-teal-600">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs text-teal-900/60 font-semibold uppercase tracking-wide mb-1">Privacy</p>
+                    <p class="text-sm text-teal-900/80 leading-relaxed">Your credentials and identity are protected with encryption at every step.</p>
+                  </div>
                 </div>
               </div>
+
+              <div class="mt-6 pt-6 border-t border-teal-200/60">
+                <p class="text-xs text-teal-900/60 leading-relaxed">
+                  Usernames are <strong class="text-teal-900">case-sensitive</strong>. Please enter yours exactly as it was registered.
+                </p>
+              </div>
+
             </div>
-          </div>
+          </aside>
 
         </div>
       </div>
-
-    </div>
+    </section>
   </main>
 
-  <!-- ====================== SCRIPTS ====================== -->
-  <script>
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
+  <!-- Footer -->
+  <footer class="bg-teal-900 text-white mt-8">
+    <div class="roofline"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-3 mb-4 bg-white rounded-lg px-3 py-2 w-fit">
+            <img src="public/rcss-logo.webp" alt="Rajagiri College of Social Sciences" class="h-8 w-auto" />
+          </div>
+          <p class="text-teal-100/80 text-sm leading-relaxed max-w-xs">
+            Committed to fairness, transparency and prompt grievance redressal.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Quick links</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="login.php?role=student" class="text-teal-100/80 hover:text-white transition-colors">Student</a></li>
+            <li><a href="login.php?role=parent" class="text-teal-100/80 hover:text-white transition-colors">Parent</a></li>
+            <li><a href="login.php?role=staff" class="text-teal-100/80 hover:text-white transition-colors">Staff</a></li>
+            <li><a href="login.php?role=management" class="text-teal-100/80 hover:text-white transition-colors">Grievance Member</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-4 text-sm uppercase tracking-wide text-teal-200">Contact</h4>
+          <ul class="space-y-3 text-sm text-teal-100/80">
+            <li class="flex items-center gap-2">
+              <i data-lucide="mail" class="w-4 h-4 text-teal-300"></i>
+              <span>grievance@rajagiricss.edu</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="phone" class="w-4 h-4 text-teal-300"></i>
+              <span>+91 484 XXX XXXX</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-teal-300"></i>
+              <span>Aluva, Kochi, Kerala</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-6 text-center text-xs text-teal-200/70">
+        <p>&copy; <?php echo date('Y'); ?> Rajagiri College of Social Sciences. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 
-    // Toggle password visibility
+  <script>
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
     (function () {
       const toggleBtn = document.getElementById('togglePassword');
       const pwdInput  = document.getElementById('password');
       const eyeIcon   = document.getElementById('eyeIcon');
-
       if (!toggleBtn || !pwdInput || !eyeIcon) return;
 
       toggleBtn.addEventListener('click', function () {
         const isHidden = pwdInput.type === 'password';
         pwdInput.type = isHidden ? 'text' : 'password';
-
         eyeIcon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons({ targets: [eyeIcon] });
-        }
+        if (typeof lucide !== 'undefined') lucide.createIcons({ targets: [eyeIcon] });
       });
     })();
-
-    window.scrollTo(0, 0);
   </script>
-
-  <script src="assets/js/index.js"></script>
 </body>
 </html>

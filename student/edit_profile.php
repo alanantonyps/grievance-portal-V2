@@ -542,43 +542,32 @@ $countryCodes = [
   <title>Edit Profile — Student | Rajagiri College Grievance Portal</title>
   <link rel="icon" type="image/svg+xml" href="../public/favicon.svg" />
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Tailwind Theme -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandPurple: '#4A154B',
-            brandPink: '#E5097F',
-            brandGreen: '#006837',
-            brandGold: '#C5A059'
+            teal: {
+              50:'#EAF4F4',100:'#CFE6E7',200:'#9FCDCF',300:'#6FB4B7',400:'#3F9B9F',
+              500:'#128287',600:'#006E74',700:'#005A5F',800:'#00454A',900:'#003134'
+            }
+          },
+          fontFamily: {
+            display: ['Coolvetica', 'Poppins', 'sans-serif'],
+            sans: ['Coolvetica', 'Poppins', 'sans-serif']
           },
           keyframes: {
-            fadeInUp: {
-              '0%':   { opacity: '0', transform: 'translateY(12px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            },
-            dropdownFade: {
-              '0%':   { opacity: '0', transform: 'translateY(-8px) scale(0.98)' },
-              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' }
-            },
-            modalFadeIn: {
-              '0%':   { opacity: '0', transform: 'scale(0.96)' },
-              '100%': { opacity: '1', transform: 'scale(1)' }
-            },
-            confirmShake: {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '20%':      { transform: 'translateX(-6px)' },
-              '40%':      { transform: 'translateX(6px)' },
-              '60%':      { transform: 'translateX(-4px)' },
-              '80%':      { transform: 'translateX(4px)' }
-            }
+            fadeInUp: { '0%': { opacity: '0', transform: 'translateY(12px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            dropdownFade: { '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.98)' }, '100%': { opacity: '1', transform: 'translateY(0) scale(1)' } },
+            modalFadeIn: { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
+            confirmShake: { '0%, 100%': { transform: 'translateX(0)' }, '20%': { transform: 'translateX(-6px)' }, '40%': { transform: 'translateX(6px)' }, '60%': { transform: 'translateX(-4px)' }, '80%': { transform: 'translateX(4px)' } }
           },
           animation: {
             'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -591,211 +580,205 @@ $countryCodes = [
     };
   </script>
 
-  <!-- Local Styles -->
-  <link rel="stylesheet" href="../assets/css/index.css" />
+  <style>
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-rg.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-rg.woff') format('woff');
+      font-weight: 400; font-display: swap;
+    }
+    @font-face {
+      font-family: 'Coolvetica';
+      src: url('../assets/fonts/coolvetica-bold.woff2') format('woff2'),
+           url('../assets/fonts/coolvetica-bold.woff') format('woff');
+      font-weight: 700; font-display: swap;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Coolvetica', 'Poppins', sans-serif; }
+    .hero-dots { background-image: radial-gradient(rgba(255,255,255,0.35) 1.5px, transparent 1.5px); background-size: 22px 22px; }
+    .roofline {
+      height: 14px;
+      background-image: linear-gradient(45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%),
+                        linear-gradient(-45deg, transparent 33.33%, #006E74 33.33%, #006E74 66.66%, transparent 66.66%);
+      background-size: 20px 14px; background-repeat: repeat-x;
+    }
+    .logo-divider { width: 1px; background-color: #CFE6E7; }
+    #sidebarNav::-webkit-scrollbar { width: 6px; }
+    #sidebarNav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #CFE6E7;
+      border-radius: 0.5rem;
+      background-color: rgba(234, 244, 244, 0.4);
+      color: #003134;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .form-input::placeholder { color: rgba(0, 49, 52, 0.4); }
+    .form-input:hover { border-color: #9FCDCF; }
+    .form-input:focus {
+      outline: none;
+      border-color: #006E74;
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(0, 110, 116, 0.1);
+    }
+    .form-input.pl-11 { padding-left: 2.75rem; }
+    .form-input.pl-12 { padding-left: 3rem; }
+    .form-input.pr-12 { padding-right: 3rem; }
+    .form-textarea { resize: none; }
+  </style>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col">
+<body class="min-h-screen bg-teal-50/40 text-teal-900 antialiased selection:bg-teal-100 selection:text-teal-700 flex flex-col">
 
   <div class="flex min-h-screen flex-1">
 
-    <!-- ============================================================
-         SIDEBAR
-         ============================================================ -->
-    <aside class="w-20 bg-gradient-to-b from-[#4A154B] via-[#5A1B5C] to-[#006837] flex flex-col items-center py-4 shadow-2xl fixed inset-y-0 left-0 z-40">
+    <!-- SIDEBAR (no brand logo) -->
+    <aside id="studentSidebar"
+           class="w-20 bg-teal-800 flex flex-col py-4 shadow-xl fixed inset-y-0 left-0 z-40
+                  transition-all duration-300 ease-in-out overflow-hidden">
 
-      <button class="text-white/80 hover:text-white mb-8 p-2 rounded-lg hover:bg-white/10 transition-colors" aria-label="Toggle sidebar">
-        <i data-lucide="menu" class="w-6 h-6"></i>
-      </button>
+      <div class="flex items-center justify-end px-3 mb-6 flex-shrink-0">
+        <button id="sidebarToggle"
+                class="text-white/70 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors
+                       flex items-center justify-center flex-shrink-0" aria-label="Toggle sidebar">
+          <i data-lucide="menu" class="w-5 h-5 flex-shrink-0"></i>
+        </button>
+      </div>
 
-      <nav class="flex flex-col items-center space-y-6 flex-1">
+      <nav id="sidebarNav" class="flex flex-col space-y-1 flex-1 w-full px-3 pt-1 overflow-y-auto overflow-x-hidden">
 
-        <a href="dashboard.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110"
-           title="Dashboard">
-          <i data-lucide="home" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Dashboard
-          </span>
+        <a href="dashboard.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="home" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Dashboard</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Dashboard</span>
         </a>
 
-        <a href="profile.php"
-           class="group relative w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-lg ring-2 ring-white/30 transition-all hover:scale-110 hover:bg-white/30"
-           title="Profile">
-          <i data-lucide="user" class="w-6 h-6"></i>
-          <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-[#4A154B] text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-            Profile
-          </span>
+        <a href="profile.php" class="group relative w-full h-12 rounded-xl bg-white text-teal-800 shadow-md flex items-center px-3 flex-shrink-0 transition-all">
+          <i data-lucide="user" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">My Profile</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">My Profile</span>
+        </a>
+
+        <a href="change_password.php" class="group relative w-full h-12 rounded-xl hover:bg-white/10 flex items-center text-white transition-all px-3 flex-shrink-0">
+          <i data-lucide="key" class="w-6 h-6 flex-shrink-0"></i>
+          <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Change Password</span>
+          <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-teal-900 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Change Password</span>
         </a>
 
       </nav>
 
-      <!-- Sidebar Logout (triggers modal) -->
-      <a href="#"
-         id="sidebarLogoutBtn"
-         class="group relative w-12 h-12 rounded-xl bg-white/10 hover:bg-red-500/40 flex items-center justify-center text-white transition-all hover:scale-110"
-         title="Logout">
-        <i data-lucide="log-out" class="w-6 h-6 group-hover:translate-x-0.5 transition-transform"></i>
-        <span class="absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">
-          Logout
-        </span>
+      <a href="#" data-logout-trigger="1" id="sidebarLogoutBtn"
+         class="group relative w-full h-12 rounded-xl hover:bg-red-500/30 flex items-center text-white transition-all mx-3 px-3 flex-shrink-0"
+         style="width: calc(100% - 1.5rem);" title="Logout">
+        <i data-lucide="log-out" class="w-6 h-6 flex-shrink-0"></i>
+        <span class="sidebar-label ml-4 text-sm font-semibold whitespace-nowrap opacity-0 w-0 overflow-hidden transition-all duration-200">Logout</span>
+        <span class="sidebar-tooltip absolute left-full ml-3 hidden group-hover:block whitespace-nowrap bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-50">Logout</span>
       </a>
-
     </aside>
 
-    <!-- ============================================================
-         MAIN CONTENT
-         ============================================================ -->
-    <div class="flex-1 ml-20 flex flex-col min-h-screen">
+    <!-- MAIN CONTENT -->
+    <div id="studentMain" class="flex-1 ml-20 flex flex-col min-h-screen transition-all duration-300">
 
-      <!-- ============ TOP HEADER ============ -->
-      <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
-        <div class="flex items-center justify-between px-6 py-4">
-
-          <div class="flex items-center space-x-4">
+      <header class="bg-white border-b-2 border-teal-600 shadow-sm sticky top-0 z-30">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3">
+          <div class="flex items-center gap-3 md:gap-4">
             <a href="dashboard.php" class="flex items-center group">
-              <img src="../public/rcss-logo.png" alt="RCSS Logo"
-                   class="h-10 md:h-11 w-auto transition-transform group-hover:scale-105" />
+              <img src="../public/rcss-logo.webp" alt="RCSS Logo" class="h-9 md:h-10 w-auto" />
             </a>
-
-            <div class="hidden sm:flex items-center h-10">
-              <div class="w-px h-full bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
-            </div>
-
-            <img src="../public/orel-grievance.png" alt="Oréll Grievance"
-                 class="hidden sm:block h-8 md:h-9 w-auto object-contain" />
+            <span class="hidden sm:block logo-divider h-8"></span>
+            <span class="hidden sm:flex items-baseline gap-1">
+              <span class="text-lg md:text-xl font-bold text-teal-600 tracking-tight">grievance</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mb-1"></span>
+            </span>
           </div>
 
-          <!-- =====================================================
-               PROFILE DROPDOWN
-               ===================================================== -->
           <div class="relative" id="profile-dropdown-container">
-            <button id="profile-dropdown-btn"
-                    type="button"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                    class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+            <button id="profile-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false"
+                    class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-teal-50 transition-colors">
 
               <?php if ($existingPreviewUrl): ?>
                 <img src="<?= e($existingPreviewUrl) ?>" alt="<?= e($formData['username'] ?: 'Student') ?>"
-                     class="w-10 h-10 rounded-full object-cover border-2 border-[#C5A059] shadow-md ring-2 ring-purple-100" />
+                     class="w-9 h-9 rounded-full object-cover border-2 border-teal-600" />
               <?php else: ?>
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                            flex items-center justify-center text-white shadow-md ring-2 ring-purple-100">
-                  <i data-lucide="user" class="w-5 h-5"></i>
+                <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white">
+                  <i data-lucide="user" class="w-5 h-5 text-white"></i>
                 </div>
               <?php endif; ?>
 
-              <span class="hidden sm:block text-sm font-semibold text-slate-700">
+              <span class="hidden sm:block text-sm font-semibold text-teal-900 max-w-[10rem] truncate">
                 <?= e($formData['username'] ?: 'Student') ?>
               </span>
-              <i data-lucide="chevron-down" id="profile-chevron"
-                 class="w-4 h-4 text-slate-500 transition-transform duration-300"></i>
+              <i data-lucide="chevron-down" id="profile-chevron" class="w-4 h-4 text-teal-600 transition-transform duration-300"></i>
             </button>
 
-            <!-- Dropdown menu -->
-            <div id="profile-dropdown-menu"
-                 class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl
-                        border border-slate-200 py-2 z-50 overflow-hidden">
-
-              <!-- Header info -->
-              <div class="px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-                <div class="flex items-center space-x-3">
+            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2 z-50 overflow-hidden">
+              <div class="px-4 py-3 border-b border-teal-100 bg-teal-50/60">
+                <div class="flex items-center gap-3">
                   <?php if ($existingPreviewUrl): ?>
                     <img src="<?= e($existingPreviewUrl) ?>" alt="<?= e($formData['username'] ?: 'Student') ?>"
-                         class="w-12 h-12 rounded-full object-cover border-2 border-[#C5A059]" />
+                         class="w-12 h-12 rounded-full object-cover border-2 border-teal-600" />
                   <?php else: ?>
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#4A154B] to-[#8B1E7E]
-                                flex items-center justify-center text-white">
+                    <div class="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white">
                       <i data-lucide="user" class="w-6 h-6 text-white"></i>
                     </div>
                   <?php endif; ?>
                   <div class="min-w-0 flex-1">
-                    <p class="text-sm font-bold text-slate-800 truncate">
+                    <p class="text-sm font-bold text-teal-900 truncate">
                       <?= e($formData['name'] ?: ($formData['username'] ?: 'Student')) ?>
                     </p>
-                    <p class="text-xs text-slate-500 truncate">
+                    <p class="text-xs text-teal-900/60 truncate">
                       <?= e($formData['email'] ?: 'student@rajagiri.edu') ?>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <!-- Menu items -->
-              <a href="dashboard.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700
-                        hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50
-                        hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="layout-dashboard"
-                   class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
-                <span class="font-medium">Dashboard</span>
-                <i data-lucide="arrow-right"
-                   class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="dashboard.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-teal-600"></i><span class="font-medium">Dashboard</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-
-              <a href="profile.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700
-                        hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50
-                        hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="user"
-                   class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
-                <span class="font-medium">My Profile</span>
-                <i data-lucide="arrow-right"
-                   class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="profile.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="user" class="w-4 h-4 mr-3 text-teal-600"></i><span class="font-medium">My Profile</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-
-              <a href="change_password.php"
-                 class="flex items-center px-4 py-2.5 text-sm text-slate-700
-                        hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50
-                        hover:text-[#8B1E7E] transition-all duration-200 group/item">
-                <i data-lucide="key"
-                   class="w-4 h-4 mr-3 text-[#8B1E7E] group-hover/item:scale-110 transition-transform"></i>
-                <span class="font-medium">Change Password</span>
-                <i data-lucide="arrow-right"
-                   class="w-4 h-4 ml-auto opacity-0 group-hover/item:opacity-100 text-[#8B1E7E] transition-opacity"></i>
+              <a href="change_password.php" class="flex items-center px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-all group">
+                <i data-lucide="key" class="w-4 h-4 mr-3 text-teal-600"></i><span class="font-medium">Change Password</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 text-teal-600 transition-opacity"></i>
               </a>
-
-              <div class="border-t border-slate-100 mt-2 pt-2">
-                <a href="#" id="dropdownLogoutBtn"
-                   class="flex items-center px-4 py-2.5 text-sm text-red-600
-                          hover:bg-red-50 transition-all duration-200 group/item">
-                  <i data-lucide="log-out" class="w-4 h-4 mr-3 group-hover/item:scale-110 transition-transform"></i>
-                  <span class="font-medium">Logout</span>
+              <div class="border-t border-teal-100 mt-1 pt-1">
+                <a href="#" id="dropdownLogoutBtn" class="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all group">
+                  <i data-lucide="log-out" class="w-4 h-4 mr-3"></i><span class="font-medium">Logout</span>
                 </a>
               </div>
             </div>
           </div>
-          <!-- ===================================================== -->
-
         </div>
       </header>
 
-      <!-- ============ PAGE CONTENT ============ -->
-      <main class="flex-1 px-6 py-8">
+      <main class="flex-1 px-4 sm:px-6 py-6 sm:py-8">
 
-        <!-- Breadcrumb -->
-        <div class="max-w-5xl mx-auto mb-8 animate-fade-in-up">
-          <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-3 flex items-center tracking-tight">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4A154B] to-[#E5097F] flex items-center justify-center mr-3 shadow-lg shadow-purple-500/20">
-              <i data-lucide="user" class="w-5 h-5 text-white"></i>
-            </div>
-            User Details
-          </h1>
-          <nav class="flex items-center space-x-2 text-sm text-slate-500 ml-1">
-            <a href="dashboard.php" class="flex items-center hover:text-[#8B1E7E] transition-colors">
-              <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i>
-              Dashboard
+        <div class="max-w-5xl mx-auto mb-6 animate-fade-in-up">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-teal-600"></span>
+            <p class="text-xs font-semibold text-teal-600 uppercase tracking-wider">Student Portal</p>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-teal-900 mb-2">Edit Profile</h1>
+          <nav class="flex flex-wrap items-center gap-2 text-sm text-teal-900/60">
+            <a href="dashboard.php" class="inline-flex items-center gap-1 hover:text-teal-600 transition-colors">
+              <i data-lucide="layout-dashboard" class="w-4 h-4"></i>Dashboard
             </a>
-            <span class="text-slate-300">/</span>
-            <a href="profile.php" class="hover:text-[#8B1E7E] transition-colors">Grievance</a>
-            <span class="text-slate-300">/</span>
-            <span class="text-[#E5097F] font-semibold">User Details</span>
+            <span class="text-teal-900/30">/</span>
+            <a href="profile.php" class="hover:text-teal-600 transition-colors">User Details</a>
+            <span class="text-teal-900/30">/</span>
+            <span class="text-teal-600 font-semibold">Edit</span>
           </nav>
         </div>
 
-        <!-- Error Banner -->
         <?php if ($dbError || !empty($formErrors)): ?>
-          <div class="max-w-5xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start space-x-2">
+          <div class="max-w-5xl mx-auto mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 flex items-start gap-2">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
             <div class="text-sm text-red-700 space-y-1">
               <?php if ($dbError): ?>
@@ -808,546 +791,334 @@ $countryCodes = [
           </div>
         <?php endif; ?>
 
-        <!-- ============ UPDATE FORM CARD ============ -->
         <div class="max-w-5xl mx-auto animate-fade-in-up">
-          <div class="relative group/card">
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-[#4A154B] via-[#8B1E7E] to-[#E5097F] rounded-2xl blur opacity-10 group-hover/card:opacity-20 transition duration-500"></div>
+          <div class="bg-white rounded-2xl border-2 border-teal-100 overflow-hidden">
 
-            <div class="relative bg-white rounded-2xl shadow-xl border border-slate-200/60 overflow-hidden">
+            <div class="bg-teal-50/60 border-b border-teal-100 px-6 py-5">
+              <h2 class="text-xl md:text-2xl font-bold text-teal-900 flex items-center gap-2">
+                <i data-lucide="pencil-line" class="w-5 h-5 text-teal-600"></i>
+                Update
+              </h2>
+              <p class="text-sm text-teal-900/60 mt-1">Manage your personal information and login credentials</p>
+            </div>
 
-              <div class="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-5 border-b border-slate-200">
-                <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center">
-                  <i data-lucide="pencil-line" class="w-5 h-5 mr-2 text-[#8B1E7E]"></i>
-                  Update
-                </h2>
-                <p class="text-sm text-slate-500 mt-1">Manage your personal information and login credentials</p>
+            <form action="edit_profile.php" method="POST" enctype="multipart/form-data" class="p-6 md:p-8 space-y-8">
+
+              <!-- PERSONAL DETAILS -->
+              <div class="space-y-6">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label for="name" class="block text-sm font-semibold text-teal-900">
+                      Name <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                      <input type="text" id="name" name="name" value="<?= e($formData['name']) ?>" required placeholder="Enter your full name"
+                             class="form-input pl-11" />
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="address" class="block text-sm font-semibold text-teal-900">Address</label>
+                    <div class="relative">
+                      <i data-lucide="map-pin" class="absolute left-3 top-3 w-5 h-5 text-teal-600/60"></i>
+                      <textarea id="address" name="address" rows="3" placeholder="Enter your residential address"
+                                class="form-input pl-11 form-textarea"><?= e($formData['address']) ?></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label for="email" class="block text-sm font-semibold text-teal-900">
+                      Email <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                      <input type="email" id="email" name="email" value="<?= e($formData['email']) ?>" required placeholder="Enter your email address"
+                             class="form-input pl-11" />
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="profile_picture" class="block text-sm font-semibold text-teal-900">Image</label>
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <input type="file" id="profile_picture" name="profile_picture" accept=".jpg,.jpeg,.png,.webp" class="hidden" onchange="previewProfileImage(event)" />
+                      <button type="button" onclick="document.getElementById('profile_picture').click()"
+                              class="px-5 py-2.5 bg-teal-50 hover:bg-teal-100 border-2 border-teal-100 rounded-lg text-sm font-semibold text-teal-700 transition-colors">
+                        Choose file
+                      </button>
+                      <span id="file-chosen-text" class="text-sm text-teal-900/60 truncate">
+                        <?= $existingPreviewUrl ? 'Current image loaded' : 'No file chosen' ?>
+                      </span>
+                      <?php if ($existingPreviewUrl): ?>
+                        <img id="profile-preview" src="<?= e($existingPreviewUrl) ?>" alt="Preview" class="w-10 h-10 rounded-lg object-cover border-2 border-teal-100" />
+                      <?php else: ?>
+                        <img id="profile-preview" src="" alt="Preview" class="hidden w-10 h-10 rounded-lg object-cover border-2 border-teal-100" />
+                      <?php endif; ?>
+                    </div>
+                    <p class="text-xs text-teal-900/60 mt-1">Allowed: JPG, JPEG, PNG, WEBP (max 2 MB)</p>
+                  </div>
+                </div>
+
+                <!-- Mobile + WhatsApp -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  <div class="space-y-2">
+                    <label for="contact_number" class="block text-sm font-semibold text-teal-900">
+                      Mobile Number <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                      <div class="relative w-40 flex-shrink-0" data-country-select="mobile">
+                        <button type="button"
+                                class="country-select-trigger w-full flex items-center justify-between px-3 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 text-sm font-medium hover:border-teal-200 focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10 transition-all">
+                          <span class="country-select-label truncate">+91</span>
+                          <i data-lucide="chevron-down" class="w-4 h-4 text-teal-600/60 pointer-events-none flex-shrink-0"></i>
+                        </button>
+
+                        <div class="country-select-panel hidden absolute z-50 mt-1 w-72 bg-white rounded-xl shadow-xl border border-teal-100 overflow-hidden">
+                          <div class="p-3 border-b border-teal-100 bg-teal-50/60">
+                            <div class="relative">
+                              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-600/60"></i>
+                              <input type="text" class="country-select-search w-full pl-10 pr-4 py-2 border-2 border-teal-100 rounded-lg bg-white text-teal-900 text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/10 transition-all" placeholder="Search country..." />
+                            </div>
+                          </div>
+                          <div class="country-select-list max-h-56 overflow-y-auto">
+                            <?php foreach ($countryCodes as $code => $label): ?>
+                              <button type="button"
+                                      class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors <?= $code === '+91' ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-teal-900 hover:bg-teal-50' ?>"
+                                      data-value="<?= e($code) ?>"
+                                      data-label="<?= e($label) ?>"
+                                      data-search="<?= e(strtolower($code . ' ' . $label)) ?>">
+                                <span class="font-medium flex-shrink-0"><?= e($code) ?></span>
+                                <span class="text-xs text-teal-900/60 flex-1 ml-3 text-left truncate"><?= e($label) ?></span>
+                                <?php if ($code === '+91'): ?>
+                                  <i data-lucide="check-circle" class="w-4 h-4 text-teal-600 flex-shrink-0"></i>
+                                <?php endif; ?>
+                              </button>
+                            <?php endforeach; ?>
+                          </div>
+                          <div class="country-select-empty hidden px-4 py-3 text-sm text-teal-900/60 text-center">No countries found</div>
+                        </div>
+                      </div>
+
+                      <div class="relative flex-1">
+                        <i data-lucide="smartphone" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                        <input type="tel" id="contact_number" name="contact_number" value="<?= e($formData['contact_number']) ?>" required placeholder="Enter mobile number"
+                               class="form-input pl-11" />
+                      </div>
+                    </div>
+                    <p class="text-xs text-teal-900/60 mt-1">Country code is displayed for reference only.</p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="whatsapp_number" class="block text-sm font-semibold text-teal-900">WhatsApp Number</label>
+                    <div class="flex gap-2">
+                      <div class="relative w-40 flex-shrink-0" data-country-select="whatsapp">
+                        <button type="button"
+                                class="country-select-trigger w-full flex items-center justify-between px-3 py-3 border-2 border-teal-100 rounded-lg bg-teal-50/40 text-teal-900 text-sm font-medium hover:border-teal-200 focus:outline-none focus:border-teal-600 focus:bg-white focus:ring-4 focus:ring-teal-600/10 transition-all">
+                          <span class="country-select-label truncate">--SELECT--</span>
+                          <i data-lucide="chevron-down" class="w-4 h-4 text-teal-600/60 pointer-events-none flex-shrink-0"></i>
+                        </button>
+
+                        <div class="country-select-panel hidden absolute z-50 mt-1 w-72 bg-white rounded-xl shadow-xl border border-teal-100 overflow-hidden">
+                          <div class="p-3 border-b border-teal-100 bg-teal-50/60">
+                            <div class="relative">
+                              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-teal-600/60"></i>
+                              <input type="text" class="country-select-search w-full pl-10 pr-4 py-2 border-2 border-teal-100 rounded-lg bg-white text-teal-900 text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/10 transition-all" placeholder="Search country..." />
+                            </div>
+                          </div>
+                          <div class="country-select-list max-h-56 overflow-y-auto">
+                            <button type="button"
+                                    class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors bg-teal-50 text-teal-700 font-semibold"
+                                    data-value=""
+                                    data-label="--SELECT--"
+                                    data-search="select">
+                              <span class="font-medium">--SELECT--</span>
+                              <span class="text-xs text-teal-900/60 flex-1 ml-3 text-left truncate">Choose a country code</span>
+                            </button>
+                            <?php foreach ($countryCodes as $code => $label): ?>
+                              <button type="button"
+                                      class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm text-teal-900 hover:bg-teal-50 transition-colors"
+                                      data-value="<?= e($code) ?>"
+                                      data-label="<?= e($label) ?>"
+                                      data-search="<?= e(strtolower($code . ' ' . $label)) ?>">
+                                <span class="font-medium flex-shrink-0"><?= e($code) ?></span>
+                                <span class="text-xs text-teal-900/60 flex-1 ml-3 text-left truncate"><?= e($label) ?></span>
+                              </button>
+                            <?php endforeach; ?>
+                          </div>
+                          <div class="country-select-empty hidden px-4 py-3 text-sm text-teal-900/60 text-center">No countries found</div>
+                        </div>
+                      </div>
+
+                      <div class="relative flex-1">
+                        <i data-lucide="message-circle" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                        <input type="tel" id="whatsapp_number" name="whatsapp_number" value="<?= e($formData['whatsapp_number']) ?>" placeholder="Enter Your Whatsapp No"
+                               class="form-input pl-11" />
+                      </div>
+                    </div>
+                    <p class="text-xs text-teal-900/60 mt-1">Optional — leave blank if not applicable.</p>
+                  </div>
+
+                </div>
               </div>
 
-              <form action="edit_profile.php" method="POST" enctype="multipart/form-data" class="p-6 md:p-8 space-y-8">
-
-                <!-- ================= PERSONAL DETAILS ================= -->
-                <div class="space-y-6">
-
-                  <!-- Row 1: Name | Address -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <div class="space-y-2">
-                      <label for="name" class="block text-sm font-semibold text-slate-700">
-                        Name <span class="text-red-500">*</span>
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          value="<?= e($formData['name']) ?>"
-                          required
-                          placeholder="Enter your full name"
-                          class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="space-y-2">
-                      <label for="address" class="block text-sm font-semibold text-slate-700">
-                        Address
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="map-pin" class="absolute left-3 top-3 w-5 h-5 text-slate-400"></i>
-                        <textarea
-                          id="address"
-                          name="address"
-                          rows="3"
-                          placeholder="Enter your residential address"
-                          class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl resize-none
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        ><?= e($formData['address']) ?></textarea>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <!-- Row 2: Email | Image -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <div class="space-y-2">
-                      <label for="email" class="block text-sm font-semibold text-slate-700">
-                        Email <span class="text-red-500">*</span>
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value="<?= e($formData['email']) ?>"
-                          required
-                          placeholder="Enter your email address"
-                          class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        />
-                      </div>
-                    </div>
-
-                    <div class="space-y-2">
-                      <label for="profile_picture" class="block text-sm font-semibold text-slate-700">
-                        Image
-                      </label>
-
-                      <div class="flex items-center space-x-3">
-                        <input
-                          type="file"
-                          id="profile_picture"
-                          name="profile_picture"
-                          accept=".jpg,.jpeg,.png,.webp"
-                          class="hidden"
-                          onchange="previewProfileImage(event)"
-                        />
-
-                        <button
-                          type="button"
-                          onclick="document.getElementById('profile_picture').click()"
-                          class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-200
-                                 rounded-xl text-sm font-semibold text-slate-700 transition-colors
-                                 focus:outline-none focus:border-[#4A154B]"
-                        >
-                          Choose file
-                        </button>
-
-                        <span id="file-chosen-text" class="text-sm text-slate-500 truncate">
-                          <?= $existingPreviewUrl ? 'Current image loaded' : 'No file chosen' ?>
-                        </span>
-
-                        <?php if ($existingPreviewUrl): ?>
-                          <img id="profile-preview"
-                               src="<?= e($existingPreviewUrl) ?>"
-                               alt="Preview"
-                               class="w-10 h-10 rounded-lg object-cover border-2 border-slate-200" />
-                        <?php else: ?>
-                          <img id="profile-preview"
-                               src=""
-                               alt="Preview"
-                               class="hidden w-10 h-10 rounded-lg object-cover border-2 border-slate-200" />
-                        <?php endif; ?>
-                      </div>
-                      <p class="text-xs text-slate-500 mt-1">Allowed: JPG, JPEG, PNG, WEBP (max 2 MB)</p>
-                    </div>
-
-                  </div>
-
-                  <!-- Row 3: Mobile | WhatsApp -->
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <!-- Mobile -->
-                    <div class="space-y-2">
-                      <label for="contact_number" class="block text-sm font-semibold text-slate-700">
-                        Mobile Number <span class="text-red-500">*</span>
-                      </label>
-                      <div class="flex gap-2">
-
-                        <div class="relative w-40 flex-shrink-0" data-country-select="mobile">
-                          <button type="button"
-                                  class="country-select-trigger w-full flex items-center justify-between px-3 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 text-sm font-medium hover:border-[#4A154B]/40 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10 transition-all">
-                            <span class="country-select-label truncate">+91</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 pointer-events-none flex-shrink-0"></i>
-                          </button>
-
-                          <div class="country-select-panel hidden absolute z-50 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
-                            <div class="p-3 border-b border-slate-200 bg-slate-50">
-                              <div class="relative">
-                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input
-                                  type="text"
-                                  class="country-select-search w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg
-                                         focus:outline-none focus:border-[#4A154B] focus:ring-2 focus:ring-[#4A154B]/10
-                                         transition-all text-sm"
-                                  placeholder="Search country..."
-                                />
-                              </div>
-                            </div>
-
-                            <div class="country-select-list max-h-56 overflow-y-auto">
-                              <?php foreach ($countryCodes as $code => $label): ?>
-                                <button
-                                  type="button"
-                                  class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors
-                                         <?= $code === '+91' ? 'bg-purple-50 text-[#8B1E7E] font-semibold' : 'text-slate-700 hover:bg-purple-50' ?>"
-                                  data-value="<?= e($code) ?>"
-                                  data-label="<?= e($label) ?>"
-                                  data-search="<?= e(strtolower($code . ' ' . $label)) ?>"
-                                >
-                                  <span class="font-medium flex-shrink-0"><?= e($code) ?></span>
-                                  <span class="text-xs text-slate-500 flex-1 ml-3 text-left truncate"><?= e($label) ?></span>
-                                  <?php if ($code === '+91'): ?>
-                                    <i data-lucide="check-circle" class="w-4 h-4 text-[#8B1E7E] flex-shrink-0"></i>
-                                  <?php endif; ?>
-                                </button>
-                              <?php endforeach; ?>
-                            </div>
-
-                            <div class="country-select-empty hidden px-4 py-3 text-sm text-slate-500 text-center">
-                              No countries found
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="relative flex-1">
-                          <i data-lucide="smartphone" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                          <input
-                            type="tel"
-                            id="contact_number"
-                            name="contact_number"
-                            value="<?= e($formData['contact_number']) ?>"
-                            required
-                            placeholder="Enter mobile number"
-                            class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                                   focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                   transition-all text-slate-800 font-medium placeholder-slate-400
-                                   hover:border-[#4A154B]/40"
-                          />
-                        </div>
-
-                      </div>
-                      <p class="text-xs text-slate-500 mt-1">Country code is displayed for reference only.</p>
-                    </div>
-
-                    <!-- WhatsApp -->
-                    <div class="space-y-2">
-                      <label for="whatsapp_number" class="block text-sm font-semibold text-slate-700">
-                        WhatsApp Number
-                      </label>
-                      <div class="flex gap-2">
-
-                        <div class="relative w-40 flex-shrink-0" data-country-select="whatsapp">
-                          <button type="button"
-                                  class="country-select-trigger w-full flex items-center justify-between px-3 py-3 border-2 border-slate-200 rounded-xl bg-white text-slate-800 text-sm font-medium hover:border-[#4A154B]/40 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10 transition-all">
-                            <span class="country-select-label truncate">--SELECT--</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 pointer-events-none flex-shrink-0"></i>
-                          </button>
-
-                          <div class="country-select-panel hidden absolute z-50 mt-1 w-72 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
-                            <div class="p-3 border-b border-slate-200 bg-slate-50">
-                              <div class="relative">
-                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                                <input
-                                  type="text"
-                                  class="country-select-search w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg
-                                         focus:outline-none focus:border-[#4A154B] focus:ring-2 focus:ring-[#4A154B]/10
-                                         transition-all text-sm"
-                                  placeholder="Search country..."
-                                />
-                              </div>
-                            </div>
-
-                            <div class="country-select-list max-h-56 overflow-y-auto">
-                              <button
-                                type="button"
-                                class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors bg-purple-50 text-[#8B1E7E] font-semibold"
-                                data-value=""
-                                data-label="--SELECT--"
-                                data-search="select"
-                              >
-                                <span class="font-medium">--SELECT--</span>
-                                <span class="text-xs text-slate-500 flex-1 ml-3 text-left truncate">Choose a country code</span>
-                              </button>
-
-                              <?php foreach ($countryCodes as $code => $label): ?>
-                                <button
-                                  type="button"
-                                  class="country-select-option w-full flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 hover:bg-purple-50 transition-colors"
-                                  data-value="<?= e($code) ?>"
-                                  data-label="<?= e($label) ?>"
-                                  data-search="<?= e(strtolower($code . ' ' . $label)) ?>"
-                                >
-                                  <span class="font-medium flex-shrink-0"><?= e($code) ?></span>
-                                  <span class="text-xs text-slate-500 flex-1 ml-3 text-left truncate"><?= e($label) ?></span>
-                                </button>
-                              <?php endforeach; ?>
-                            </div>
-
-                            <div class="country-select-empty hidden px-4 py-3 text-sm text-slate-500 text-center">
-                              No countries found
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="relative flex-1">
-                          <i data-lucide="message-circle" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                          <input
-                            type="tel"
-                            id="whatsapp_number"
-                            name="whatsapp_number"
-                            value="<?= e($formData['whatsapp_number']) ?>"
-                            placeholder="Enter Your Whatsapp No"
-                            class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                                   focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                   transition-all text-slate-800 font-medium placeholder-slate-400
-                                   hover:border-[#4A154B]/40"
-                          />
-                        </div>
-
-                      </div>
-                      <p class="text-xs text-slate-500 mt-1">Optional — leave blank if not applicable.</p>
-                    </div>
-
-                  </div>
-
+              <!-- LOGIN DETAILS -->
+              <div class="space-y-6">
+                <div class="bg-teal-600 rounded-lg px-4 py-3">
+                  <h3 class="text-white font-bold text-sm flex items-center gap-2">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    Login Details
+                  </h3>
                 </div>
 
-                <!-- ================= LOGIN DETAILS ================= -->
-                <div class="space-y-6">
-
-                  <div class="bg-[#4A154B] rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-                    <h3 class="relative text-white font-bold text-sm flex items-center">
-                      <i data-lucide="lock" class="w-4 h-4 mr-2"></i>
-                      Login Details
-                    </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div class="space-y-2">
+                    <label for="username" class="block text-sm font-semibold text-teal-900">
+                      Username <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                      <i data-lucide="user-circle" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                      <input type="text" id="username" name="username" value="<?= e($formData['username']) ?>" required placeholder="Enter username"
+                             class="form-input pl-11" />
+                    </div>
                   </div>
 
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    <div class="space-y-2">
-                      <label for="username" class="block text-sm font-semibold text-slate-700">
-                        Username <span class="text-red-500">*</span>
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="user-circle" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input
-                          type="text"
-                          id="username"
-                          name="username"
-                          value="<?= e($formData['username']) ?>"
-                          required
-                          placeholder="Enter username"
-                          class="w-full pl-11 pr-4 py-3 border-2 border-slate-200 rounded-xl
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        />
-                      </div>
+                  <div class="space-y-2">
+                    <label for="password" class="block text-sm font-semibold text-teal-900">Password</label>
+                    <div class="relative">
+                      <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                      <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password"
+                             class="form-input pl-11 pr-12" />
+                      <button type="button" onclick="togglePasswordVisibility('password', this)"
+                              class="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600/60 hover:text-teal-600 transition-colors" aria-label="Toggle password visibility">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                      </button>
                     </div>
-
-                    <div class="space-y-2">
-                      <label for="password" class="block text-sm font-semibold text-slate-700">
-                        Password
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input
-                          type="password"
-                          id="password"
-                          name="password"
-                          placeholder="••••••••"
-                          autocomplete="new-password"
-                          class="w-full pl-11 pr-12 py-3 border-2 border-slate-200 rounded-xl
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        />
-                        <button
-                          type="button"
-                          onclick="togglePasswordVisibility('password', this)"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#4A154B] transition-colors"
-                          aria-label="Toggle password visibility"
-                        >
-                          <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                      </div>
-                      <p class="text-xs text-slate-500">Leave blank to keep current password</p>
-                    </div>
-
-                    <div class="space-y-2">
-                      <label for="confirm_password" class="block text-sm font-semibold text-slate-700">
-                        Confirm Password
-                      </label>
-                      <div class="relative">
-                        <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
-                        <input
-                          type="password"
-                          id="confirm_password"
-                          name="confirm_password"
-                          placeholder="••••••••"
-                          autocomplete="new-password"
-                          class="w-full pl-11 pr-12 py-3 border-2 border-slate-200 rounded-xl
-                                 focus:outline-none focus:border-[#4A154B] focus:ring-4 focus:ring-[#4A154B]/10
-                                 transition-all text-slate-800 font-medium placeholder-slate-400
-                                 hover:border-[#4A154B]/40"
-                        />
-                        <button
-                          type="button"
-                          onclick="togglePasswordVisibility('confirm_password', this)"
-                          class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#4A154B] transition-colors"
-                          aria-label="Toggle password visibility"
-                        >
-                          <i data-lucide="eye" class="w-5 h-5"></i>
-                        </button>
-                      </div>
-                      <p class="text-xs text-slate-500">Must match the password above</p>
-                    </div>
-
+                    <p class="text-xs text-teal-900/60">Leave blank to keep current password</p>
                   </div>
 
-                </div>
-
-                <!-- ================= ACTIONS ================= -->
-                <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-6 border-t border-slate-200">
-
-                  <a href="profile.php"
-                     class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl shadow-md shadow-pink-500/20 hover:shadow-pink-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-95">
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#E5097F] via-[#C41574] to-[#E5097F]"></div>
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#C41574] via-[#E5097F] to-[#C41574] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-                    <div class="relative flex items-center justify-center space-x-2 py-2.5 px-8 text-white font-bold">
-                      <i data-lucide="x" class="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-300"></i>
-                      <span>Close</span>
+                  <div class="space-y-2">
+                    <label for="confirm_password" class="block text-sm font-semibold text-teal-900">Confirm Password</label>
+                    <div class="relative">
+                      <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-600/60"></i>
+                      <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" autocomplete="new-password"
+                             class="form-input pl-11 pr-12" />
+                      <button type="button" onclick="togglePasswordVisibility('confirm_password', this)"
+                              class="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600/60 hover:text-teal-600 transition-colors" aria-label="Toggle password visibility">
+                        <i data-lucide="eye" class="w-5 h-5"></i>
+                      </button>
                     </div>
-                  </a>
-
-                  <button type="submit"
-                          class="group/btn relative w-full sm:w-auto overflow-hidden rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-95">
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#006837] via-[#008a4a] to-[#006837]"></div>
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#008a4a] via-[#006837] to-[#008a4a] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500"></div>
-                    <div class="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
-                    <div class="relative flex items-center justify-center space-x-2 py-2.5 px-8 text-white font-bold">
-                      <i data-lucide="save" class="w-4 h-4 group-hover/btn:scale-110 transition-transform duration-300"></i>
-                      <span>Update</span>
-                    </div>
-                  </button>
-
+                    <p class="text-xs text-teal-900/60">Must match the password above</p>
+                  </div>
                 </div>
+              </div>
 
-              </form>
+              <!-- ACTIONS -->
+              <div class="flex flex-col-reverse sm:flex-row justify-end items-center gap-3 pt-6 border-t border-teal-100">
+                <a href="profile.php"
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold w-full sm:w-auto
+                          text-teal-600 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50
+                          transition-all duration-200">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                  <span>Close</span>
+                </a>
 
-            </div>
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold text-white w-full sm:w-auto
+                               bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md
+                               transition-all duration-200 cursor-pointer">
+                  <i data-lucide="save" class="w-4 h-4"></i>
+                  <span>Update</span>
+                </button>
+              </div>
+
+            </form>
           </div>
         </div>
 
       </main>
 
-      <!-- ============ FOOTER ============ -->
-      <footer class="bg-gradient-to-r from-purple-200 via-pink-100 to-purple-200 border-t border-purple-200/60 mt-auto">
-        <div class="px-6 py-6">
-          <div class="max-w-7xl mx-auto">
-            <div class="border-t border-purple-300/50 pt-4">
-              <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
-                <p class="text-xs text-slate-700 text-center sm:text-left">
-                  &copy; <?= date('Y') ?>
-                  <span class="font-bold text-[#006837]">Rajagiri College of Social Sciences</span>.
-                  All rights reserved.
-                </p>
-                <p class="text-xs text-slate-700">
-                  Powered by
-                  <span class="font-bold bg-gradient-to-r from-[#4A154B] to-[#E5097F] bg-clip-text text-transparent ml-1">
-                    Oréll Grievance
-                  </span>
-                </p>
-              </div>
-            </div>
+      <footer class="bg-teal-900 text-white mt-auto">
+        <div class="roofline"></div>
+        <div class="px-4 sm:px-6 py-6">
+          <div class="max-w-7xl mx-auto text-center">
+            <p class="text-xs text-teal-200/70">
+              &copy; <?= date('Y') ?>
+              <span class="font-bold text-white">Rajagiri College of Social Sciences</span>. All rights reserved.
+            </p>
+            <p class="text-xs text-teal-200/70 mt-1">
+              Powered by <span class="font-bold text-white">RLabZ</span>
+            </p>
           </div>
         </div>
       </footer>
-
     </div>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- CUSTOM LOGOUT CONFIRMATION MODAL                              -->
-  <!-- ============================================================ -->
+  <!-- LOGOUT CONFIRMATION MODAL -->
   <div id="logoutConfirmModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
 
-    <div id="logoutConfirmPanel"
-         class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
-
-      <div class="h-1.5 w-full bg-gradient-to-r from-[#6A2C8A] via-[#8B1E7E] to-[#C43A7A]"></div>
+    <div id="logoutConfirmPanel" class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl animate-modal-in overflow-hidden">
+      <div class="h-1.5 w-full bg-teal-600"></div>
 
       <div class="px-6 pt-6 pb-2 flex flex-col items-center text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4
-                    bg-gradient-to-br from-red-100 to-pink-100 ring-4 ring-red-50">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-50 ring-4 ring-red-100/60">
           <i data-lucide="log-out" class="w-8 h-8 text-red-500"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Log Out?</h3>
+        <h3 class="text-xl font-bold text-teal-900 mb-2">Log Out?</h3>
 
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <p class="text-sm text-teal-900/70 leading-relaxed">
           You are about to log out of
-          <span class="font-bold text-[#8B1E7E] break-words"><?= e($formData['name'] ?: ($formData['username'] ?: 'Student')) ?></span>.
+          <span class="font-bold text-teal-700 break-words"><?= e($formData['name'] ?: ($formData['username'] ?: 'Student')) ?></span>.
           Any unsaved changes will be lost.
         </p>
 
-        <p class="text-xs text-slate-400 font-medium mt-3 flex items-center gap-1.5">
-          <i data-lucide="info" class="w-3.5 h-3.5"></i>
-          You can log back in anytime.
+        <p class="text-xs text-teal-900/50 font-medium mt-3 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-3.5 h-3.5"></i> You can log back in anytime.
         </p>
       </div>
 
       <div class="px-6 py-5 mt-2 flex flex-col-reverse sm:flex-row gap-3">
-        <button type="button"
-                onclick="closeLogoutModal()"
-                class="flex-1 px-5 py-3 rounded-xl font-semibold text-slate-700
-                       bg-slate-100 hover:bg-slate-200 border border-slate-200
-                       transition-all duration-200 active:scale-95">
+        <button type="button" onclick="closeLogoutModal()"
+                class="flex-1 px-5 py-3 rounded-lg font-semibold text-teal-900 bg-white border-2 border-teal-200 hover:border-teal-600 hover:bg-teal-50 transition-all duration-200">
           Cancel
         </button>
-
-        <button type="button"
-                id="confirmLogoutBtn"
-                class="flex-1 px-5 py-3 rounded-xl font-bold text-white
-                       bg-gradient-to-r from-red-500 via-red-600 to-rose-600
-                       hover:from-red-600 hover:via-red-700 hover:to-rose-700
-                       shadow-lg shadow-red-500/30 hover:shadow-red-500/50
-                       transition-all duration-300 hover:-translate-y-0.5 active:scale-95
-                       flex items-center justify-center gap-2">
+        <button type="button" id="confirmLogoutBtn"
+                class="flex-1 px-5 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2">
           <i data-lucide="log-out" class="w-4 h-4"></i>
           <span>Log Out</span>
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- ====================== SCRIPTS ====================== -->
   <script>
-    if (typeof lucide !== 'undefined') {
-      lucide.createIcons();
-    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // ---- Image Preview ----
     function previewProfileImage(event) {
       const file = event.target.files && event.target.files[0];
       const previewEl = document.getElementById('profile-preview');
       const textEl    = document.getElementById('file-chosen-text');
-
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function (e) {
         previewEl.src = e.target.result;
         previewEl.classList.remove('hidden');
       };
       reader.readAsDataURL(file);
-
-      if (textEl) {
-        textEl.textContent = file.name;
-      }
+      if (textEl) textEl.textContent = file.name;
     }
 
-    // ---- Toggle Password Visibility ----
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
       if (!input) return;
-
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
-
       const icon = btn.querySelector('i');
       if (icon && typeof lucide !== 'undefined') {
         icon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
@@ -1355,10 +1126,9 @@ $countryCodes = [
       }
     }
 
-    // ---- Searchable Country Code Selects (display-only) ----
+    // Searchable country code selects
     (function initCountrySelects() {
       const wrappers = document.querySelectorAll('[data-country-select]');
-
       wrappers.forEach(function (wrapper) {
         const trigger  = wrapper.querySelector('.country-select-trigger');
         const label    = wrapper.querySelector('.country-select-label');
@@ -1366,178 +1136,148 @@ $countryCodes = [
         const search   = wrapper.querySelector('.country-select-search');
         const options  = wrapper.querySelectorAll('.country-select-option');
         const emptyMsg = wrapper.querySelector('.country-select-empty');
-
         if (!trigger || !panel) return;
 
         trigger.addEventListener('click', function (e) {
           e.stopPropagation();
-
-          document.querySelectorAll('.country-select-panel').forEach(function (p) {
-            if (p !== panel) p.classList.add('hidden');
-          });
-
+          document.querySelectorAll('.country-select-panel').forEach(function (p) { if (p !== panel) p.classList.add('hidden'); });
           const isOpen = !panel.classList.contains('hidden');
           panel.classList.toggle('hidden', isOpen);
-
-          if (!isOpen) {
-            setTimeout(function () { search && search.focus(); }, 30);
-          } else if (search) {
-            search.value = '';
-            filterOptions('');
-          }
+          if (!isOpen) setTimeout(function () { search && search.focus(); }, 30);
+          else if (search) { search.value = ''; filterOptions(''); }
         });
 
         function filterOptions(term) {
           const t = term.trim().toLowerCase();
           let visibleCount = 0;
-
           options.forEach(function (opt) {
             const haystack = opt.getAttribute('data-search') || '';
             const match = t === '' || haystack.indexOf(t) !== -1;
             opt.style.display = match ? '' : 'none';
             if (match) visibleCount++;
           });
-
-          if (emptyMsg) {
-            emptyMsg.classList.toggle('hidden', visibleCount !== 0);
-          }
+          if (emptyMsg) emptyMsg.classList.toggle('hidden', visibleCount !== 0);
         }
 
         if (search) {
-          search.addEventListener('input', function () {
-            filterOptions(search.value);
-          });
-          search.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-              panel.classList.add('hidden');
-            }
-          });
+          search.addEventListener('input', function () { filterOptions(search.value); });
+          search.addEventListener('keydown', function (e) { if (e.key === 'Escape') panel.classList.add('hidden'); });
         }
 
         options.forEach(function (opt) {
           opt.addEventListener('click', function (e) {
             e.stopPropagation();
-
             const value = opt.getAttribute('data-value') || '';
             const lbl   = opt.getAttribute('data-label') || value;
-
             if (label) label.textContent = lbl || '--SELECT--';
-
-            options.forEach(function (o) {
-              o.classList.remove('bg-purple-50', 'text-[#8B1E7E]', 'font-semibold');
-            });
-            opt.classList.add('bg-purple-50', 'text-[#8B1E7E]', 'font-semibold');
-
+            options.forEach(function (o) { o.classList.remove('bg-teal-50', 'text-teal-700', 'font-semibold'); });
+            opt.classList.add('bg-teal-50', 'text-teal-700', 'font-semibold');
             panel.classList.add('hidden');
             if (search) search.value = '';
             filterOptions('');
           });
         });
 
-        document.addEventListener('click', function (e) {
-          if (!wrapper.contains(e.target)) {
-            panel.classList.add('hidden');
-          }
-        });
+        document.addEventListener('click', function (e) { if (!wrapper.contains(e.target)) panel.classList.add('hidden'); });
       });
     })();
 
-    // ---- Profile Dropdown (top header) ----
-    (function initProfileDropdown() {
+    // Profile dropdown
+    (function () {
       const btn       = document.getElementById('profile-dropdown-btn');
       const menu      = document.getElementById('profile-dropdown-menu');
       const chevron   = document.getElementById('profile-chevron');
       const container = document.getElementById('profile-dropdown-container');
-
       if (!btn || !menu || !container) return;
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = !menu.classList.contains('hidden');
         if (isOpen) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         } else {
-          menu.classList.remove('hidden');
-          menu.classList.add('animate-dropdown');
+          menu.classList.remove('hidden'); menu.classList.add('animate-dropdown');
           if (chevron) chevron.classList.add('rotate-180');
-          btn.setAttribute('aria-expanded', 'true');
+          btn.setAttribute('aria-expanded','true');
         }
       });
-
       document.addEventListener('click', function (e) {
         if (!container.contains(e.target)) {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         }
       });
-
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-          menu.classList.add('hidden');
-          menu.classList.remove('animate-dropdown');
+          menu.classList.add('hidden'); menu.classList.remove('animate-dropdown');
           if (chevron) chevron.classList.remove('rotate-180');
-          btn.setAttribute('aria-expanded', 'false');
+          btn.setAttribute('aria-expanded','false');
         }
       });
     })();
 
-    // ============================================================
-    // LOGOUT CONFIRMATION MODAL
-    // ============================================================
+    // Sidebar expand / collapse
+    (function () {
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const sidebar   = document.getElementById('studentSidebar');
+      const main      = document.getElementById('studentMain');
+      if (!toggleBtn || !sidebar || !main) return;
+      const labels   = sidebar.querySelectorAll('.sidebar-label');
+      const tooltips = sidebar.querySelectorAll('.sidebar-tooltip');
+      let expanded = false;
+      toggleBtn.addEventListener('click', function () {
+        expanded = !expanded;
+        if (expanded) {
+          sidebar.classList.remove('w-20'); sidebar.classList.add('w-64');
+          main.classList.remove('ml-20'); main.classList.add('ml-64');
+          labels.forEach(function (el) { el.classList.remove('opacity-0','w-0'); el.classList.add('opacity-100','w-auto'); });
+          tooltips.forEach(function (el) { el.classList.add('hidden'); });
+        } else {
+          sidebar.classList.add('w-20'); sidebar.classList.remove('w-64');
+          main.classList.add('ml-20'); main.classList.remove('ml-64');
+          labels.forEach(function (el) { el.classList.add('opacity-0','w-0'); el.classList.remove('opacity-100','w-auto'); });
+          tooltips.forEach(function (el) { el.classList.remove('hidden'); });
+        }
+        setTimeout(function () { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 250);
+      });
+    })();
+
+    // Logout modal
     const logoutConfirmModal = document.getElementById('logoutConfirmModal');
     const logoutConfirmPanel = document.getElementById('logoutConfirmPanel');
     const confirmLogoutBtn   = document.getElementById('confirmLogoutBtn');
-
     const LOGOUT_URL = '../logout.php?role=student';
 
     function openLogoutModal() {
       if (!logoutConfirmModal) return;
       logoutConfirmModal.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
-
       if (logoutConfirmPanel) {
         logoutConfirmPanel.classList.remove('animate-confirm-shake');
         void logoutConfirmPanel.offsetWidth;
         logoutConfirmPanel.classList.add('animate-confirm-shake');
       }
-
       setTimeout(function () { if (confirmLogoutBtn) confirmLogoutBtn.focus(); }, 80);
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
-
     function closeLogoutModal() {
       if (!logoutConfirmModal) return;
       logoutConfirmModal.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     }
-
-    (function () {
-      const triggers = [
-        document.getElementById('sidebarLogoutBtn'),
-        document.getElementById('dropdownLogoutBtn'),
-      ];
-      triggers.forEach(function (btn) {
-        if (!btn) return;
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          openLogoutModal();
-        });
-      });
-    })();
-
+    [document.getElementById('sidebarLogoutBtn'), document.getElementById('dropdownLogoutBtn')].forEach(function (btn) {
+      if (!btn) return;
+      btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openLogoutModal(); });
+    });
     if (confirmLogoutBtn) {
       confirmLogoutBtn.addEventListener('click', function () {
         confirmLogoutBtn.classList.add('opacity-50', 'pointer-events-none');
         window.location.href = LOGOUT_URL;
       });
     }
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && logoutConfirmModal && !logoutConfirmModal.classList.contains('hidden')) {
         closeLogoutModal();
